@@ -1,10 +1,24 @@
 <script setup>
 import { Icon } from "@iconify/vue";
+import { useScrollDirection } from "@/composables/useScrollDirection";
 import logo from "@assets/logo-2.png";
+import { watch } from "vue";
+
+const { isScrollingUp, isAtTop } = useScrollDirection();
+
+watch(isScrollingUp, isAtTop, () => {
+  console.log("isScrollingUp: ", isScrollingUp);
+  console.log("isAtTop: ", isAtTop);
+});
 </script>
 
 <template>
-  <div class="header-container">
+  <div
+    :class="[
+      'header-sticky-container',
+      { hidden: !isScrollingUp, isAtTop: isAtTop },
+    ]"
+  >
     <div class="logo-container">
       <img :src="logo" />
     </div>
@@ -29,4 +43,4 @@ import logo from "@assets/logo-2.png";
   </div>
 </template>
 
-<style src="@styles/components/wrappers/page-header.css"></style>
+<style src="@styles/components/wrappers/page-header-sticky.css"></style>
