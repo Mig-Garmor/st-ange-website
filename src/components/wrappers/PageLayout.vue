@@ -1,13 +1,7 @@
 <script setup>
-import { useScrollDirection } from "@/composables/useScrollDirection";
-
 import PageFooterComponent from "./PageFooterComponent.vue";
 import PageHeaderComponent from "./PageHeaderComponent.vue";
 import PageStickyHeaderComponent from "./PageStickyHeaderComponent.vue";
-
-const { isScrollingUp } = useScrollDirection();
-
-console.log("isScrollingUp: ", isScrollingUp);
 </script>
 
 <template>
