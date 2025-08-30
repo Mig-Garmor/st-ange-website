@@ -1,15 +1,9 @@
 <script setup>
 import { Icon } from "@iconify/vue";
-import { useScrollDirection } from "@/composables/useScrollDirection";
+import { useScrollDirection } from "@composables/useScrollDirection";
 import logo from "@assets/logo-2.png";
-import { watch } from "vue";
 
 const { isScrollingUp, isAtTop } = useScrollDirection();
-
-watch(isScrollingUp, isAtTop, () => {
-  console.log("isScrollingUp: ", isScrollingUp);
-  console.log("isAtTop: ", isAtTop);
-});
 </script>
 
 <template>
