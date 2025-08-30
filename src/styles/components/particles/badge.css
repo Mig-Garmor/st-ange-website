@@ -1,0 +1,5 @@
+.badge-component {
+  @apply text-[20px] font-bold;
+  @apply bg-[#F6C220] rounded-full px-[20px] py-[10px];
+  @apply flex justify-start items-center gap-[5px];
+}

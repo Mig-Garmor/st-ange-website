@@ -3,9 +3,12 @@
     @apply flex w-full justify-center;
     @apply font-bold text-[40px]  text-center text-white bg-[rgba(0,0,0,0.5)];
   }
+  .call-to-action {
+    @apply flex w-full justify-center gap-[20px];
+  }
   .services {
     @apply text-white bg-[rgba(0,0,0,0.5)];
     @apply flex flex-wrap w-[80%] items-center justify-center text-center gap-[20px] py-[40px];
   }
-  @apply flex flex-col items-center w-full h-[900px] bg-center bg-cover gap-[40px];
+  @apply flex flex-col items-center w-full bg-center bg-cover gap-[40px];
 }

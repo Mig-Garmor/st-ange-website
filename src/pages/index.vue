@@ -10,6 +10,7 @@ import moreServicesImage from "@assets/more-services.png";
 
 import PageLayout from "@components/wrappers/PageLayout.vue";
 import ServiceCard from "@components/ServiceCard.vue";
+import Badge from "../components/particles/Badge.vue";
 </script>
 
 <template>
@@ -19,6 +20,16 @@ import ServiceCard from "@components/ServiceCard.vue";
       :style="{ backgroundImage: `url(${backgroundImg})` }"
     >
       <div class="title">CAR REPAIR & SERVICE</div>
+      <div class="call-to-action">
+        <Badge text="Call us" icon="mdi:phone" iconWidth="24" iconHeight="24" />
+        <Icon icon="stash:hand-holding-dollar-solid" width="24" height="24" />
+        <Badge
+          text="Free Quote"
+          icon="la:file-invoice-dollar"
+          iconWidth="26"
+          iconHeight="26"
+        />
+      </div>
       <div class="services">
         <ServiceCard :image="alignmentImage" name="Car Alignment" />
         <ServiceCard :image="acRepairImage" name="A/C Repair" />
