@@ -1,0 +1,4 @@
+.page-footer-component {
+  @apply h-[100px] p-[20px];
+  @apply flex items-center justify-center;
+}

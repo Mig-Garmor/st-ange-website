@@ -11,11 +11,16 @@ import logo from "@assets/logo-2.png";
     </div>
     <div class="information-container">
       <div class="phone-number">
-        <Icon icon="mdi:phone" width="24" height="24" />(555) 555-1234
+        <Icon
+          icon="mdi:phone"
+          width="24"
+          height="24"
+          color="#011F7C"
+        />832-572-7121
       </div>
       <div class="location">
-        <Icon icon="mdi:location" width="24" height="24" />1300 N Main St,
-        Baytown
+        <Icon icon="mdi:location" width="24" height="24" color="#011F7C" />1300
+        N Main St, Baytown
       </div>
     </div>
     <div class="links-container">
