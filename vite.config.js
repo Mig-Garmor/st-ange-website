@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import Pages from "vite-plugin-pages";
+import svgLoader from "vite-svg-loader";
+
 import path from "path";
 
 export default defineConfig({
@@ -10,9 +12,11 @@ export default defineConfig({
       dirs: "src/pages", // default
       extensions: ["vue"],
     }),
+    svgLoader(),
   ],
   resolve: {
     alias: {
+      "@assets": path.resolve(__dirname, "./assets"),
       "@": path.resolve(__dirname, "./src"),
       "@components": path.resolve(__dirname, "./src/components"),
       "@styles": path.resolve(__dirname, "./src/styles"),

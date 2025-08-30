@@ -1,0 +1,17 @@
+.header-container {
+  .logo-container {
+    @apply flex items-center h-full w-[400px] overflow-hidden;
+  }
+  .information-container {
+    .phone-number,
+    .location {
+      @apply flex items-center gap-[10px];
+    }
+    @apply flex items-center flex-wrap justify-between h-full lg:gap-[20px] p-[10px];
+  }
+  .links-container {
+    @apply flex items-center h-full gap-[20px];
+  }
+
+  @apply flex items-center justify-between bg-[#F6C220] h-[100px] px-[40px];
+}
