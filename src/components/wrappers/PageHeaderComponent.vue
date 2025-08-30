@@ -25,4 +25,4 @@ import logo from "@assets/logo-2.png";
   </div>
 </template>
 
-<style src="@styles/components/page-header.css"></style>
+<style src="@styles/components/wrappers/page-header.css"></style>

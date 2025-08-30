@@ -1,0 +1,9 @@
+.service-card-container {
+  .service-name {
+    @apply absolute bottom-0 left-1/2 transform -translate-x-1/2;
+    @apply text-black font-bold bg-[#F6C220] rounded-full;
+    @apply flex items-center justify-center w-full;
+  }
+  @apply relative w-[250px] h-[250px] bg-black rounded-full;
+  @apply bg-center bg-cover;
+}
