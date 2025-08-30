@@ -13,5 +13,5 @@
     @apply flex items-center h-full gap-[20px];
   }
 
-  @apply flex items-center justify-between bg-[#F6C220] h-[100px] px-[40px] text-[#011F7C];
+  @apply flex items-center justify-between bg-[#F6C220] h-[100px] px-[40px] text-[#011F7C] overflow-hidden;
 }
