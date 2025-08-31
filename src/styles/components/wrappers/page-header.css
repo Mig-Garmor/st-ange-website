@@ -1,19 +1,26 @@
 .header-container {
   .logo-container {
-    @apply flex items-center h-full w-[400px] overflow-hidden;
+    @apply flex flex-col items-center h-full w-[400px] overflow-hidden;
   }
   .information-container {
     .phone-number,
     .location {
-      @apply flex items-center gap-[10px];
+      @apply flex items-center gap-[10px] text-[13px] font-bold;
+      @apply lg:text-[16px] lg:font-normal;
     }
-    @apply flex items-center flex-wrap justify-between h-full lg:gap-[20px] p-[10px];
+    .icon {
+      @apply shrink-0;
+    }
+    @apply flex flex-col items-start flex-wrap justify-center h-full p-[0px];
+    @apply md:gap-[10px];
+    @apply lg:p-[0px] lg:flex-row lg:items-center lg:gap-[60px];
   }
   .links-container {
     @apply flex items-center h-full gap-[20px];
   }
 
-  @apply flex items-center justify-between bg-[#F6C220] h-[100px] px-[40px] text-[#011F7C] overflow-hidden;
+  @apply flex items-center justify-between bg-[#F6C220] h-[100px] px-[20px] text-[#011F7C] overflow-hidden;
+  @apply lg:px-[20px];
 }
 
 .header-sticky-container {
