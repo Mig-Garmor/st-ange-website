@@ -15,7 +15,6 @@ const props = defineProps({
 const emit = defineEmits(["close-mobile-menu"]);
 
 const closeMobileMenu = () => {
-  console.log("closeMobileMenu");
   emit("close-mobile-menu");
 };
 </script>
