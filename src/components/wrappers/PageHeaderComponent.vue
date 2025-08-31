@@ -29,6 +29,7 @@ const handleCloseMobileMenu = () => {
   isMobileMenuOpen.value = false;
 };
 
+// Stops scrolling when menu is open
 watch(isMobileMenuOpen, (isOpen) => {
   if (isOpen) {
     document.body.style.overflow = "hidden";

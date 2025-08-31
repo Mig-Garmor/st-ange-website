@@ -1,0 +1,31 @@
+.mobile-menu-overlay-component {
+  .mobile-menu-content {
+    @apply w-full h-full p-[20px] flex flex-col;
+  }
+  .mobile-menu-header {
+    @apply flex justify-end pt-[30px] pb-[30px];
+  }
+  .close-icon {
+    @apply cursor-pointer transition-transform duration-200 ease-in-out;
+  }
+  .close-icon:hover {
+    @apply scale-125;
+  }
+  .mobile-menu-body {
+    @apply flex-1 flex flex-col justify-center items-center gap-10;
+  }
+  .mobile-menu-item {
+    @apply text-[24px] font-semibold text-[#011f7c] cursor-pointer px-[30px] py-[15px] rounded-lg transition-all duration-300 ease-in-out text-center min-w-[150px];
+  }
+  .mobile-menu-item:hover {
+    @apply bg-[#f0f7ff] scale-110;
+  }
+  .mobile-contact-info {
+    @apply mt-[50px] flex flex-col gap-4 items-center;
+  }
+  .mobile-phone,
+  .mobile-location {
+    @apply flex items-center gap-2 text-[16px] text-[#011f7c];
+  }
+  @apply fixed top-0 left-0 w-screen h-screen bg-white/95 backdrop-blur-sm z-[9999] flex flex-col animate-fadeIn;
+}
