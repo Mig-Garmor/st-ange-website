@@ -1,11 +1,21 @@
 <script setup>
 import { ref, watch } from "vue";
+import { useScrollDirection } from "@composables/useScrollDirection";
+
 import { Icon } from "@iconify/vue";
 import logo from "@assets/logo-2.png";
 
 import { useDeviceType } from "@composables/useDeviceType";
 import MobileMenuOverlayComponent from "../modals/MobileMenuOverlayComponent.vue";
 
+defineProps({
+  isSticky: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const { isScrollingUp, isAtTop } = useScrollDirection();
 const { isMobile } = useDeviceType();
 
 // Mobile menu state
@@ -29,7 +39,13 @@ watch(isMobileMenuOpen, (isOpen) => {
 </script>
 
 <template>
-  <div class="header-container">
+  <div
+    :class="[
+      isSticky && 'header-sticky-container',
+      { hidden: !isScrollingUp, isAtTop: isAtTop },
+    ]"
+    class="header-container"
+  >
     <div class="logo-container">
       <img :src="logo" />
     </div>

@@ -2,14 +2,13 @@
 import { useScrollDirection } from "@composables/useScrollDirection";
 import PageFooterComponent from "./PageFooterComponent.vue";
 import PageHeaderComponent from "./PageHeaderComponent.vue";
-import PageStickyHeaderComponent from "./PageStickyHeaderComponent.vue";
 
 const { isAtTop } = useScrollDirection();
 </script>
 
 <template>
   <PageHeaderComponent />
-  <PageStickyHeaderComponent v-if="!isAtTop" />
+  <PageHeaderComponent v-if="!isAtTop" is-sticky="true" />
 
   <div class="page-layout-content">
     <slot></slot>

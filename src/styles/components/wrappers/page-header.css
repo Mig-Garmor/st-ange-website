@@ -15,3 +15,16 @@
 
   @apply flex items-center justify-between bg-[#F6C220] h-[100px] px-[40px] text-[#011F7C] overflow-hidden;
 }
+
+.header-sticky-container {
+  @apply fixed top-0 left-0 w-full z-[999];
+  @apply transition-transform duration-300 ease-in-out overflow-hidden;
+}
+
+.header-sticky-container.hidden {
+  @apply -translate-y-[100px];
+}
+
+.header-sticky-container.isAtTop {
+  @apply -translate-y-[100px] duration-0;
+}
