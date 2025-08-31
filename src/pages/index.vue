@@ -22,10 +22,15 @@ import Badge from "../components/particles/Badge.vue";
       <div class="title">CAR REPAIR & SERVICE</div>
       <div class="call-to-action">
         <Badge text="Call us" icon="mdi:phone" iconWidth="24" iconHeight="24" />
-        <Icon icon="stash:hand-holding-dollar-solid" width="24" height="24" />
         <Badge
           text="Free Quote"
           icon="la:file-invoice-dollar"
+          iconWidth="26"
+          iconHeight="26"
+        />
+        <Badge
+          text="Reviews"
+          icon="carbon:star-review"
           iconWidth="26"
           iconHeight="26"
         />
@@ -40,6 +45,9 @@ import Badge from "../components/particles/Badge.vue";
         />
         <ServiceCard :image="tiresRepairImage" name="New & Old tires" />
         <ServiceCard :image="moreServicesImage" name="And More..." />
+      </div>
+      <div class="reviews bg-black text-white p-[10px]">
+        GOOGLE MAPS REVIEWS
       </div>
     </div>
   </PageLayout>

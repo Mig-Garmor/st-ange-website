@@ -4,7 +4,7 @@
     @apply font-bold text-[40px]  text-center text-white bg-[rgba(0,0,0,0.5)];
   }
   .call-to-action {
-    @apply flex w-full justify-center gap-[20px];
+    @apply flex flex-wrap w-full justify-center gap-[20px];
   }
   .services {
     @apply text-white bg-[rgba(0,0,0,0.5)];
