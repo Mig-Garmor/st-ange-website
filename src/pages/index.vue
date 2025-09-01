@@ -102,9 +102,6 @@ onMounted(async () => {
         <ServiceCard :image="tiresRepairImage" name="New & Old tires" />
         <ServiceCard :image="moreServicesImage" name="And More..." />
       </div>
-      <div class="reviews bg-black text-white p-[10px]">
-        GOOGLE MAPS REVIEWS
-      </div>
     </div>
   </PageLayout>
 </template>
