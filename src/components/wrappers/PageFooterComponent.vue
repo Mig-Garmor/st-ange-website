@@ -1,6 +1,6 @@
 <template>
   <div class="page-footer-component">
-    © 2024 St. Ange Auto Service. All rights reserved.
+    © 2025 St. Ange Auto Service. All rights reserved.
   </div>
 </template>
 
