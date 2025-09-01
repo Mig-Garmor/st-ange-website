@@ -10,11 +10,11 @@ const props = defineProps({
   action: { type: Function, default: null },
 });
 
-const handleClick = computed(() => {
+const handleClick = () => {
   if (props.action) {
     props.action();
   }
-});
+};
 </script>
 
 <template>

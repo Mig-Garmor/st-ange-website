@@ -20,9 +20,8 @@ const googleReviewsUrl =
   "https://search.google.com/local/reviews?placeid=ChIJiRaP15ZdP4YRQL29VtCpdp0";
 
 function handleReviewsClick() {
-  const googleMapsUrl =
-    "https://search.google.com/local/reviews?placeid=ChIJiRaP15ZdP4YRQL29VtCpdp0";
-  window.open(googleMapsUrl, "_blank");
+  console.log("REVIEWS");
+  window.open(googleReviewsUrl, "_blank");
 }
 function handleCallUsClick() {
   console.log("Click");
