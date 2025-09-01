@@ -3,7 +3,7 @@ import { ref, watch } from "vue";
 import { useScrollDirection } from "@composables/useScrollDirection";
 
 import { Icon } from "@iconify/vue";
-import logo from "@assets/logo-2.png";
+import logo from "@assets/logo-2.webp";
 
 import { useDeviceType } from "@composables/useDeviceType";
 import MobileMenuOverlayComponent from "../modals/MobileMenuOverlayComponent.vue";

@@ -1,12 +1,12 @@
 <script setup>
-import backgroundImg from "@assets/mechanic-bg.jpeg";
+import backgroundImg from "@assets/mechanic-bg.webp";
 
-import alignmentImage from "@assets/car-alignment.png";
-import acRepairImage from "@assets/ac-repair.png";
-import brakeRepairImage from "@assets/brake-repair.png";
-import suspensionRepairImage from "@assets/suspension-repair.png";
-import tiresRepairImage from "@assets/tires-repair.png";
-import moreServicesImage from "@assets/more-services.png";
+import alignmentImage from "@assets/car-alignment.webp";
+import acRepairImage from "@assets/ac-repair.webp";
+import brakeRepairImage from "@assets/brake-repair.webp";
+import suspensionRepairImage from "@assets/suspension-repair.webp";
+import tiresRepairImage from "@assets/tires-repair.webp";
+import moreServicesImage from "@assets/more-services.webp";
 
 import PageLayout from "@components/wrappers/PageLayout.vue";
 import ServiceCard from "@components/ServiceCard.vue";
