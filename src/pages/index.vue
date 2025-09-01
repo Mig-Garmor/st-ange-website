@@ -17,6 +17,9 @@ function handleReviewsClick() {
     "https://search.google.com/local/reviews?placeid=ChIJiRaP15ZdP4YRQL29VtCpdp0";
   window.open(googleMapsUrl, "_blank");
 }
+function handleCallNowClick() {
+  window.location.href = "tel:832-572-7121";
+}
 </script>
 
 <template>
@@ -27,7 +30,13 @@ function handleReviewsClick() {
     >
       <div class="title">CAR REPAIR & SERVICE</div>
       <div class="call-to-action">
-        <Badge text="Call us" icon="mdi:phone" iconWidth="24" iconHeight="24" />
+        <Badge
+          text="Call us"
+          icon="mdi:phone"
+          iconWidth="24"
+          iconHeight="24"
+          :action="isMobile ? handleCallNowClick : null"
+        />
         <!-- <Badge
           text="Free Quote"
           icon="la:file-invoice-dollar"
