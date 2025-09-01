@@ -32,7 +32,10 @@ defineProps({
 <template>
   <div class="icon-text-container">
     <Icon :icon="icon" :width="iconWidth" :height="iconHeight" />
-    <a :href="link ?? null" class="text" v-html="text" target="_blank"></a>
+    <a v-if="link" :href="link ?? null" class="text" target="_blank">{{
+      text
+    }}</a>
+    <p v-else>{{ text }}</p>
   </div>
 </template>
 
