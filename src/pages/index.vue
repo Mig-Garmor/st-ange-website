@@ -96,10 +96,16 @@ onMounted(async () => {
       </div>
       <!-- Featurable Badge Widget -->
       <div class="text-white">
-        <div
-          id="featurable-41509530-5f33-499e-85c5-72c7e376bfc7"
-          data-featurable-async
-        ></div>
+        <a
+          href="https://search.google.com/local/reviews?placeid=ChIJiRaP15ZdP4YRQL29VtCpdp0"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <div
+            id="featurable-41509530-5f33-499e-85c5-72c7e376bfc7"
+            data-featurable-async
+          ></div>
+        </a>
       </div>
     </div>
   </PageLayout>
