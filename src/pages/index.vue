@@ -1,4 +1,5 @@
 <script setup>
+import { onMounted, nextTick } from "vue";
 import { useDeviceType } from "@composables/useDeviceType";
 
 import backgroundImg from "@assets/mechanic-bg.webp";
@@ -24,6 +25,33 @@ function handleCallUsClick() {
   console.log("Click");
   window.location.href = "tel:832-572-7121";
 }
+
+onMounted(async () => {
+  // Wait for DOM to render fully
+  await nextTick();
+
+  // Check if the script is already loaded
+  const existingScript = document.querySelector(
+    'script[src="https://featurable.com/assets/bundle.js"]'
+  );
+  if (!existingScript) {
+    const script = document.createElement("script");
+    script.src = "https://featurable.com/assets/bundle.js";
+    script.defer = true;
+    script.charset = "UTF-8";
+    script.onload = () => {
+      if (window.Featurable && typeof window.Featurable.init === "function") {
+        window.Featurable.init();
+      }
+    };
+    document.body.appendChild(script);
+  } else {
+    // If script already loaded, re-init Featurable
+    if (window.Featurable && typeof window.Featurable.init === "function") {
+      window.Featurable.init();
+    }
+  }
+});
 </script>
 
 <template>
@@ -54,6 +82,14 @@ function handleCallUsClick() {
           iconHeight="26"
           :action="handleReviewsClick"
         />
+      </div>
+
+      <!-- Featurable Badge Widget -->
+      <div class="reviews text-white">
+        <div
+          id="featurable-41509530-5f33-499e-85c5-72c7e376bfc7"
+          data-featurable-async
+        ></div>
       </div>
       <div class="services">
         <ServiceCard :image="alignmentImage" name="Car Alignment" />
