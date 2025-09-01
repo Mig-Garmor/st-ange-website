@@ -1,6 +1,7 @@
 <script setup>
-import backgroundImg from "@assets/mechanic-bg.webp";
+import { useDeviceType } from "@composables/useDeviceType";
 
+import backgroundImg from "@assets/mechanic-bg.webp";
 import alignmentImage from "@assets/car-alignment.webp";
 import acRepairImage from "@assets/ac-repair.webp";
 import brakeRepairImage from "@assets/brake-repair.webp";
@@ -12,12 +13,15 @@ import PageLayout from "@components/wrappers/PageLayout.vue";
 import ServiceCard from "@components/ServiceCard.vue";
 import Badge from "../components/utilities/Badge.vue";
 
+const { isMobile } = useDeviceType();
+
 function handleReviewsClick() {
   const googleMapsUrl =
     "https://search.google.com/local/reviews?placeid=ChIJiRaP15ZdP4YRQL29VtCpdp0";
   window.open(googleMapsUrl, "_blank");
 }
-function handleCallNowClick() {
+function handleCallUsClick() {
+  console.log("Click");
   window.location.href = "tel:832-572-7121";
 }
 </script>
@@ -35,7 +39,7 @@ function handleCallNowClick() {
           icon="mdi:phone"
           iconWidth="24"
           iconHeight="24"
-          :action="isMobile ? handleCallNowClick : null"
+          :action="isMobile ? handleCallUsClick : null"
         />
         <!-- <Badge
           text="Free Quote"

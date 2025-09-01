@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from "vue";
 import { Icon } from "@iconify/vue";
 
 const props = defineProps({
@@ -9,11 +10,11 @@ const props = defineProps({
   action: { type: Function, default: null },
 });
 
-const handleClick = () => {
+const handleClick = computed(() => {
   if (props.action) {
     props.action();
   }
-};
+});
 </script>
 
 <template>
