@@ -102,7 +102,7 @@ onMounted(async () => {
         <ServiceCard :image="moreServicesImage" name="And More..." />
       </div>
       <!-- Featurable Badge Widget -->
-      <div class="text-white">
+      <div class="google-reviews-widget">
         <div
           id="featurable-41509530-5f33-499e-85c5-72c7e376bfc7"
           data-featurable-async
