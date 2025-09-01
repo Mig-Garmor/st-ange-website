@@ -61,6 +61,7 @@ const googleMapsBusinessLink = "https://maps.app.goo.gl/kRiqUGChingHzADh6";
             text="832-572-7121"
             :iconWidth="isMobile ? '15' : '24'"
             :iconHeight="isMobile ? '15' : '24'"
+            :link="isMobile && googleMapsBusinessLink"
           />
         </div>
         <div class="location">
