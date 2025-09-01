@@ -5,11 +5,6 @@
   .information-container {
     .phone-number,
     .location {
-      @apply flex items-center gap-[10px] text-[13px] font-bold;
-      @apply lg:text-[16px] lg:font-normal;
-    }
-    .icon {
-      @apply shrink-0;
     }
     @apply flex flex-col items-start flex-wrap justify-center h-full p-[0px];
     @apply md:gap-[10px];

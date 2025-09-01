@@ -1,0 +1,5 @@
+.icon-text-container {
+  @apply flex items-center gap-[10px] text-[13px] font-bold;
+  @apply lg:text-[16px] lg:font-normal;
+  @apply shrink-0;
+}

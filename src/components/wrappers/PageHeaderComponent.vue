@@ -1,12 +1,15 @@
 <script setup>
 import { ref, watch } from "vue";
-import { useScrollDirection } from "@composables/useScrollDirection";
 
 import { Icon } from "@iconify/vue";
+
 import logo from "@assets/logo-2.webp";
 
+import MobileMenuOverlayComponent from "@components/modals/MobileMenuOverlayComponent.vue";
+import IconText from "@components/utilities/IconText.vue";
+
+import { useScrollDirection } from "@composables/useScrollDirection";
 import { useDeviceType } from "@composables/useDeviceType";
-import MobileMenuOverlayComponent from "../modals/MobileMenuOverlayComponent.vue";
 
 defineProps({
   isSticky: {
@@ -37,6 +40,8 @@ watch(isMobileMenuOpen, (isOpen) => {
     document.body.style.overflow = "unset";
   }
 });
+
+const googleMapsBusinessLink = "https://maps.app.goo.gl/kRiqUGChingHzADh6";
 </script>
 
 <template>
@@ -51,43 +56,34 @@ watch(isMobileMenuOpen, (isOpen) => {
       <img :src="logo" />
       <div class="information-container">
         <div class="phone-number">
-          <Icon
-            class="icon"
+          <IconText
             icon="mdi:phone"
-            :width="isMobile ? '15' : '24'"
-            :height="24"
-            color="#011F7C"
-          />832-572-7121
+            text="832-572-7121"
+            :iconWidth="isMobile ? '15' : '24'"
+            :iconHeight="isMobile ? '15' : '24'"
+          />
         </div>
         <div class="location">
-          <Icon
-            class="icon"
+          <IconText
             icon="mdi:location"
-            :width="isMobile ? '15' : '24'"
-            height="24"
-            color="#011F7C"
-          />1300 N Main St, Baytown
+            text="1300 N Main St, Baytown"
+            :iconWidth="isMobile ? '15' : '24'"
+            :iconHeight="isMobile ? '15' : '24'"
+            :link="googleMapsBusinessLink"
+          />
         </div>
       </div>
     </div>
     <div v-if="!isMobile" class="information-container">
       <div class="phone-number">
-        <Icon
-          class="icon"
-          icon="mdi:phone"
-          width="24"
-          height="24"
-          color="#011F7C"
-        />832-572-7121
+        <IconText icon="mdi:phone" text="832-572-7121" />
       </div>
       <div class="location">
-        <Icon
-          class="icon"
+        <IconText
           icon="mdi:location"
-          width="24"
-          height="24"
-          color="#011F7C"
-        />1300 N Main St, Baytown
+          text="1300 N Main St, Baytown"
+          :link="googleMapsBusinessLink"
+        />
       </div>
     </div>
     <div v-if="!isMobile" class="links-container">
