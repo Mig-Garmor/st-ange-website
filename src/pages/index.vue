@@ -10,7 +10,13 @@ import moreServicesImage from "@assets/more-services.webp";
 
 import PageLayout from "@components/wrappers/PageLayout.vue";
 import ServiceCard from "@components/ServiceCard.vue";
-import Badge from "../components/particles/Badge.vue";
+import Badge from "../components/utilities/Badge.vue";
+
+function handleReviewsClick() {
+  const googleMapsUrl =
+    "https://search.google.com/local/reviews?placeid=ChIJiRaP15ZdP4YRQL29VtCpdp0";
+  window.open(googleMapsUrl, "_blank");
+}
 </script>
 
 <template>
@@ -22,17 +28,18 @@ import Badge from "../components/particles/Badge.vue";
       <div class="title">CAR REPAIR & SERVICE</div>
       <div class="call-to-action">
         <Badge text="Call us" icon="mdi:phone" iconWidth="24" iconHeight="24" />
-        <Badge
+        <!-- <Badge
           text="Free Quote"
           icon="la:file-invoice-dollar"
           iconWidth="26"
           iconHeight="26"
-        />
+        /> -->
         <Badge
           text="Reviews"
           icon="carbon:star-review"
           iconWidth="26"
           iconHeight="26"
+          :action="handleReviewsClick"
         />
       </div>
       <div class="services">
