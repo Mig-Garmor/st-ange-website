@@ -16,6 +16,9 @@ import Badge from "../components/utilities/Badge.vue";
 
 const { isMobile } = useDeviceType();
 
+const googleReviewsUrl =
+  "https://search.google.com/local/reviews?placeid=ChIJiRaP15ZdP4YRQL29VtCpdp0";
+
 function handleReviewsClick() {
   const googleMapsUrl =
     "https://search.google.com/local/reviews?placeid=ChIJiRaP15ZdP4YRQL29VtCpdp0";
@@ -34,6 +37,12 @@ onMounted(async () => {
   const existingScript = document.querySelector(
     'script[src="https://featurable.com/assets/bundle.js"]'
   );
+
+  const initialize = () => {
+    if (window.Featurable && typeof window.Featurable.init === "function") {
+      window.Featurable.init();
+    }
+  };
   if (!existingScript) {
     const script = document.createElement("script");
     script.src = "https://featurable.com/assets/bundle.js";
@@ -47,9 +56,7 @@ onMounted(async () => {
     document.body.appendChild(script);
   } else {
     // If script already loaded, re-init Featurable
-    if (window.Featurable && typeof window.Featurable.init === "function") {
-      window.Featurable.init();
-    }
+    initialize();
   }
 });
 </script>
@@ -96,16 +103,10 @@ onMounted(async () => {
       </div>
       <!-- Featurable Badge Widget -->
       <div class="text-white">
-        <a
-          href="https://search.google.com/local/reviews?placeid=ChIJiRaP15ZdP4YRQL29VtCpdp0"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <div
-            id="featurable-41509530-5f33-499e-85c5-72c7e376bfc7"
-            data-featurable-async
-          ></div>
-        </a>
+        <div
+          id="featurable-41509530-5f33-499e-85c5-72c7e376bfc7"
+          data-featurable-async
+        ></div>
       </div>
     </div>
   </PageLayout>
