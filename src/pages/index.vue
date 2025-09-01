@@ -83,14 +83,6 @@ onMounted(async () => {
           :action="handleReviewsClick"
         />
       </div>
-
-      <!-- Featurable Badge Widget -->
-      <div class="reviews text-white">
-        <div
-          id="featurable-41509530-5f33-499e-85c5-72c7e376bfc7"
-          data-featurable-async
-        ></div>
-      </div>
       <div class="services">
         <ServiceCard :image="alignmentImage" name="Car Alignment" />
         <ServiceCard :image="acRepairImage" name="A/C Repair" />
@@ -101,6 +93,13 @@ onMounted(async () => {
         />
         <ServiceCard :image="tiresRepairImage" name="New & Old tires" />
         <ServiceCard :image="moreServicesImage" name="And More..." />
+      </div>
+      <!-- Featurable Badge Widget -->
+      <div class="text-white">
+        <div
+          id="featurable-41509530-5f33-499e-85c5-72c7e376bfc7"
+          data-featurable-async
+        ></div>
       </div>
     </div>
   </PageLayout>
