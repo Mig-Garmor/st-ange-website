@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, nextTick } from "vue";
+import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { useDeviceType } from "@composables/useDeviceType";
 
 import backgroundImg from "@assets/mechanic-bg.webp";
@@ -15,6 +15,7 @@ import ServiceCard from "@components/ServiceCard.vue";
 import Badge from "../components/utilities/Badge.vue";
 
 const { isMobile } = useDeviceType();
+const featurableContainer = ref(null);
 
 const googleReviewsUrl =
   "https://search.google.com/local/reviews?placeid=ChIJiRaP15ZdP4YRQL29VtCpdp0";
@@ -28,34 +29,52 @@ function handleCallUsClick() {
   window.location.href = "tel:832-572-7121";
 }
 
-onMounted(async () => {
-  // Wait for DOM to render fully
-  await nextTick();
-
-  // Check if the script is already loaded
-  const existingScript = document.querySelector(
-    'script[src="https://featurable.com/assets/bundle.js"]'
-  );
-
-  const initialize = () => {
-    if (window.Featurable && typeof window.Featurable.init === "function") {
-      window.Featurable.init();
+function loadFeaturableScript() {
+  return new Promise((resolve, reject) => {
+    // Remove any existing Featurable script
+    const oldScript = document.querySelector(
+      'script[src^="https://featurable.com/assets/bundle.js"]'
+    );
+    if (oldScript) {
+      oldScript.remove();
     }
-  };
-  if (!existingScript) {
+
     const script = document.createElement("script");
-    script.src = "https://featurable.com/assets/bundle.js";
+    script.src = `https://featurable.com/assets/bundle.js?reload=${Date.now()}`; // bust cache
     script.defer = true;
     script.charset = "UTF-8";
     script.onload = () => {
-      if (window.Featurable && typeof window.Featurable.init === "function") {
-        window.Featurable.init();
-      }
+      console.log("✅ Featurable script reloaded");
+      resolve();
+    };
+    script.onerror = () => {
+      console.error("❌ Failed to load Featurable script");
+      reject();
     };
     document.body.appendChild(script);
-  } else {
-    // If script already loaded, re-init Featurable
-    initialize();
+  });
+}
+
+async function initializeFeaturable() {
+  if (!featurableContainer.value) return;
+
+  // Completely clear and recreate the container
+  featurableContainer.value.innerHTML = `
+    <div id="featurable-41509530-5f33-499e-85c5-72c7e376bfc7" data-featurable-async></div>
+  `;
+
+  // Load script fresh every time
+  await loadFeaturableScript();
+}
+
+onMounted(async () => {
+  initializeFeaturable();
+});
+
+onBeforeUnmount(() => {
+  // Optional cleanup
+  if (featurableContainer.value) {
+    featurableContainer.value.innerHTML = "";
   }
 });
 </script>
@@ -101,12 +120,7 @@ onMounted(async () => {
         <ServiceCard :image="moreServicesImage" name="And More..." />
       </div>
       <!-- Featurable Badge Widget -->
-      <div class="google-reviews-widget">
-        <div
-          id="featurable-41509530-5f33-499e-85c5-72c7e376bfc7"
-          data-featurable-async
-        ></div>
-      </div>
+      <div ref="featurableContainer" class="google-reviews-widget"></div>
     </div>
   </PageLayout>
 </template>
