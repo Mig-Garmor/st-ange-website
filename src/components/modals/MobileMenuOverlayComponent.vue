@@ -1,5 +1,10 @@
 <script setup>
+import { useRouter } from "vue-router";
+
 import { Icon } from "@iconify/vue";
+import IconText from "@components/utilities/IconText.vue";
+
+import logo from "@assets/logo-2.webp";
 
 const props = defineProps({
   isMobile: {
@@ -12,10 +17,15 @@ const props = defineProps({
   },
 });
 
+const router = useRouter();
+
+const googleMapsBusinessLink = "https://maps.app.goo.gl/kRiqUGChingHzADh6";
+
 const emit = defineEmits(["close-mobile-menu"]);
 
-const closeMobileMenu = () => {
+const closeMobileMenu = (route) => {
   emit("close-mobile-menu");
+  router.push(route);
 };
 </script>
 
@@ -35,24 +45,35 @@ const closeMobileMenu = () => {
           class="close-icon"
         />
       </div>
+      <img :src="logo" />
 
       <div class="mobile-menu-body">
-        <div class="mobile-menu-item" @click="closeMobileMenu">Home</div>
-        <div class="mobile-menu-item" @click="closeMobileMenu">About</div>
+        <div class="mobile-menu-item" @click="closeMobileMenu('/')">Home</div>
+        <div class="mobile-menu-item" @click="closeMobileMenu('/about')">
+          About
+        </div>
+        <div class="mobile-menu-item" @click="closeMobileMenu('/contact-us')">
+          Contact Us
+        </div>
 
         <!-- You can also include the contact info in the mobile menu if desired -->
         <div class="mobile-contact-info">
           <div class="mobile-phone">
-            <Icon
+            <IconText
               icon="mdi:phone"
-              width="20"
-              height="20"
-              color="#011F7C"
-            />832-572-7121
+              text="832-572-7121"
+              iconWidth="20"
+              iconHeight="20"
+            />
           </div>
           <div class="mobile-location">
-            <Icon icon="mdi:location" width="20" height="20" color="#011F7C" />
-            1300 N Main St, Baytown
+            <IconText
+              icon="mdi:location"
+              text="1300 N Main St, Baytown"
+              iconWidth="20"
+              iconHeight="20"
+              :link="googleMapsBusinessLink"
+            />
           </div>
         </div>
       </div>
