@@ -1,7 +1,8 @@
 .index-page-container {
   .title {
-    @apply flex w-full justify-center;
-    @apply font-bold text-[30px] text-center text-white bg-[rgba(0,0,0,0.5)];
+    @apply flex w-full justify-center max-w-[80%];
+    @apply font-bold text-[30px] text-center text-white;
+    /* @apply bg-[rgba(0,0,0,0.5)]; */
     @apply md:text-[35px];
     @apply lg:text-[40px];
   }
@@ -9,7 +10,7 @@
     @apply flex flex-wrap w-full justify-center gap-[20px];
   }
   .services {
-    @apply text-white bg-[rgba(0,0,0,0.5)];
+    @apply text-white bg-[rgba(0,0,0,0.5)] rounded-[10px];
     @apply flex flex-wrap w-[80%] items-center justify-center text-center gap-[20px] py-[40px];
   }
   .google-reviews-widget {

@@ -1,6 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
-import { useDeviceType } from "@composables/useDeviceType";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 
 import backgroundImg from "@assets/mechanic-bg.webp";
 import alignmentImage from "@assets/car-alignment.webp";
@@ -14,19 +13,23 @@ import PageLayout from "@components/wrappers/PageLayout.vue";
 import ServiceCard from "@components/ServiceCard.vue";
 import Badge from "../components/utilities/Badge.vue";
 
-const { isMobile } = useDeviceType();
 const featurableContainer = ref(null);
 
 const googleReviewsUrl =
   "https://search.google.com/local/reviews?placeid=ChIJiRaP15ZdP4YRQL29VtCpdp0";
 
-function handleReviewsClick() {
-  console.log("REVIEWS");
-  window.open(googleReviewsUrl, "_blank");
-}
+const googleMapsBusinessLink = "https://maps.app.goo.gl/kRiqUGChingHzADh6";
+
 function handleCallUsClick() {
-  console.log("Click");
   window.location.href = "tel:832-572-7121";
+}
+
+function handleFindUsClick() {
+  window.open(googleMapsBusinessLink, "_blank");
+}
+
+function handleReviewsClick() {
+  window.open(googleReviewsUrl, "_blank");
 }
 
 function loadFeaturableScript() {
@@ -81,33 +84,59 @@ onBeforeUnmount(() => {
 
 <template>
   <PageLayout>
-    <div
+    <!-- <div
       class="index-page-container"
       :style="{ backgroundImage: `url(${backgroundImg})` }"
-    >
-      <div class="title">CAR REPAIR & SERVICE</div>
-      <div class="call-to-action">
-        <Badge
-          text="Call us"
-          icon="mdi:phone"
-          iconWidth="24"
-          iconHeight="24"
-          :action="isMobile ? handleCallUsClick : null"
-        />
-        <!-- <Badge
+    > -->
+    <div class="index-page-container">
+      <div
+        class="w-full mb-[15px]"
+        :style="{
+          backgroundImage: `url(${backgroundImg})`,
+          backgroundSize: 'cover',
+        }"
+      >
+        <div
+          class="flex flex-col justify-center items-center w-full gap-[40px] bg-[rgba(0,0,0,0.4)] p-[20px]"
+        >
+          <div class="title">
+            <p>
+              BAYTOWN <br />
+              CAR REPAIR & SERVICE
+            </p>
+          </div>
+          <div class="call-to-action">
+            <Badge
+              text="Call us"
+              icon="mdi:phone"
+              iconWidth="24"
+              iconHeight="24"
+              :action="handleCallUsClick"
+            />
+            <Badge
+              text="Find us"
+              icon="mdi:location"
+              iconWidth="24"
+              iconHeight="24"
+              :action="handleFindUsClick"
+            />
+            <!-- <Badge
           text="Free Quote"
           icon="la:file-invoice-dollar"
           iconWidth="26"
           iconHeight="26"
         /> -->
-        <Badge
-          text="Reviews"
-          icon="carbon:star-review"
-          iconWidth="26"
-          iconHeight="26"
-          :action="handleReviewsClick"
-        />
+            <Badge
+              text="Reviews"
+              icon="carbon:star-review"
+              iconWidth="26"
+              iconHeight="26"
+              :action="handleReviewsClick"
+            />
+          </div>
+        </div>
       </div>
+      <div class="text-[25px] font-bold">OUR SERVICES</div>
       <div class="services">
         <ServiceCard :image="alignmentImage" name="Car Alignment" />
         <ServiceCard :image="acRepairImage" name="A/C Repair" />
