@@ -52,9 +52,12 @@ const googleMapsBusinessLink = "https://maps.app.goo.gl/kRiqUGChingHzADh6";
     ]"
     class="header-container"
   >
-    <div class="logo-container" :class="isMobile && 'max-w-[200px]'">
+    <div
+      class="logo-container"
+      :class="isMobile ? 'max-w-[200px]' : 'max-w-[300px]'"
+    >
       <img :src="logo" />
-      <div class="information-container">
+      <div v-if="isMobile" class="information-container">
         <div class="phone-number">
           <IconText
             icon="mdi:phone"

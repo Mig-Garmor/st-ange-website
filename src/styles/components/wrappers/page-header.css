@@ -1,6 +1,6 @@
 .header-container {
   .logo-container {
-    @apply flex flex-col items-center h-full w-[400px] overflow-hidden;
+    @apply flex flex-col justify-center items-center h-full w-[400px] overflow-hidden;
   }
   .information-container {
     .phone-number,
@@ -9,6 +9,9 @@
     @apply flex flex-col items-start flex-wrap justify-center h-full p-[0px];
     @apply md:gap-[10px];
     @apply lg:p-[0px] lg:flex-row lg:items-center lg:gap-[60px];
+    .location {
+      @apply cursor-pointer;
+    }
   }
   .links-container {
     @apply flex items-center h-full gap-[20px];
