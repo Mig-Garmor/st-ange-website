@@ -153,7 +153,7 @@ onBeforeUnmount(() => {
         <ServiceCard :image="moreServicesImage" name="And More..." />
       </div>
 
-      <div class="text-[25px] font-bold">OUR HAPPY CUSTOMERS</div>
+      <div class="text-[25px] font-bold">HAPPY CUSTOMERS</div>
 
       <!-- Featurable Badge Widget -->
       <div ref="featurableContainer" class="google-reviews-widget"></div>
