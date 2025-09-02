@@ -101,7 +101,7 @@ onBeforeUnmount(() => {
         >
           <div class="title">
             <div
-              class="bg-black/20 rounded-2xl w-full backdrop-blur-md border border-white/10"
+              class="bg-black/20 rounded-[10px] w-full backdrop-blur-sm border border-white/10"
             >
               <p>
                 Baytown <br />
