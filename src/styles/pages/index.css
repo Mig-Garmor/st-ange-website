@@ -7,7 +7,7 @@
     @apply lg:text-[40px];
   }
   .call-to-action {
-    @apply flex flex-wrap w-full justify-center gap-[20px];
+    @apply flex flex-wrap w-full justify-center gap-[20px] text-[#011F7C];
   }
   .services {
     @apply text-white bg-[rgba(0,0,0,0.5)] rounded-[10px];

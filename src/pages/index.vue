@@ -100,10 +100,14 @@ onBeforeUnmount(() => {
           class="flex flex-col justify-center items-center w-full gap-[40px] bg-[rgba(0,0,0,0.4)] p-[20px]"
         >
           <div class="title">
-            <p>
-              BAYTOWN <br />
-              CAR REPAIR & SERVICE
-            </p>
+            <div
+              class="bg-black/20 rounded-2xl w-full backdrop-blur-md border border-white/10"
+            >
+              <p>
+                Baytown <br />
+                Car Repair & Service
+              </p>
+            </div>
           </div>
           <div class="call-to-action">
             <Badge
@@ -148,6 +152,9 @@ onBeforeUnmount(() => {
         <ServiceCard :image="tiresRepairImage" name="New & Old tires" />
         <ServiceCard :image="moreServicesImage" name="And More..." />
       </div>
+
+      <div class="text-[25px] font-bold">OUR HAPPY CUSTOMERS</div>
+
       <!-- Featurable Badge Widget -->
       <div ref="featurableContainer" class="google-reviews-widget"></div>
     </div>
