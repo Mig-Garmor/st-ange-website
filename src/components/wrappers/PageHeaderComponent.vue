@@ -54,7 +54,10 @@ const googleMapsBusinessLink = "https://maps.app.goo.gl/kRiqUGChingHzADh6";
   >
     <div
       class="logo-container"
-      :class="isMobile ? 'max-w-[200px]' : 'max-w-[300px]'"
+      :class="[
+        isMobile ? 'max-w-[200px]' : 'max-w-[300px]',
+        link && 'cursor-pointer',
+      ]"
     >
       <img :src="logo" />
       <div v-if="isMobile" class="information-container">
@@ -72,7 +75,6 @@ const googleMapsBusinessLink = "https://maps.app.goo.gl/kRiqUGChingHzADh6";
             text="1300 N Main St, Baytown"
             :iconWidth="isMobile ? '15' : '24'"
             :iconHeight="isMobile ? '15' : '24'"
-            :link="googleMapsBusinessLink"
           />
         </div>
       </div>
