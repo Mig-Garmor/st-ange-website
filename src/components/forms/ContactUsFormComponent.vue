@@ -58,30 +58,6 @@ async function handleSubmit() {
     phone.value = "";
     message.value = "";
   }
-
-  try {
-    const response = await fetch("/api/send-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
-
-    if (response.ok) {
-      submissionStatus.value = "success";
-      name.value = "";
-      email.value = "";
-      confirmEmail.value = "";
-      phone.value = "";
-      message.value = "";
-    } else {
-      const err = await response.json();
-      submissionStatus.value = "error";
-      console.error(err.error);
-    }
-  } catch (error) {
-    submissionStatus.value = "error";
-    console.error(error);
-  }
 }
 </script>
 

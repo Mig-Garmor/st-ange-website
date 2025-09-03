@@ -1,6 +1,4 @@
-import sgMail from "@sendgrid/mail";
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+import SibApiV3Sdk from "@sendinblue/client";
 
 export default async function handler(req, res) {
   if (req.method !== "POST")
@@ -8,21 +6,23 @@ export default async function handler(req, res) {
 
   const { name, email, phone, message } = req.body;
 
-  if (!name || !email || !phone || !message)
-    return res.status(400).json({ error: "All fields are required" });
-
-  const msg = {
-    to: process.env.PERSONAL_EMAIL,
-    from: process.env.SENDGRID_VERIFIED_SENDER,
-    subject: `New Contact Form Submission from ${name}`,
-    text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\n\nMessage:\n${message}`,
-  };
+  const client = new SibApiV3Sdk.TransactionalEmailsApi();
+  client.setApiKey(
+    SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey,
+    process.env.BREVO_API_KEY
+  );
 
   try {
-    await sgMail.send(msg);
-    res.status(200).json({ message: "Email sent successfully!" });
+    await client.sendTransacEmail({
+      sender: { email: "migarmoral42@gmail.com" },
+      to: [{ email: "migarmoral42@gmail.com" }],
+      subject: `New Contact from ${name}`,
+      textContent: `Message: ${message}\nFrom: ${email}\nPhone: ${phone}`,
+    });
+
+    return res.status(200).json({ message: "Email sent successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to send email" });
+    return res.status(500).json({ error: "Failed to send email" });
   }
 }
