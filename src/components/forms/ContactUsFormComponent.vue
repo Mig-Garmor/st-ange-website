@@ -122,7 +122,8 @@ async function handleSubmit() {
 
     <!-- Success Banner -->
     <div v-if="submissionStatus === 'success'" class="banner-success">
-      Your message was sent successfully!
+      Your message was sent. <br />
+      We will be in touch with you shortly
     </div>
 
     <!-- Error Banner -->
