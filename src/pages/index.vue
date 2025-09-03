@@ -11,7 +11,7 @@ import moreServicesImage from "@assets/more-services.webp";
 
 import PageLayout from "@components/wrappers/PageLayout.vue";
 import ServiceCard from "@components/ServiceCard.vue";
-import Badge from "../components/utilities/Badge.vue";
+import Badge from "@components/utilities/Badge.vue";
 
 const featurableContainer = ref(null);
 
