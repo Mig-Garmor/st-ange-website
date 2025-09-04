@@ -2,11 +2,17 @@
   .logo-container {
     @apply flex flex-col justify-center items-center h-full w-[400px] overflow-hidden;
   }
+  .logo {
+    img {
+      @apply block w-full h-full object-contain;
+    }
+    @apply flex w-full cursor-pointer overflow-hidden;
+  }
   .information-container {
     .phone-number,
     .location {
     }
-    @apply flex flex-col items-start flex-wrap justify-center h-full p-[0px];
+    @apply flex flex-col items-start flex-wrap justify-center h-full p-[0px] h-fit;
     @apply md:gap-[10px];
     @apply lg:p-[0px] lg:flex-row lg:items-center lg:gap-[60px];
   }

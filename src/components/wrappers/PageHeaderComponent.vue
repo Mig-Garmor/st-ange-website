@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch } from "vue";
+import { useRouter } from "vue-router";
 
 import { Icon } from "@iconify/vue";
 
@@ -17,6 +18,8 @@ defineProps({
     default: false,
   },
 });
+
+const router = useRouter();
 
 const { isScrollingUp, isAtTop } = useScrollDirection();
 const { isMobile } = useDeviceType();
@@ -58,8 +61,10 @@ const googleMapsBusinessLink = "https://maps.app.goo.gl/kRiqUGChingHzADh6";
         isMobile ? 'max-w-[200px]' : 'max-w-[300px]',
         link && 'cursor-pointer',
       ]"
+      @click="router.push('/')"
     >
-      <img :src="logo" />
+      <div class="logo"><img :src="logo" /></div>
+
       <div v-if="isMobile" class="information-container">
         <div class="phone-number">
           <IconText

@@ -27,6 +27,11 @@ const closeMobileMenu = (route) => {
   emit("close-mobile-menu");
   router.push(route);
 };
+
+const clickLogo = () => {
+  emit("close-mobile-menu");
+  router.push("/");
+};
 </script>
 
 <template>
@@ -45,7 +50,7 @@ const closeMobileMenu = (route) => {
           class="close-icon"
         />
       </div>
-      <img :src="logo" />
+      <img :src="logo" @click="clickLogo" class="cursor-pointer" />
 
       <div class="mobile-menu-body">
         <div class="mobile-menu-item" @click="closeMobileMenu('/')">Home</div>
