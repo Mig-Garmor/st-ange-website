@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   if (req.method !== "POST")
     return res.status(405).json({ error: "Method not allowed" });
 
-  const { name, email, phone, message, subject } = req.body;
+  const { name, email, phone, message, subject } = req.body.data;
 
   const client = new SibApiV3Sdk.TransactionalEmailsApi();
   client.setApiKey(
