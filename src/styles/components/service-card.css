@@ -4,6 +4,6 @@
     @apply text-black font-bold bg-[#F6C220] rounded-full;
     @apply flex items-center justify-center w-full;
   }
-  @apply relative w-[250px] h-[250px] bg-black rounded-full;
-  @apply bg-center bg-cover;
+  @apply relative w-[100px] h-[100px] text-[12px] bg-black rounded-full bg-center bg-cover;
+  @apply lg:w-[200px] lg:h-[200px] lg:text-[20px];
 }

@@ -84,13 +84,9 @@ onBeforeUnmount(() => {
 
 <template>
   <PageLayout>
-    <!-- <div
-      class="index-page-container"
-      :style="{ backgroundImage: `url(${backgroundImg})` }"
-    > -->
     <div class="index-page-container">
       <div
-        class="w-full mb-[15px]"
+        class="title-container"
         :style="{
           backgroundImage: `url(${backgroundImg})`,
           backgroundSize: 'cover',
@@ -140,7 +136,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </div>
-      <div class="text-[25px] font-bold">OUR SERVICES</div>
+      <div class="text-[25px] font-bold">Our Services</div>
       <div class="services">
         <ServiceCard :image="alignmentImage" name="Car Alignment" />
         <ServiceCard :image="acRepairImage" name="A/C Repair" />
@@ -149,11 +145,11 @@ onBeforeUnmount(() => {
           :image="suspensionRepairImage"
           name="Suspension & Steering"
         />
-        <ServiceCard :image="tiresRepairImage" name="New & Old tires" />
+        <ServiceCard :image="tiresRepairImage" name="New & used tires" />
         <ServiceCard :image="moreServicesImage" name="And More..." />
       </div>
 
-      <div class="text-[25px] font-bold">HAPPY CUSTOMERS</div>
+      <div class="text-[25px] font-bold">Our Happy Customers</div>
 
       <!-- Featurable Badge Widget -->
       <div ref="featurableContainer" class="google-reviews-widget"></div>
