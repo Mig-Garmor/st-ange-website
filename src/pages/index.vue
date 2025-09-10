@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
+import { useRouter } from "vue-router";
 
 import backgroundImg from "@assets/mechanic-bg.webp";
 import alignmentImage from "@assets/car-alignment.webp";
@@ -12,6 +13,8 @@ import moreServicesImage from "@assets/more-services.webp";
 import PageLayout from "@components/wrappers/PageLayout.vue";
 import ServiceCard from "@components/ServiceCard.vue";
 import Badge from "@components/utilities/Badge.vue";
+
+const router = useRouter();
 
 const featurableContainer = ref(null);
 
@@ -68,6 +71,12 @@ async function initializeFeaturable() {
 
   // Load script fresh every time
   await loadFeaturableScript();
+}
+
+function serviceClick(subject) {
+  if (subject !== "" && subject !== undefined)
+    router.push({ name: "contact-us", query: { subject: subject } });
+  else router.push({ name: "contact-us" });
 }
 
 onMounted(async () => {
@@ -138,15 +147,36 @@ onBeforeUnmount(() => {
       </div>
       <div class="text-[25px] font-bold">Our Services</div>
       <div class="services">
-        <ServiceCard :image="alignmentImage" name="Car Alignment" />
-        <ServiceCard :image="acRepairImage" name="A/C Repair" />
-        <ServiceCard :image="brakeRepairImage" name="Brake Repair" />
+        <ServiceCard
+          :image="alignmentImage"
+          name="Car Alignment"
+          @click="serviceClick('Car Alignment')"
+        />
+        <ServiceCard
+          :image="acRepairImage"
+          name="A/C Repair"
+          @click="serviceClick('A/C Repair')"
+        />
+        <ServiceCard
+          :image="brakeRepairImage"
+          name="Brake Repair"
+          @click="serviceClick('Brake Repair')"
+        />
         <ServiceCard
           :image="suspensionRepairImage"
           name="Suspension & Steering"
+          @click="serviceClick('Suspension & Steering')"
         />
-        <ServiceCard :image="tiresRepairImage" name="New & used tires" />
-        <ServiceCard :image="moreServicesImage" name="And More..." />
+        <ServiceCard
+          :image="tiresRepairImage"
+          name="New & used tires"
+          @click="serviceClick('New & used tires')"
+        />
+        <ServiceCard
+          :image="moreServicesImage"
+          name="And More..."
+          @click="serviceClick('')"
+        />
       </div>
 
       <div class="text-[25px] font-bold">Our Happy Customers</div>

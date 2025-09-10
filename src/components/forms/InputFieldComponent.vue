@@ -9,6 +9,10 @@ const props = defineProps({
   },
   modelValue: String,
   error: String,
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(["update:modelValue"]);
@@ -30,13 +34,14 @@ function handleInput(e) {
 
 <template>
   <div class="input-wrapper">
-    <label class="input-label">{{ label }}</label>
+    <label class="input-label" :disabled="disabled">{{ label }}</label>
 
     <template v-if="type === 'textarea'">
       <textarea
         class="input-base"
         :value="modelValue"
         @input="handleInput"
+        :disabled="disabled"
       ></textarea>
     </template>
     <template v-else>
@@ -45,6 +50,7 @@ function handleInput(e) {
         :type="type"
         :value="modelValue"
         @input="handleInput"
+        :disabled="disabled"
       />
     </template>
 

@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import { useRoute } from "vue-router";
 import InputFieldComponent from "@components/forms/InputFieldComponent.vue";
 import {
   validateName,
@@ -9,6 +10,9 @@ import {
 } from "@modules/validate.js";
 
 import { submitForm } from "@api/forms";
+
+const route = useRoute();
+const subject = ref(route.query.subject || "");
 
 const name = ref("");
 const email = ref("");
@@ -43,6 +47,7 @@ async function handleSubmit() {
   submissionStatus.value = ""; // reset
 
   const formData = {
+    subject: subject.value,
     name: name.value,
     email: email.value,
     phone: phone.value,
@@ -63,6 +68,13 @@ async function handleSubmit() {
 
 <template>
   <form class="form-wrapper" @submit.prevent="handleSubmit">
+    <InputFieldComponent
+      v-if="subject"
+      label="Subject"
+      v-model="subject"
+      type="text"
+      :disabled="true"
+    />
     <InputFieldComponent
       label="Name"
       v-model="name"
