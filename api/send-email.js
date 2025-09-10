@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   if (req.method !== "POST")
     return res.status(405).json({ error: "Method not allowed" });
 
-  const { name, email, phone, message } = req.body;
+  const { name, email, phone, message, subject } = req.body;
 
   const client = new SibApiV3Sdk.TransactionalEmailsApi();
   client.setApiKey(
@@ -16,8 +16,8 @@ export default async function handler(req, res) {
     await client.sendTransacEmail({
       sender: { email: "migarmoral42@gmail.com" },
       to: [{ email: "migarmoral42@gmail.com" }],
-      subject: `New Contact from ${name}`,
-      textContent: `Message: ${message}\nFrom: ${email}\nPhone: ${phone}`,
+      subject: subject ? `${subject}` : `Service Request from ${name}`,
+      textContent: `Name: ${name}\nMessage: ${message}\nFrom: ${email}\nPhone: ${phone}`,
     });
 
     return res.status(200).json({ message: "Email sent successfully" });
