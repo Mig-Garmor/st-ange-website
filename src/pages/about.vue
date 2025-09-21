@@ -8,6 +8,7 @@ import ImageTextBlock from "../components/blocks/ImageTextBlock.vue";
   <PageLayout>
     <div class="about-us-page-container">
       <div class="text-container">
+        <h1>Our Story</h1>
         <ImageTextBlock
           image="assets/st-lucia-family.webp"
           text="We're a proud family-owned St. Lucian mechanic shop right here in

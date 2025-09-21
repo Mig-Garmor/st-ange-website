@@ -15,8 +15,8 @@ const { isMobile } = useDeviceType();
 
 <template>
   <div class="image-text-block-container">
-    <ImageContainer :image="image" />
     <div class="text-content">{{ text }}</div>
+    <ImageContainer :image="image" />
   </div>
 </template>
 

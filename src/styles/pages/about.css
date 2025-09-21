@@ -1,5 +1,10 @@
 .about-us-page-container {
   .text-container {
+    h1 {
+      @apply text-[30px] mb-[20px] font-bold;
+      @apply md:text-[35px];
+      @apply lg:text-[40px];
+    }
     @apply flex flex-col items-center justify-center p-[20px] mt-[20px];
     @apply h-fit w-[80%] bg-[rgba(0,0,0,0.6)] rounded-[10px];
     @apply text-gray-100 text-[20px];
