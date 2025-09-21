@@ -55,7 +55,7 @@ const clickLogo = () => {
       <div class="mobile-menu-body">
         <div class="mobile-menu-item" @click="closeMobileMenu('/')">Home</div>
         <div class="mobile-menu-item" @click="closeMobileMenu('/about')">
-          About
+          About Us
         </div>
         <div class="mobile-menu-item" @click="closeMobileMenu('/contact-us')">
           Contact Us
