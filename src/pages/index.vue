@@ -178,7 +178,7 @@ onBeforeUnmount(() => {
 
       <GoogleMapsWidget />
 
-      <div class="text-[40px] text-center font-bold">Our Happy Customers</div>
+      <div class="text-[40px] text-center font-bold">Customers Reviews</div>
 
       <!-- Featurable Badge Widget -->
       <div ref="featurableContainer" class="google-reviews-widget"></div>
