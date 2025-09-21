@@ -1,5 +1,6 @@
 <script setup>
 import PageLayout from "@components//wrappers/PageLayout.vue";
+import GoogleMapsWidget from "@components/blocks/GoogleMapsWidget.vue";
 </script>
 
 <template>
@@ -21,6 +22,7 @@ import PageLayout from "@components//wrappers/PageLayout.vue";
         on. Every customer is treated like family, and we go the extra mile to
         make sure you drive away with confidence.
       </div>
+      <GoogleMapsWidget />
     </div>
   </PageLayout>
 </template>
