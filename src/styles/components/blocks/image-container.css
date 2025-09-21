@@ -1,0 +1,5 @@
+.image-container {
+  @apply w-[150px] h-[150px] text-[12px] bg-black rounded-[10px] bg-center bg-cover shrink-0;
+  @apply md:w-[150px] md:h-[150px] md:text-[15px];
+  @apply lg:w-[200px] lg:h-[200px] lg:text-[20px];
+}

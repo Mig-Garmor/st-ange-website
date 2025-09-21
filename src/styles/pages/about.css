@@ -3,7 +3,7 @@
     @apply flex flex-col items-center justify-center p-[20px] mt-[20px];
     @apply h-fit w-[80%] bg-[rgba(0,0,0,0.6)] rounded-[10px];
     @apply text-gray-100 text-[20px];
-    @apply md:w-[60%] md:p-[40px];
+    @apply md:w-[80%] md:p-[40px];
     @apply lg:w-[70%] lg:p-[60px] mt-[40px];
   }
   @apply flex flex-col justify-center items-center gap-[50px] min-h-screen;
