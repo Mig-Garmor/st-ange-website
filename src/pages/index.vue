@@ -4,14 +4,6 @@ import { useRouter } from "vue-router";
 
 import { useDeviceType } from "@composables/useDeviceType";
 
-import backgroundImg from "@assets/mechanic-bg.webp";
-import alignmentImage from "@assets/car-alignment.webp";
-import acRepairImage from "@assets/ac-repair.webp";
-import brakeRepairImage from "@assets/brake-repair.webp";
-import suspensionRepairImage from "@assets/suspension-repair.webp";
-import tiresRepairImage from "@assets/tires-repair.webp";
-import moreServicesImage from "@assets/more-services.webp";
-
 import PageLayout from "@components/wrappers/PageLayout.vue";
 import ServiceCard from "@components/ServiceCard.vue";
 import Badge from "@components/utilities/Badge.vue";
@@ -102,7 +94,7 @@ onBeforeUnmount(() => {
       <div
         class="title-container"
         :style="{
-          backgroundImage: `url(${backgroundImg})`,
+          backgroundImage: `url(/assets/mechanic-bg.webp)`,
           backgroundSize: 'cover',
         }"
       >
@@ -153,32 +145,32 @@ onBeforeUnmount(() => {
       <div class="text-[40px] text-center font-bold">Our Services</div>
       <div class="services">
         <ServiceCard
-          :image="alignmentImage"
+          image="/assets/car-alignment.webp"
           name="Car Alignment"
           @click="serviceClick('Car Alignment')"
         />
         <ServiceCard
-          :image="acRepairImage"
+          image="/assets/ac-repair.webp"
           name="A/C Repair"
           @click="serviceClick('A/C Repair')"
         />
         <ServiceCard
-          :image="brakeRepairImage"
+          image="/assets/brake-repair.webp"
           name="Brake Repair"
           @click="serviceClick('Brake Repair')"
         />
         <ServiceCard
-          :image="suspensionRepairImage"
+          image="/assets/suspension-repair.webp"
           name="Suspension & Steering"
           @click="serviceClick('Suspension & Steering')"
         />
         <ServiceCard
-          :image="tiresRepairImage"
+          image="/assets/tires-repair.webp"
           name="New & used tires"
           @click="serviceClick('New & used tires')"
         />
         <ServiceCard
-          :image="moreServicesImage"
+          image="/assets/more-services.webp"
           name="And More..."
           @click="serviceClick('')"
         />

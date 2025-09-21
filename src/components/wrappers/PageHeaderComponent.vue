@@ -4,8 +4,6 @@ import { useRouter } from "vue-router";
 
 import { Icon } from "@iconify/vue";
 
-import logo from "@assets/logo-2.webp";
-
 import MobileMenuOverlayComponent from "@components/modals/MobileMenuOverlayComponent.vue";
 import IconText from "@components/utilities/IconText.vue";
 
@@ -63,7 +61,7 @@ const googleMapsBusinessLink = "https://maps.app.goo.gl/kRiqUGChingHzADh6";
       ]"
       @click="router.push('/')"
     >
-      <div class="logo"><img :src="logo" /></div>
+      <div class="logo"><img src="/assets/logo-2.webp" /></div>
 
       <div v-if="isMobile" class="information-container">
         <div class="phone-number">

@@ -4,8 +4,6 @@ import { useRouter } from "vue-router";
 import { Icon } from "@iconify/vue";
 import IconText from "@components/utilities/IconText.vue";
 
-import logo from "@assets/logo-2.webp";
-
 const props = defineProps({
   isMobile: {
     type: Boolean,
@@ -50,7 +48,11 @@ const clickLogo = () => {
           class="close-icon"
         />
       </div>
-      <img :src="logo" @click="clickLogo" class="cursor-pointer" />
+      <img
+        src="/assets/logo-2.webp"
+        @click="clickLogo"
+        class="cursor-pointer"
+      />
 
       <div class="mobile-menu-body">
         <div class="mobile-menu-item" @click="closeMobileMenu('/')">Home</div>
