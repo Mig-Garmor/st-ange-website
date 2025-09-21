@@ -4,5 +4,5 @@
     @apply lg:text-[20px] lg:text-left;
   }
   @apply flex flex-col justify-start items-center w-full gap-[20px] mb-[20px];
-  @apply md:flex-row md:gap-[40px] md:text-left;
+  @apply md:flex-row-reverse md:gap-[40px] md:text-left;
 }
