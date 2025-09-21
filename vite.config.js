@@ -22,7 +22,6 @@ export default defineConfig({
       "@composables": path.resolve(__dirname, "./src/composables"),
       "@modules": path.resolve(__dirname, "./src/modules"),
       "@api": path.resolve(__dirname, "./src/api"),
-      "@composables": path.resolve(__dirname, "./src/composables"),
     },
   },
 });
