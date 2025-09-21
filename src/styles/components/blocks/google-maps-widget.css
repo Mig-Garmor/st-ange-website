@@ -1,0 +1,3 @@
+.google-maps-widget {
+  @apply rounded-[10px] overflow-hidden;
+}
