@@ -2,6 +2,8 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 
+import { useDeviceType } from "@composables/useDeviceType";
+
 import backgroundImg from "@assets/mechanic-bg.webp";
 import alignmentImage from "@assets/car-alignment.webp";
 import acRepairImage from "@assets/ac-repair.webp";
@@ -15,6 +17,8 @@ import ServiceCard from "@components/ServiceCard.vue";
 import Badge from "@components/utilities/Badge.vue";
 
 const router = useRouter();
+
+const { isMobile } = useDeviceType();
 
 const featurableContainer = ref(null);
 
@@ -145,7 +149,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </div>
-      <div class="text-[25px] font-bold">Our Services</div>
+      <div class="text-[40px] text-center font-bold">Our Services</div>
       <div class="services">
         <ServiceCard
           :image="alignmentImage"
@@ -179,7 +183,19 @@ onBeforeUnmount(() => {
         />
       </div>
 
-      <div class="text-[25px] font-bold">Our Happy Customers</div>
+      <div class="google-maps-widget">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3464.2548993612645!2d-94.9661879244063!3d29.74133527507762!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x863f5d96d78f1689%3A0x9d76a9d056bdbd40!2sSt%20Ange%20Auto%20Service!5e0!3m2!1sen!2smt!4v1758451884017!5m2!1sen!2smt"
+          :width="isMobile ? '350' : '600'"
+          height="450"
+          style="border: 0"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+
+      <div class="text-[40px] text-center font-bold">Our Happy Customers</div>
 
       <!-- Featurable Badge Widget -->
       <div ref="featurableContainer" class="google-reviews-widget"></div>
