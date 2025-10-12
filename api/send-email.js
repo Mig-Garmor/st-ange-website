@@ -14,8 +14,8 @@ export default async function handler(req, res) {
 
   try {
     await client.sendTransacEmail({
-      sender: { email: "migarmoral42@gmail.com" },
-      to: [{ email: "migarmoral42@gmail.com" }],
+      sender: { email: "st.angeautos@gmail.com" },
+      to: [{ email: "st.angeautos@gmail.com" }],
       subject: subject ? `${subject}` : `Service Request from ${name}`,
       textContent: `Name: ${name}\nMessage: ${message}\nFrom: ${email}\nPhone: ${phone}`,
     });
