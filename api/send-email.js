@@ -22,7 +22,11 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ message: "Email sent successfully" });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Failed to send email" });
+    // Capture Brevo response if available
+    let errorMessage = error.response?.body || error.message || error;
+    console.error("Email sending failed:", errorMessage);
+
+    // Make sure the error is visible in the response too
+    return res.status(500).json({ error: errorMessage });
   }
 }
