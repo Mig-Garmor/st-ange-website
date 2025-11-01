@@ -1,41 +1,63 @@
 <script setup>
-import PageLayout from "@components//wrappers/PageLayout.vue";
+import PageLayout from "@components/wrappers/PageLayout.vue";
 import GoogleMapsWidget from "@components/blocks/GoogleMapsWidget.vue";
 import ImageTextBlock from "../components/blocks/ImageTextBlock.vue";
+import { useHead } from "@vueuse/head";
+
+// ✅ SEO metadata
+useHead({
+  title: "About St Ange Auto Service | Family-Owned Mechanic in Baytown, TX",
+  meta: [
+    {
+      name: "description",
+      content:
+        "Learn about St Ange Auto Service, a trusted family-owned mechanic shop in Baytown, TX. Over 30 years of experience in car repair, brakes, alignment, and A/C service.",
+    },
+  ],
+});
 </script>
 
 <template>
   <PageLayout>
-    <div class="about-us-page-container">
-      <div class="text-container">
-        <h1>Our Story</h1>
+    <main class="about-us-page-container">
+      <section class="text-container max-w-4xl mx-auto p-6">
+        <h1 class="text-[40px] font-bold text-center mb-8">
+          About St Ange Auto Service
+        </h1>
+
         <ImageTextBlock
           image="assets/st-lucia-family.webp"
-          text="We're a proud family-owned St. Lucian mechanic shop right here in
-        Baytown, Texas."
+          text="We’re a proud family-owned St. Lucian mechanic shop located right here in Baytown, Texas. Our story began with a passion for cars and helping people stay safely on the road."
         />
+
         <ImageTextBlock
           image="/assets/working-with-uncle.webp"
-          text="   What began around 30 years ago with our owner fixing his dad’s car and
-        running a mobile mechanic business from his truck has grown into a
-        trusted local shop with 5-star reviews on Google."
+          text="What started over 30 years ago with our owner fixing his father’s car and running a mobile mechanic business from his truck has grown into a full-service local auto repair shop known for honesty and quality workmanship."
         />
+
         <ImageTextBlock
           image="/assets/satisfied-customers.webp"
-          text="At our shop, customer satisfaction is our number one priority.
-"
+          text="Customer satisfaction is our top priority. We believe in clear communication, fair pricing, and reliable service that earns your trust."
         />
+
         <ImageTextBlock
           image="/assets/more-services.webp"
-          text="We specialize in alignments, brakes, wheels, suspension, steering, regular service checks, and more, with a commitment to quality work you can rely on."
+          text="Our experienced team specializes in alignments, brakes, A/C repair, suspension and steering work, and tire services — all done with professional care and attention to detail."
         />
+
         <ImageTextBlock
           image="/assets/customer-deal.webp"
-          text="Every customer is treated like family, and we go the extra mile to make sure you drive away with confidence."
+          text="Every customer is treated like family. When you visit St Ange Auto Service, you’ll receive personal service and leave confident your car is in great hands."
         />
-      </div>
-      <GoogleMapsWidget />
-    </div>
+      </section>
+
+      <section class="mt-10">
+        <h2 class="text-[32px] font-bold text-center mb-6">
+          Find Us in Baytown
+        </h2>
+        <GoogleMapsWidget />
+      </section>
+    </main>
   </PageLayout>
 </template>
 
