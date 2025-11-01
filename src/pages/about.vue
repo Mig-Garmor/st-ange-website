@@ -22,7 +22,7 @@ import ImageTextBlock from "../components/blocks/ImageTextBlock.vue";
         />
         <ImageTextBlock
           image="/assets/satisfied-customers.webp"
-          text="        At our shop, customer satisfaction is our number one priority.
+          text="At our shop, customer satisfaction is our number one priority.
 "
         />
         <ImageTextBlock
