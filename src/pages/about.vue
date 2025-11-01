@@ -32,7 +32,7 @@ useHead({
 
         <ImageTextBlock
           image="/assets/working-with-uncle.webp"
-          text="What started over 30 years ago with our owner fixing his father’s car and running a mobile mechanic business from his truck has grown into a full-service local auto repair shop known for honesty and quality workmanship."
+          text="What started over 30 years ago with our owner lending a hand at his uncle's tire shop and later running a mobile mechanic business from his truck has grown into a full-service local auto repair shop known for honesty and quality workmanship."
         />
 
         <ImageTextBlock
