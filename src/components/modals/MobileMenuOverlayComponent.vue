@@ -56,11 +56,11 @@ const clickLogo = () => {
 
       <div class="mobile-menu-body">
         <div class="mobile-menu-item" @click="closeMobileMenu('/')">Home</div>
-        <div class="mobile-menu-item" @click="closeMobileMenu('/about')">
-          About Us
-        </div>
         <div class="mobile-menu-item" @click="closeMobileMenu('/contact-us')">
           Contact Us
+        </div>
+        <div class="mobile-menu-item" @click="closeMobileMenu('/about')">
+          About Us
         </div>
 
         <!-- You can also include the contact info in the mobile menu if desired -->

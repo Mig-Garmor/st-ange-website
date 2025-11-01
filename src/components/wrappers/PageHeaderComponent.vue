@@ -96,8 +96,8 @@ const googleMapsBusinessLink = "https://maps.app.goo.gl/kRiqUGChingHzADh6";
     </div>
     <div v-if="!isMobile" class="links-container">
       <RouterLink to="/">Home</RouterLink>
-      <RouterLink to="/about">About</RouterLink>
       <RouterLink to="/contact-us">Contact Us</RouterLink>
+      <RouterLink to="/about">About</RouterLink>
     </div>
 
     <Icon
