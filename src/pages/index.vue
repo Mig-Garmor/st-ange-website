@@ -167,7 +167,11 @@ useHead({
 
       <section class="py-10">
         <h2 class="text-[40px] text-center font-bold mb-6">Customer Reviews</h2>
-        <div ref="featurableContainer" class="google-reviews-widget"></div>
+        <div
+          ref="featurableContainer"
+          class="google-reviews-widget"
+          title="Google reviews carousel"
+        ></div>
       </section>
     </section>
   </PageLayout>
