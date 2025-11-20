@@ -61,7 +61,7 @@ const googleMapsBusinessLink = "https://maps.app.goo.gl/kRiqUGChingHzADh6";
       ]"
       @click="router.push('/')"
     >
-      <div class="logo"><img src="/assets/logo-2.webp" /></div>
+      <div class="logo"><img src="/assets/logo-2.webp" alt="logo" /></div>
 
       <div v-if="isMobile" class="information-container">
         <div class="phone-number">

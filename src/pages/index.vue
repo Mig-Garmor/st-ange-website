@@ -128,31 +128,37 @@ useHead({
             image="/assets/car-alignment.webp"
             name="Car Alignment"
             @click="serviceClick('Car Alignment')"
+            alt="Car Alignment"
           />
           <ServiceCard
             image="/assets/ac-repair.webp"
             name="A/C Repair"
             @click="serviceClick('A/C Repair')"
+            alt="A/C Repair"
           />
           <ServiceCard
             image="/assets/brake-repair.webp"
             name="Brake Repair"
             @click="serviceClick('Brake Repair')"
+            alt="Brake Repair"
           />
           <ServiceCard
             image="/assets/suspension-repair.webp"
             name="Suspension & Steering"
             @click="serviceClick('Suspension & Steering')"
+            alt="Suspension & Steering"
           />
           <ServiceCard
             image="/assets/tires-repair.webp"
             name="New & Used Tires"
             @click="serviceClick('New & Used Tires')"
+            alt="New & Used Tires"
           />
           <ServiceCard
             image="/assets/more-services.webp"
             name="And More..."
             @click="serviceClick('')"
+            alt="More Services"
           />
         </div>
       </section>

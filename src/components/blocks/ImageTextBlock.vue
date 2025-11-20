@@ -8,6 +8,10 @@ defineProps({
     type: String,
     required: true,
   },
+  alt: {
+    type: String,
+    required: true,
+  },
 });
 
 const { isMobile } = useDeviceType();
@@ -16,7 +20,7 @@ const { isMobile } = useDeviceType();
 <template>
   <div class="image-text-block-container">
     <div class="text-content">{{ text }}</div>
-    <ImageContainer :image="image" />
+    <ImageContainer :image="image" :alt="alt" />
   </div>
 </template>
 

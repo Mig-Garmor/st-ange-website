@@ -52,6 +52,7 @@ const clickLogo = () => {
         src="/assets/logo-2.webp"
         @click="clickLogo"
         class="cursor-pointer"
+        alt="logo"
       />
 
       <div class="mobile-menu-body">
