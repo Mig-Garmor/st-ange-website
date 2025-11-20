@@ -24,4 +24,8 @@ export default defineConfig({
       "@api": path.resolve(__dirname, "./src/api"),
     },
   },
+  publicDir: "public",
+  build: {
+    outDir: "dist",
+  },
 });

@@ -1,0 +1,6 @@
+# Ensure robots.txt and sitemap.xml are served as static files
+/robots.txt    /robots.txt    200
+/sitemap.xml   /sitemap.xml   200
+
+# All other routes go to your SPA
+/*    /index.html   200
