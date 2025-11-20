@@ -106,7 +106,9 @@ async function handleSubmit() {
       type="textarea"
     />
 
-    <button class="submit-btn" type="submit">Send Email</button>
+    <button class="submit-btn" type="submit" aria-label="Send Email">
+      Send Email
+    </button>
 
     <!-- Success Banner -->
     <div v-if="submissionStatus === 'success'" class="banner-success">
