@@ -1,7 +1,7 @@
 <script setup>
 import IconText from "@components/utilities/IconText.vue";
 import HoursList from "@components/utilities/HoursList.vue";
-import { business, fullAddress } from "@/config/business";
+import { business, fullAddress, services } from "@/config/business";
 import { navLinks } from "@/config/navigation";
 
 const year = new Date().getFullYear();
@@ -31,6 +31,17 @@ const year = new Date().getFullYear();
         <p class="footer-heading">Hours</p>
         <HoursList />
       </div>
+
+      <nav class="footer-column" aria-label="Services">
+        <p class="footer-heading">Services</p>
+        <RouterLink
+          v-for="service in services"
+          :key="service.slug"
+          :to="`/services/${service.slug}`"
+        >
+          {{ service.name }}
+        </RouterLink>
+      </nav>
 
       <nav class="footer-column" aria-label="Footer">
         <p class="footer-heading">Pages</p>

@@ -1,0 +1,111 @@
+.service-page {
+  @apply flex flex-col items-center w-full;
+
+  .service-hero {
+    @apply flex items-center justify-center gap-10 w-full px-[20px] py-[40px] md:py-[56px] bg-brand-navy text-white;
+  }
+
+  .service-hero-inner {
+    @apply flex flex-col gap-4 max-w-3xl;
+
+    h1 {
+      @apply text-[32px] md:text-[44px] font-bold leading-tight;
+    }
+
+    p {
+      @apply text-[17px] md:text-[19px] text-white/90;
+    }
+  }
+
+  .hero-actions {
+    @apply flex flex-wrap gap-4 mt-2;
+  }
+
+  .service-hero-image {
+    @apply hidden md:block w-[220px] h-[220px] lg:w-[260px] lg:h-[260px] rounded-full object-cover border-4 border-brand-yellow shrink-0;
+  }
+
+  .service-section {
+    @apply flex flex-col gap-6 w-full max-w-5xl px-[20px] py-[44px];
+  }
+
+  .service-section-title {
+    @apply text-[28px] md:text-[36px] font-bold text-center text-brand-navy leading-tight;
+  }
+
+  .service-intro {
+    @apply max-w-3xl gap-4 text-[18px] leading-relaxed text-gray-800;
+  }
+
+  .service-columns {
+    @apply grid gap-6 w-full max-w-5xl px-[20px] md:grid-cols-2;
+  }
+
+  .service-panel {
+    @apply flex flex-col gap-4 p-6 rounded-[10px] bg-black/5;
+
+    h2 {
+      @apply text-[22px] md:text-[24px] font-bold text-brand-navy;
+    }
+  }
+
+  .check-list {
+    @apply flex flex-col gap-3;
+
+    li {
+      @apply flex gap-3 items-start text-[16px] text-gray-800;
+    }
+
+    svg {
+      @apply text-brand-navy shrink-0 mt-[1px];
+    }
+  }
+
+  .process-list {
+    @apply flex flex-col gap-3;
+    counter-reset: step;
+
+    li {
+      @apply relative pl-10 text-[16px] text-gray-800;
+      counter-increment: step;
+    }
+
+    li::before {
+      content: counter(step);
+      @apply absolute left-0 top-0 grid place-items-center w-7 h-7 rounded-full bg-brand-yellow text-brand-navy font-bold text-[14px];
+    }
+  }
+
+  .reasons {
+    @apply grid gap-5 sm:grid-cols-2;
+
+    li {
+      @apply flex gap-3 items-start;
+    }
+
+    svg {
+      @apply text-brand-navy shrink-0;
+    }
+
+    h3 {
+      @apply font-bold text-[17px] text-brand-navy;
+    }
+
+    p {
+      @apply text-[15px] text-gray-700 leading-relaxed;
+    }
+  }
+
+  .other-services-grid,
+  .services-overview {
+    @apply grid gap-x-6 gap-y-10 justify-items-center;
+  }
+
+  .other-services-grid {
+    @apply grid-cols-2 md:grid-cols-4;
+  }
+
+  .services-overview {
+    @apply sm:grid-cols-2 lg:grid-cols-3;
+  }
+}

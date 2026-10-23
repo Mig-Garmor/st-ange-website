@@ -21,8 +21,6 @@ usePageSeo({
   path: "/",
 });
 
-const contactFor = (subject) => ({ path: "/contact-us", query: { subject } });
-
 const trustPoints = [
   { icon: "mdi:star", text: `${business.googleRating} Google rating` },
   { icon: "mdi:account-group", text: "Family-owned" },
@@ -82,7 +80,7 @@ const trustPoints = [
             :image="service.image"
             :name="service.name"
             :summary="service.summary"
-            :to="contactFor(service.name)"
+            :to="`/services/${service.slug}`"
           />
           <ServiceCard
             image="/assets/more-services.webp"

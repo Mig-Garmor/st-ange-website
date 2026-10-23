@@ -3,6 +3,7 @@ export const featuredReviews = [
   {
     author: "Matthew P.",
     service: "A/C repair",
+    serviceSlug: "ac-repair",
     text: "This place saved me approximately $1,000 on getting my air conditioner replaced. Exceptional customer service and superb expertise. They ordered the parts and had my car fixed in less than 24hrs.",
   },
   {

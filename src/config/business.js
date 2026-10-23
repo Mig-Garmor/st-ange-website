@@ -44,30 +44,35 @@ export const shortAddress = `${business.address.street}, ${business.address.city
 
 export const services = [
   {
+    slug: "car-alignment",
     name: "Car Alignment",
     image: "/assets/car-alignment.webp",
     summary:
       "Car pulling to one side or tires wearing unevenly? We check and adjust your alignment so the car drives straight and your tires last longer.",
   },
   {
+    slug: "ac-repair",
     name: "A/C Repair",
     image: "/assets/ac-repair.webp",
     summary:
       "Baytown heat is hard on any A/C. We find out why yours is blowing warm or weak, track down leaks and get the cold air back.",
   },
   {
+    slug: "brake-repair",
     name: "Brake Repair",
     image: "/assets/brake-repair.webp",
     summary:
       "Squealing, grinding or a soft pedal? We inspect pads, rotors and the whole brake system, then fix only what needs fixing.",
   },
   {
+    slug: "suspension-steering",
     name: "Suspension & Steering",
     image: "/assets/suspension-repair.webp",
     summary:
       "Clunks over bumps, a bouncy ride or loose steering usually mean worn shocks, struts or steering parts. We find the cause and repair it.",
   },
   {
+    slug: "tires",
     name: "New & Used Tires",
     image: "/assets/tires-repair.webp",
     summary:
