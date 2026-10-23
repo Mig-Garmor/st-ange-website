@@ -1,38 +1,42 @@
-.header-container {
-  .logo-container {
-    @apply flex flex-col justify-center items-center h-full w-[400px] overflow-hidden;
+.site-header {
+  @apply sticky top-0 z-[999] flex items-center justify-between gap-4;
+  @apply h-[100px] px-[20px] bg-brand-yellow text-brand-navy;
+  @apply transition-transform duration-300 ease-in-out;
+
+  &.is-hidden {
+    @apply -translate-y-full;
   }
-  .logo {
-    img {
-      @apply block w-full h-full object-contain;
+
+  .header-brand {
+    @apply flex flex-col justify-center gap-1 min-w-0 max-w-[200px] md:max-w-[300px];
+  }
+
+  .logo img {
+    @apply block w-full h-auto object-contain;
+  }
+
+  .contact-info {
+    @apply flex flex-col gap-1;
+  }
+
+  .contact-info--mobile {
+    @apply md:hidden;
+  }
+
+  .contact-info--desktop {
+    @apply hidden md:flex md:gap-[10px] lg:flex-row lg:items-center lg:gap-[60px];
+  }
+
+  .nav-links {
+    @apply hidden md:flex items-center gap-[20px] font-semibold;
+
+    a:hover,
+    a.router-link-exact-active {
+      @apply underline underline-offset-4;
     }
-    @apply flex w-full cursor-pointer overflow-hidden;
-  }
-  .information-container {
-    .phone-number,
-    .location {
-    }
-    @apply flex flex-col items-start flex-wrap justify-center h-full p-[0px] h-fit;
-    @apply md:gap-[10px];
-    @apply lg:p-[0px] lg:flex-row lg:items-center lg:gap-[60px];
-  }
-  .links-container {
-    @apply flex items-center h-full gap-[20px];
   }
 
-  @apply flex items-center justify-between bg-[#F6C220] h-[100px] px-[20px] text-[#011F7C] overflow-hidden;
-  @apply lg:px-[20px];
-}
-
-.header-sticky-container {
-  @apply fixed top-0 left-0 w-full z-[999];
-  @apply transition-transform duration-300 ease-in-out overflow-hidden;
-}
-
-.header-sticky-container.hidden {
-  @apply -translate-y-[100px];
-}
-
-.header-sticky-container.isAtTop {
-  @apply -translate-y-[100px] duration-0;
+  .menu-button {
+    @apply md:hidden shrink-0;
+  }
 }

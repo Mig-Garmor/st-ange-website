@@ -1,31 +1,31 @@
 <script setup>
-import { computed } from "vue";
 import { Icon } from "@iconify/vue";
 
-const props = defineProps({
+defineProps({
   text: { type: String, required: true },
   icon: { type: String, default: null },
-  iconWidth: { type: [Number, String], default: 20 },
-  iconHeight: { type: [Number, String], default: 20 },
-  action: { type: Function, default: null },
+  iconSize: { type: [Number, String], default: 24 },
+  href: { type: String, default: null },
+  to: { type: [String, Object], default: null },
+  external: { type: Boolean, default: false },
 });
-
-const handleClick = () => {
-  if (props.action) {
-    props.action();
-  }
-};
 </script>
 
 <template>
-  <div
-    class="badge-component"
-    :class="action && 'cursor-pointer'"
-    @click="handleClick"
-  >
-    <Icon v-if="icon" :icon="icon" :width="iconWidth" :height="iconHeight" />
+  <RouterLink v-if="to" :to="to" class="badge-component">
+    <Icon v-if="icon" :icon="icon" :width="iconSize" :height="iconSize" aria-hidden="true" />
     {{ text }}
-  </div>
+  </RouterLink>
+  <a
+    v-else
+    :href="href"
+    class="badge-component"
+    :target="external ? '_blank' : null"
+    :rel="external ? 'noopener' : null"
+  >
+    <Icon v-if="icon" :icon="icon" :width="iconSize" :height="iconSize" aria-hidden="true" />
+    {{ text }}
+  </a>
 </template>
 
 <style src="@styles/components/utilities/badge.css"></style>

@@ -28,4 +28,8 @@ export default defineConfig({
   build: {
     outDir: "dist",
   },
+  ssgOptions: {
+    dirStyle: "flat",
+    formatting: "minify",
+  },
 });

@@ -1,26 +1,15 @@
 <script setup>
-import { useDeviceType } from "@composables/useDeviceType";
-import ImageContainer from "./ImageContainer.vue";
-
 defineProps({
   image: { type: String, required: true },
-  text: {
-    type: String,
-    required: true,
-  },
-  alt: {
-    type: String,
-    required: true,
-  },
+  alt: { type: String, required: true },
+  text: { type: String, required: true },
 });
-
-const { isMobile } = useDeviceType();
 </script>
 
 <template>
   <div class="image-text-block-container">
-    <div class="text-content">{{ text }}</div>
-    <ImageContainer :image="image" :alt="alt" />
+    <p class="text-content">{{ text }}</p>
+    <img :src="image" :alt="alt" class="block-image" loading="lazy" width="200" height="200" />
   </div>
 </template>
 

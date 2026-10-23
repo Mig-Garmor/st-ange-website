@@ -1,91 +1,63 @@
 <script setup>
-import { useRouter } from "vue-router";
-
 import { Icon } from "@iconify/vue";
-import IconText from "@components/utilities/IconText.vue";
 
-const props = defineProps({
-  isMobile: {
-    type: Boolean,
-    default: false,
-  },
-  isMobileMenuOpen: {
-    type: Boolean,
-    default: false,
-  },
+import IconText from "@components/utilities/IconText.vue";
+import { business, shortAddress } from "@/config/business";
+import { navLinks } from "@/config/navigation";
+
+defineProps({
+  open: { type: Boolean, default: false },
 });
 
-const router = useRouter();
-
-const googleMapsBusinessLink = "https://maps.app.goo.gl/kRiqUGChingHzADh6";
-
-const emit = defineEmits(["close-mobile-menu"]);
-
-const closeMobileMenu = (route) => {
-  emit("close-mobile-menu");
-  router.push(route);
-};
-
-const clickLogo = () => {
-  emit("close-mobile-menu");
-  router.push("/");
-};
+const emit = defineEmits(["close"]);
+const close = () => emit("close");
 </script>
 
 <template>
   <div
-    v-if="isMobile && isMobileMenuOpen"
-    class="mobile-menu-overlay-component animate-fadeIn"
+    v-if="open"
+    class="mobile-menu-overlay-component"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Menu"
   >
-    <div class="mobile-menu-content">
-      <div class="mobile-menu-header">
-        <Icon
-          icon="mdi:close"
-          width="30"
-          height="30"
-          color="#011F7C"
-          @click="closeMobileMenu"
-          class="close-icon"
+    <div class="mobile-menu-header">
+      <button type="button" aria-label="Close menu" @click="close">
+        <Icon icon="mdi:close" width="30" height="30" class="close-icon" />
+      </button>
+    </div>
+
+    <RouterLink to="/" class="mobile-menu-logo" @click="close">
+      <img src="/assets/logo-2.webp" :alt="`${business.name} logo`" />
+    </RouterLink>
+
+    <nav class="mobile-menu-body" aria-label="Mobile">
+      <RouterLink
+        v-for="link in navLinks"
+        :key="link.to"
+        :to="link.to"
+        class="mobile-menu-item"
+        @click="close"
+      >
+        {{ link.label }}
+      </RouterLink>
+
+      <div class="mobile-contact-info">
+        <IconText
+          icon="mdi:phone"
+          :text="business.phone.display"
+          :href="business.phone.href"
+          :icon-size="20"
+        />
+        <IconText
+          icon="mdi:location"
+          :text="shortAddress"
+          :href="business.links.maps"
+          external
+          :icon-size="20"
         />
       </div>
-      <img
-        src="/assets/logo-2.webp"
-        @click="clickLogo"
-        class="cursor-pointer"
-        alt="logo"
-      />
-
-      <div class="mobile-menu-body">
-        <div class="mobile-menu-item" @click="closeMobileMenu('/')">Home</div>
-        <div class="mobile-menu-item" @click="closeMobileMenu('/contact-us')">
-          Contact
-        </div>
-        <div class="mobile-menu-item" @click="closeMobileMenu('/about')">
-          About
-        </div>
-
-        <!-- You can also include the contact info in the mobile menu if desired -->
-        <div class="mobile-contact-info">
-          <div class="mobile-phone">
-            <IconText
-              icon="mdi:phone"
-              text="832-572-7121"
-              iconWidth="20"
-              iconHeight="20"
-            />
-          </div>
-          <div class="mobile-location">
-            <IconText
-              icon="mdi:location"
-              text="1300 N Main St, Baytown"
-              iconWidth="20"
-              iconHeight="20"
-              :link="googleMapsBusinessLink"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
+    </nav>
   </div>
 </template>
 

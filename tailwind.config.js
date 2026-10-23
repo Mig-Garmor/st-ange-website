@@ -3,6 +3,12 @@ export default {
   content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      colors: {
+        brand: {
+          yellow: "#F6C220",
+          navy: "#011F7C",
+        },
+      },
       keyframes: {
         fadeIn: {
           "0%": { opacity: "0" },
