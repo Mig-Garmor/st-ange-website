@@ -1,5 +1,6 @@
 <script setup>
 import IconText from "@components/utilities/IconText.vue";
+import HoursList from "@components/utilities/HoursList.vue";
 import { business, fullAddress } from "@/config/business";
 import { navLinks } from "@/config/navigation";
 
@@ -28,12 +29,7 @@ const year = new Date().getFullYear();
 
       <div class="footer-column">
         <p class="footer-heading">Hours</p>
-        <dl class="footer-hours">
-          <template v-for="slot in business.hours" :key="slot.label">
-            <dt>{{ slot.label }}</dt>
-            <dd>{{ slot.display }}</dd>
-          </template>
-        </dl>
+        <HoursList />
       </div>
 
       <nav class="footer-column" aria-label="Footer">

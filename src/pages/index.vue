@@ -1,59 +1,145 @@
 <script setup>
+import { Icon } from "@iconify/vue";
+
 import PageLayout from "@components/wrappers/PageLayout.vue";
 import ServiceCard from "@components/ServiceCard.vue";
 import Badge from "@components/utilities/Badge.vue";
+import HoursList from "@components/utilities/HoursList.vue";
+import IconText from "@components/utilities/IconText.vue";
 import GoogleMapsWidget from "@components/blocks/GoogleMapsWidget.vue";
-import GoogleReviewsWidget from "@components/blocks/GoogleReviewsWidget.vue";
+import ReviewCard from "@components/blocks/ReviewCard.vue";
+import FaqList from "@components/blocks/FaqList.vue";
 import { usePageSeo } from "@composables/usePageSeo";
-import { business, services } from "@/config/business";
+import { business, fullAddress, services } from "@/config/business";
+import { reasons, faqs } from "@/content/home";
+import { featuredReviews } from "@/content/reviews";
 
 usePageSeo({
   title: "Auto Repair & Mechanic in Baytown, TX | St Ange Auto Service",
   description:
-    "Looking for an auto repair shop in Baytown, TX? St Ange Auto Service offers professional car alignment, brake repair, A/C service, tires, and more. Call 832-572-7121!",
+    "Family-owned auto repair shop on N Main St in Baytown, TX. Alignments, A/C repair, brakes, suspension and new & used tires with fair, upfront pricing. Call 832-572-7121.",
   path: "/",
 });
 
 const contactFor = (subject) => ({ path: "/contact-us", query: { subject } });
+
+const trustPoints = [
+  { icon: "mdi:star", text: `${business.googleRating} Google rating` },
+  { icon: "mdi:account-group", text: "Family-owned" },
+  { icon: "mdi:wrench", text: `${business.yearsExperience} years experience` },
+  { icon: "mdi:clock-outline", text: "Mon–Sat 8 AM – 6 PM" },
+];
 </script>
 
 <template>
   <PageLayout>
     <main class="index-page-container">
-      <header class="title-container">
+      <header class="hero">
         <div class="hero-overlay">
-          <h1 class="hero-title">
-            St Ange Auto Service<br />
-            Baytown Car Repair &amp; Mechanic
-          </h1>
+          <div class="hero-heading">
+            <p class="hero-eyebrow">{{ business.name }}</p>
+            <h1 class="hero-title">Auto Repair &amp; Mechanic in Baytown, TX</h1>
+            <p class="hero-subtitle">
+              Honest diagnosis, fair prices and quality repairs from a family-owned shop on North Main Street.
+            </p>
+          </div>
 
           <div class="call-to-action">
             <Badge text="Call us" icon="mdi:phone" :href="business.phone.href" />
+            <Badge text="Request service" icon="mdi:calendar-check" to="/contact-us" />
             <Badge text="Find us" icon="mdi:location" :href="business.links.maps" external />
-            <Badge text="Reviews" icon="carbon:star-review" :icon-size="26" :href="business.links.reviews" external />
           </div>
+
+          <ul class="trust-bar">
+            <li v-for="point in trustPoints" :key="point.text">
+              <Icon :icon="point.icon" width="18" height="18" aria-hidden="true" />
+              {{ point.text }}
+            </li>
+          </ul>
         </div>
       </header>
 
-      <section class="flex flex-col items-center w-full py-10">
-        <h2 class="text-[40px] text-center font-bold mb-6">Our Services</h2>
+      <section class="page-section intro">
+        <h2 class="section-title">Your Local Mechanic in Baytown</h2>
+        <p>
+          St Ange Auto Service is a family-owned auto repair shop at {{ fullAddress }}.
+          Our owner has been fixing cars for more than 30 years, starting at his uncle's tire shop
+          and later running a mobile mechanic business from his truck. Today our Baytown shop handles
+          wheel alignments, A/C repair, brakes, suspension and steering, and new and used tires.
+        </p>
+        <p>
+          Whether your car is making a new noise, the A/C is blowing warm or your tires are worn out,
+          we'll find the problem, explain it in plain language and give you a fair price before any work starts.
+        </p>
+      </section>
+
+      <section id="services" class="page-section services-section">
+        <h2 class="section-title">Our Auto Repair Services</h2>
         <div class="services">
           <ServiceCard
             v-for="service in services"
             :key="service.name"
             :image="service.image"
             :name="service.name"
+            :summary="service.summary"
             :to="contactFor(service.name)"
           />
-          <ServiceCard image="/assets/more-services.webp" name="And More..." to="/contact-us" />
+          <ServiceCard
+            image="/assets/more-services.webp"
+            name="And More..."
+            summary="Not sure what's wrong? Call us or send a message describing the problem and we'll tell you how we can help."
+            to="/contact-us"
+          />
         </div>
       </section>
 
-      <GoogleMapsWidget />
+      <section class="page-section">
+        <h2 class="section-title">Why Baytown Drivers Choose Us</h2>
+        <ul class="reasons">
+          <li v-for="reason in reasons" :key="reason.title" class="reason">
+            <Icon :icon="reason.icon" width="36" height="36" class="reason-icon" aria-hidden="true" />
+            <h3>{{ reason.title }}</h3>
+            <p>{{ reason.text }}</p>
+          </li>
+        </ul>
+      </section>
 
-      <section class="py-10 w-full">
-        <h2 class="text-[40px] text-center font-bold mb-6">Customer Reviews</h2>
-        <GoogleReviewsWidget />
+      <section class="page-section reviews-section">
+        <h2 class="section-title">What Our Customers Say</h2>
+        <p class="section-lead">
+          Rated {{ business.googleRating }} out of 5 by our customers on Google.
+        </p>
+        <div class="reviews">
+          <ReviewCard
+            v-for="review in featuredReviews"
+            :key="review.author"
+            v-bind="review"
+          />
+        </div>
+        <Badge
+          text="Read all reviews on Google"
+          icon="carbon:star-review"
+          :href="business.links.reviews"
+          external
+          class="mx-auto"
+        />
+      </section>
+
+      <section class="page-section visit">
+        <div class="visit-details">
+          <h2 class="section-title text-left">Visit Our Baytown Shop</h2>
+          <IconText icon="mdi:location" :text="fullAddress" :href="business.links.maps" external />
+          <IconText icon="mdi:phone" :text="business.phone.display" :href="business.phone.href" />
+          <HoursList class="mt-2" />
+          <p class="text-gray-700">Give us a call before you come in so we can make sure a bay is free.</p>
+          <Badge text="Call us" icon="mdi:phone" :href="business.phone.href" class="self-start" />
+        </div>
+        <GoogleMapsWidget />
+      </section>
+
+      <section class="page-section faq-section">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <FaqList :items="faqs" />
       </section>
     </main>
   </PageLayout>

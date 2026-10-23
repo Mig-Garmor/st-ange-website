@@ -2,6 +2,7 @@
 import PageLayout from "@components/wrappers/PageLayout.vue";
 import ContactUsFormComponent from "@components/forms/ContactUsFormComponent.vue";
 import GoogleMapsWidget from "@components/blocks/GoogleMapsWidget.vue";
+import HoursList from "@components/utilities/HoursList.vue";
 import { usePageSeo } from "@composables/usePageSeo";
 import { business, fullAddress } from "@/config/business";
 
@@ -34,7 +35,8 @@ usePageSeo({
 
       <section class="mt-10 text-center flex flex-col items-center">
         <h2 class="text-[28px] font-bold mb-4">Visit Our Shop</h2>
-        <p class="mb-4">Opening hours vary. Give us a call before you stop by.</p>
+        <HoursList class="mb-4 text-left" />
+        <p class="mb-4">Give us a call before you stop by so we can make sure a bay is free.</p>
         <GoogleMapsWidget />
       </section>
     </main>

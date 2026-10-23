@@ -35,15 +35,42 @@ export const business = {
   mapEmbedUrl:
     "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3464.2548993612645!2d-94.9661879244063!3d29.74133527507762!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x863f5d96d78f1689%3A0x9d76a9d056bdbd40!2sSt%20Ange%20Auto%20Service!5e0!3m2!1sen!2smt!4v1758451884017!5m2!1sen!2smt",
   defaultImage: "/assets/mechanic-bg.webp",
+  googleRating: "5.0",
+  yearsExperience: "30+",
 };
 
 export const fullAddress = `${business.address.street}, ${business.address.city}, ${business.address.region} ${business.address.postalCode}`;
 export const shortAddress = `${business.address.street}, ${business.address.city}`;
 
 export const services = [
-  { name: "Car Alignment", image: "/assets/car-alignment.webp" },
-  { name: "A/C Repair", image: "/assets/ac-repair.webp" },
-  { name: "Brake Repair", image: "/assets/brake-repair.webp" },
-  { name: "Suspension & Steering", image: "/assets/suspension-repair.webp" },
-  { name: "New & Used Tires", image: "/assets/tires-repair.webp" },
+  {
+    name: "Car Alignment",
+    image: "/assets/car-alignment.webp",
+    summary:
+      "Car pulling to one side or tires wearing unevenly? We check and adjust your alignment so the car drives straight and your tires last longer.",
+  },
+  {
+    name: "A/C Repair",
+    image: "/assets/ac-repair.webp",
+    summary:
+      "Baytown heat is hard on any A/C. We find out why yours is blowing warm or weak, track down leaks and get the cold air back.",
+  },
+  {
+    name: "Brake Repair",
+    image: "/assets/brake-repair.webp",
+    summary:
+      "Squealing, grinding or a soft pedal? We inspect pads, rotors and the whole brake system, then fix only what needs fixing.",
+  },
+  {
+    name: "Suspension & Steering",
+    image: "/assets/suspension-repair.webp",
+    summary:
+      "Clunks over bumps, a bouncy ride or loose steering usually mean worn shocks, struts or steering parts. We find the cause and repair it.",
+  },
+  {
+    name: "New & Used Tires",
+    image: "/assets/tires-repair.webp",
+    summary:
+      "Affordable new and quality used tires, mounted and balanced, so you can get back on the road without overspending.",
+  },
 ];
