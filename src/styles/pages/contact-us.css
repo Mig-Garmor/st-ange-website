@@ -32,6 +32,10 @@
     .icon-text-container {
       @apply text-[16px] font-normal;
     }
+
+    .contact-address-note {
+      @apply -mt-3 pl-[30px] text-[15px] text-gray-700;
+    }
   }
 
   .contact-call {

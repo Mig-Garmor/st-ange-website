@@ -1,5 +1,6 @@
 // Imported by vite.config.js at build time, so only relative imports work here.
 import { business, fullAddress, hoursSummary, services } from "../config/business.js";
+import { relocationLlmsLine } from "../content/relocation.js";
 
 const url = (path) => new URL(path, business.siteUrl).href;
 
@@ -8,9 +9,10 @@ export function buildLlmsTxt() {
 
 > Family-owned auto repair shop and mechanic at ${fullAddress}. Car alignment, A/C repair, brake repair, suspension and steering, and new and used tires. Call ${business.phone.display}.
 
-${business.name} is a family-owned St. Lucian mechanic shop on North Main Street in Baytown, Texas. The owner has more than ${business.yearsExperience.replace("+", "")} years of experience, starting at his uncle's tire shop and later running a mobile mechanic business. The shop shows customers the problem and gives a clear price before any work starts.
+${business.name} is a family-owned St. Lucian mechanic shop on ${business.address.area} in Baytown, Texas. The owner has more than ${business.yearsExperience.replace("+", "")} years of experience, starting at his uncle's tire shop and later running a mobile mechanic business. The shop shows customers the problem and gives a clear price before any work starts.
 
 - Address: ${fullAddress}
+${relocationLlmsLine}
 - Phone: ${business.phone.display} (${business.phone.schema})
 - Email: ${business.email}
 - Hours: ${hoursSummary}

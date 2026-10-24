@@ -1,4 +1,5 @@
 import { business, fullAddress } from "@/config/business";
+import { relocationFaq } from "@/content/relocation";
 
 export const reasons = [
   {
@@ -24,9 +25,10 @@ export const reasons = [
 ];
 
 export const faqs = [
+  relocationFaq,
   {
     question: "Where is St Ange Auto Service located?",
-    answer: `We're at ${fullAddress}, on North Main Street in Baytown. Use the map on this page for directions.`,
+    answer: `We're at ${fullAddress}, on ${business.address.area} in Baytown. Use the map on this page for directions.`,
   },
   {
     id: "hours",

@@ -4,6 +4,7 @@ import GoogleMapsWidget from "@components/blocks/GoogleMapsWidget.vue";
 import ImageTextBlock from "@components/blocks/ImageTextBlock.vue";
 import CallToActionBand from "@components/blocks/CallToActionBand.vue";
 import { usePageSeo } from "@composables/usePageSeo";
+import { business } from "@/config/business";
 
 usePageSeo({
   title: "About St Ange Auto Service | Family-Owned Mechanic in Baytown, TX",
@@ -54,7 +55,7 @@ const story = [
       <header class="about-hero">
         <div class="about-hero-inner">
           <h1>About St Ange Auto Service</h1>
-          <p>A family-owned St. Lucian mechanic shop on North Main Street in Baytown, Texas.</p>
+          <p>A family-owned St. Lucian mechanic shop on {{ business.address.area }} in Baytown, Texas.</p>
         </div>
       </header>
 

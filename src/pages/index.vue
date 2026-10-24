@@ -12,12 +12,13 @@ import FaqList from "@components/blocks/FaqList.vue";
 import { usePageSeo } from "@composables/usePageSeo";
 import { business, fullAddress, services } from "@/config/business";
 import { reasons, faqs } from "@/content/home";
+import { addressNote } from "@/content/relocation";
 import { featuredReviews } from "@/content/reviews";
 
 usePageSeo({
   title: "Auto Repair & Mechanic in Baytown, TX | St Ange Auto Service",
   description:
-    "Family-owned auto repair shop on N Main St in Baytown, TX. Alignments, A/C repair, brakes, suspension and new & used tires with fair, upfront pricing. Call 832-572-7121.",
+    `Family-owned auto repair shop on ${business.address.area} in Baytown, TX. Alignments, A/C repair, brakes, suspension and new & used tires with fair, upfront pricing. Call ${business.phone.display}.`,
   path: "/",
 });
 
@@ -38,7 +39,7 @@ const trustPoints = [
             <p class="hero-eyebrow">{{ business.name }}</p>
             <h1 class="hero-title">Auto Repair &amp; Mechanic in Baytown, TX</h1>
             <p class="hero-subtitle">
-              Honest diagnosis, fair prices and quality repairs from a family-owned shop on North Main Street.
+              Honest diagnosis, fair prices and quality repairs from a family-owned shop on {{ business.address.area }}.
             </p>
           </div>
 
@@ -129,6 +130,7 @@ const trustPoints = [
         <div class="visit-details">
           <h2 class="section-title">Visit Our Baytown Shop</h2>
           <IconText icon="mdi:location" :text="fullAddress" :href="business.links.maps" external />
+          <p class="address-note">{{ addressNote }}</p>
           <IconText icon="mdi:phone" :text="business.phone.display" :href="business.phone.href" />
           <HoursList class="mt-2" />
           <p class="text-gray-700">Give us a call before you come in so we can make sure a bay is free.</p>

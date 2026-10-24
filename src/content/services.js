@@ -1,10 +1,10 @@
-import { services } from "@/config/business";
+import { business, services } from "@/config/business";
 
 const details = {
   "car-alignment": {
     seoTitle: "Wheel Alignment in Baytown, TX | St Ange Auto Service",
     metaDescription:
-      "Car pulling or tires wearing unevenly? Get a wheel alignment at St Ange Auto Service, 1300 N Main St, Baytown, TX. Fair, upfront pricing. Call 832-572-7121.",
+      `Car pulling or tires wearing unevenly? Get a wheel alignment at St Ange Auto Service, ${business.address.street}, Baytown, TX. Fair, upfront pricing. Call 832-572-7121.`,
     h1: "Car Alignment in Baytown, TX",
     intro: [
       "A wheel alignment sets the angles of your wheels so they point straight ahead and sit evenly on the road. Potholes, curbs and worn steering parts slowly knock those angles out, and the result is a car that pulls to one side, a crooked steering wheel and tires that wear out long before they should.",
@@ -180,7 +180,7 @@ const details = {
   tires: {
     seoTitle: "New & Used Tires in Baytown, TX | St Ange Auto Service",
     metaDescription:
-      "Affordable new and quality used tires in Baytown, TX, mounted and balanced at St Ange Auto Service, 1300 N Main St. Call 832-572-7121.",
+      `Affordable new and quality used tires in Baytown, TX, mounted and balanced at St Ange Auto Service, ${business.address.street}. Call 832-572-7121.`,
     h1: "New & Used Tires in Baytown, TX",
     intro: [
       "Tires are the only part of your car that touches the road, so they affect your braking, handling and fuel economy. We sell both new tires and quality used tires, so you can choose the option that fits your car and your budget.",
