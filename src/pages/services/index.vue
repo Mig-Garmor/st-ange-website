@@ -6,6 +6,7 @@ import Breadcrumbs from "@components/utilities/Breadcrumbs.vue";
 import ServiceCard from "@components/ServiceCard.vue";
 import CallToActionBand from "@components/blocks/CallToActionBand.vue";
 import { usePageSeo } from "@composables/usePageSeo";
+import { business } from "@/config/business";
 import { servicePages } from "@/content/services";
 import { breadcrumbSchema } from "@/seo/serviceSchema";
 
@@ -37,7 +38,7 @@ useHead({
           <h1>Auto Repair Services in Baytown, TX</h1>
           <p>
             From alignments and brakes to A/C, suspension and tires, our family-owned shop on
-            North Main Street keeps Baytown drivers on the road. Choose a service to learn more.
+            {{ business.address.area }} keeps Baytown drivers on the road. Choose a service to learn more.
           </p>
         </div>
       </header>

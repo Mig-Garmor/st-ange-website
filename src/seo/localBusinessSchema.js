@@ -37,7 +37,7 @@ export function localBusinessSchema() {
         opens: slot.opens,
         closes: slot.closes,
       })),
-    sameAs: [links.maps, links.facebook],
+    sameAs: [links.googleProfile, links.facebook],
     description:
       "Family-owned auto repair and mechanic shop offering car alignment, A/C repair, brake repair, suspension, and tire services in Baytown, Texas.",
   };

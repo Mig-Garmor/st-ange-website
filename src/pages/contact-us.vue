@@ -5,6 +5,7 @@ import GoogleMapsWidget from "@components/blocks/GoogleMapsWidget.vue";
 import HoursList from "@components/utilities/HoursList.vue";
 import { usePageSeo } from "@composables/usePageSeo";
 import { business, fullAddress } from "@/config/business";
+import { addressNote } from "@/content/relocation";
 
 usePageSeo({
   title: "Contact St Ange Auto Service | Auto Repair in Baytown, TX",
@@ -26,7 +27,7 @@ usePageSeo({
         call us at
         <a :href="business.phone.href" class="text-blue-600 underline font-semibold">{{
           business.phone.display
-        }}</a>. We’re located at <strong>{{ fullAddress }}</strong>.
+        }}</a>. We’re located at <strong>{{ fullAddress }}</strong>. {{ addressNote }}
       </p>
 
       <section>
