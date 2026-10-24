@@ -10,19 +10,19 @@ export const relocationNotice = hasMoved
   ? {
       lead: "We've moved to a bigger shop!",
       parts: [
-        { text: "Due to high customer demand, we're now at " },
+        { text: "We're now at " },
         { text: nextShortAddress, key: true },
-        { text: `, and no longer work from ${previous.street}.` },
+        { text: `. We moved due to high customer demand and no longer work from ${previous.street}.` },
       ],
     }
   : {
       lead: "We're moving to a bigger shop!",
       parts: [
-        { text: "Due to high customer demand, from " },
+        { text: "From " },
         { text: moveDay, key: true },
         { text: " we'll be at " },
         { text: nextShortAddress, key: true },
-        { text: "." },
+        { text: ", due to high customer demand." },
       ],
     };
 
@@ -33,11 +33,11 @@ export const addressNote = hasMoved
 export const relocationFaq = hasMoved
   ? {
       question: `Did ${business.name} move?`,
-      answer: `Yes. Due to high customer demand, we moved to a much bigger shop. Since ${moveDate} we've been at ${nextFullAddress}, ${distance} from our old shop at ${previous.street}. We no longer work from ${previous.street}.`,
+      answer: `Yes. Since ${moveDate} we've been at ${nextFullAddress}, ${distance} from our old shop at ${previous.street}. We moved to a much bigger shop due to high customer demand and no longer work from ${previous.street}.`,
     }
   : {
       question: `Is ${business.name} moving?`,
-      answer: `Yes. Due to high customer demand, we're moving to a much bigger shop. From ${moveDay} we'll be at ${nextFullAddress}, ${distance} from our current shop. Until then, you'll find us at ${previous.street}.`,
+      answer: `Yes. From ${moveDay} we'll be at ${nextFullAddress}, ${distance} from our current shop. We're moving to a much bigger shop due to high customer demand. Until then, you'll find us at ${previous.street}.`,
     };
 
 export const relocationLlmsLine = hasMoved
