@@ -7,6 +7,7 @@ import fs from "fs";
 import path from "path";
 
 import { business, services } from "./src/config/business.js";
+import { buildLlmsTxt } from "./src/seo/llmsTxt.js";
 
 const prerenderedRoutes = [];
 
@@ -23,6 +24,11 @@ function writeSitemap(outDir) {
     .join("\n");
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
   fs.writeFileSync(path.join(outDir, "sitemap.xml"), xml);
+}
+
+function writeSiteFiles(outDir = path.resolve(__dirname, "dist")) {
+  writeSitemap(outDir);
+  fs.writeFileSync(path.join(outDir, "llms.txt"), buildLlmsTxt());
 }
 
 export default defineConfig({
@@ -52,6 +58,6 @@ export default defineConfig({
     dirStyle: "flat",
     formatting: "minify",
     includedRoutes: staticRoutes,
-    onFinished: (outDir) => writeSitemap(outDir ?? path.resolve(__dirname, "dist")),
+    onFinished: (outDir) => writeSiteFiles(outDir || undefined),
   },
 });
