@@ -1,117 +1,86 @@
 <script setup>
 import { ref, watch } from "vue";
-import { useRouter } from "vue-router";
-
 import { Icon } from "@iconify/vue";
 
 import MobileMenuOverlayComponent from "@components/modals/MobileMenuOverlayComponent.vue";
 import IconText from "@components/utilities/IconText.vue";
-
 import { useScrollDirection } from "@composables/useScrollDirection";
-import { useDeviceType } from "@composables/useDeviceType";
-
-defineProps({
-  isSticky: {
-    type: Boolean,
-    default: false,
-  },
-});
-
-const router = useRouter();
+import { business, shortAddress } from "@/config/business";
+import { navLinks } from "@/config/navigation";
 
 const { isScrollingUp, isAtTop } = useScrollDirection();
-const { isMobile } = useDeviceType();
-
-// Mobile menu state
 const isMobileMenuOpen = ref(false);
 
-const openMobileMenu = () => {
-  isMobileMenuOpen.value = true;
-};
-
-const handleCloseMobileMenu = () => {
-  isMobileMenuOpen.value = false;
-};
-
-// Stops scrolling when menu is open
 watch(isMobileMenuOpen, (isOpen) => {
-  if (isOpen) {
-    document.body.style.overflow = "hidden";
-  } else {
-    document.body.style.overflow = "unset";
-  }
+  document.body.style.overflow = isOpen ? "hidden" : "";
 });
-
-const googleMapsBusinessLink = "https://maps.app.goo.gl/kRiqUGChingHzADh6";
 </script>
 
 <template>
-  <div
-    :class="[
-      isSticky && 'header-sticky-container',
-      { hidden: !isScrollingUp, isAtTop: isAtTop },
-    ]"
-    class="header-container"
+  <header
+    class="site-header"
+    :class="{ 'is-hidden': !isScrollingUp && !isAtTop }"
   >
-    <div
-      class="logo-container"
-      :class="[
-        isMobile ? 'max-w-[200px]' : 'max-w-[300px]',
-        link && 'cursor-pointer',
-      ]"
-      @click="router.push('/')"
-    >
-      <div class="logo"><img src="/assets/logo-2.webp" alt="logo" /></div>
+    <div class="header-brand">
+      <RouterLink to="/" class="logo" :aria-label="`${business.name} home`">
+        <img
+          src="/assets/logo-2.webp"
+          :alt="`${business.name} logo`"
+          width="983"
+          height="254"
+        />
+      </RouterLink>
 
-      <div v-if="isMobile" class="information-container">
-        <div class="phone-number">
-          <IconText
-            icon="mdi:phone"
-            text="832-572-7121"
-            :iconWidth="isMobile ? '15' : '24'"
-            :iconHeight="isMobile ? '15' : '24'"
-          />
-        </div>
-        <div class="location">
-          <IconText
-            icon="mdi:location"
-            text="1300 N Main St, Baytown"
-            :iconWidth="isMobile ? '15' : '24'"
-            :iconHeight="isMobile ? '15' : '24'"
-          />
-        </div>
-      </div>
-    </div>
-    <div v-if="!isMobile" class="information-container">
-      <div class="phone-number">
-        <IconText icon="mdi:phone" text="832-572-7121" />
-      </div>
-      <div class="location">
+      <div class="contact-info contact-info--mobile">
+        <IconText
+          icon="mdi:phone"
+          :text="business.phone.display"
+          :href="business.phone.href"
+          :icon-size="15"
+        />
         <IconText
           icon="mdi:location"
-          text="1300 N Main St, Baytown"
-          :link="googleMapsBusinessLink"
+          :text="shortAddress"
+          :href="business.links.maps"
+          external
+          :icon-size="15"
         />
       </div>
     </div>
-    <div v-if="!isMobile" class="links-container">
-      <RouterLink to="/">Home</RouterLink>
-      <RouterLink to="/contact-us">Contact</RouterLink>
-      <RouterLink to="/about">About</RouterLink>
+
+    <div class="contact-info contact-info--desktop">
+      <IconText
+        icon="mdi:phone"
+        :text="business.phone.display"
+        :href="business.phone.href"
+      />
+      <IconText
+        icon="mdi:location"
+        :text="shortAddress"
+        :href="business.links.maps"
+        external
+      />
     </div>
 
-    <Icon
-      v-if="isMobile"
-      icon="game-icons:hamburger-menu"
-      width="35"
-      height="35"
-      @click="openMobileMenu"
-    />
-  </div>
+    <nav class="nav-links" aria-label="Main">
+      <RouterLink v-for="link in navLinks" :key="link.to" :to="link.to">
+        {{ link.label }}
+      </RouterLink>
+    </nav>
+
+    <button
+      type="button"
+      class="menu-button"
+      aria-label="Open menu"
+      @click="isMobileMenuOpen = true"
+    >
+      <Icon icon="game-icons:hamburger-menu" width="35" height="35" />
+    </button>
+  </header>
+
   <MobileMenuOverlayComponent
-    :isMobile="isMobile"
-    :isMobileMenuOpen="isMobileMenuOpen"
-    @close-mobile-menu="handleCloseMobileMenu"
+    :open="isMobileMenuOpen"
+    @close="isMobileMenuOpen = false"
   />
 </template>
 

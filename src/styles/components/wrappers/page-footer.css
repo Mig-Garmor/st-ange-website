@@ -1,4 +1,28 @@
 .page-footer-component {
-  @apply h-[100px] p-[20px];
-  @apply flex items-center justify-center text-center;
+  /* Bottom padding keeps the copyright clear of the fixed mobile call bar. */
+  @apply px-[20px] pt-10 pb-24 md:pb-6 bg-brand-navy text-white;
+
+  .footer-columns {
+    @apply grid gap-8 max-w-6xl mx-auto sm:grid-cols-2 lg:grid-cols-4;
+  }
+
+  .footer-column {
+    @apply flex flex-col gap-3 text-[15px];
+
+    a:not(.icon-text-container):hover {
+      @apply underline underline-offset-2;
+    }
+  }
+
+  .footer-heading {
+    @apply text-brand-yellow font-bold text-[16px] uppercase tracking-wide;
+  }
+
+  .icon-text-container {
+    @apply text-[15px] font-normal;
+  }
+
+  .footer-copyright {
+    @apply mt-8 pt-4 border-t border-white/20 text-center text-[13px] text-white/70;
+  }
 }

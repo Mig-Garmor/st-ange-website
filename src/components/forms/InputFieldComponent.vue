@@ -1,58 +1,41 @@
 <script setup>
-import { ref, watch } from "vue";
+import { useId } from "vue";
 
-const props = defineProps({
-  label: String,
-  type: {
-    type: String,
-    default: "text", // text, email, number, textarea
-  },
-  modelValue: String,
-  error: String,
-  disabled: {
-    type: Boolean,
-    default: false,
-  },
+defineProps({
+  label: { type: String, required: true },
+  type: { type: String, default: "text" },
+  error: { type: String, default: "" },
+  disabled: { type: Boolean, default: false },
+  autocomplete: { type: String, default: null },
 });
 
-const emit = defineEmits(["update:modelValue"]);
-
-const inputValue = ref(props.modelValue || "");
-
-watch(
-  () => props.modelValue,
-  (val) => {
-    inputValue.value = val;
-  }
-);
-
-function handleInput(e) {
-  inputValue.value = e.target.value;
-  emit("update:modelValue", inputValue.value);
-}
+const model = defineModel({ type: String, default: "" });
+const id = useId();
 </script>
 
 <template>
   <div class="input-wrapper">
-    <label class="input-label" :disabled="disabled">{{ label }}</label>
+    <label class="input-label" :for="id">{{ label }}</label>
 
-    <template v-if="type === 'textarea'">
-      <textarea
-        class="input-base"
-        :value="modelValue"
-        @input="handleInput"
-        :disabled="disabled"
-      ></textarea>
-    </template>
-    <template v-else>
-      <input
-        class="input-base"
-        :type="type"
-        :value="modelValue"
-        @input="handleInput"
-        :disabled="disabled"
-      />
-    </template>
+    <textarea
+      v-if="type === 'textarea'"
+      :id="id"
+      v-model="model"
+      class="input-base"
+      rows="5"
+      :disabled="disabled"
+      :aria-invalid="!!error"
+    ></textarea>
+    <input
+      v-else
+      :id="id"
+      v-model="model"
+      class="input-base"
+      :type="type"
+      :disabled="disabled"
+      :autocomplete="autocomplete"
+      :aria-invalid="!!error"
+    />
 
     <p v-if="error" class="error-text">{{ error }}</p>
   </div>
@@ -66,7 +49,7 @@ function handleInput(e) {
   @apply font-semibold mb-1;
 }
 .input-base {
-  @apply border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400;
+  @apply border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100;
 }
 .error-text {
   @apply text-red-500 text-sm mt-1;

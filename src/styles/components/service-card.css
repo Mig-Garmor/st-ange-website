@@ -1,10 +1,29 @@
-.service-card-container {
-  .service-name {
-    @apply absolute bottom-0 left-1/2 transform -translate-x-1/2;
-    @apply text-black font-bold bg-[#F6C220] rounded-full;
-    @apply flex items-center justify-center w-full;
+.service-card {
+  @apply flex flex-col items-center gap-4 text-center;
+
+  &:hover .service-card-container {
+    @apply scale-105;
   }
-  @apply relative w-[100px] h-[100px] text-[12px] bg-black rounded-full bg-center bg-cover cursor-pointer;
+}
+
+.service-card-container {
+  @apply relative block shrink-0 rounded-full bg-black;
+  @apply w-[140px] h-[140px] text-[14px];
   @apply md:w-[150px] md:h-[150px] md:text-[15px];
-  @apply lg:w-[200px] lg:h-[200px] lg:text-[20px];
+  @apply lg:w-[180px] lg:h-[180px] lg:text-[18px];
+  @apply transition-transform duration-200;
+
+  .service-image {
+    @apply w-full h-full rounded-full object-cover;
+  }
+
+  .service-name {
+    @apply absolute bottom-0 left-0 w-full;
+    @apply flex items-center justify-center text-center;
+    @apply rounded-full bg-brand-yellow text-black font-bold;
+  }
+}
+
+.service-summary {
+  @apply max-w-[300px] text-[15px] leading-relaxed text-gray-700;
 }

@@ -1,5 +1,8 @@
 .icon-text-container {
-  @apply flex items-center gap-[10px] text-[13px] font-bold;
+  @apply flex items-center gap-[10px] shrink-0 text-[13px] font-bold;
   @apply lg:text-[16px] lg:font-normal;
-  @apply shrink-0;
+}
+
+a.icon-text-container:hover span {
+  @apply underline underline-offset-2;
 }

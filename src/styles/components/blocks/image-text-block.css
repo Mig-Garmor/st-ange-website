@@ -1,8 +1,13 @@
 .image-text-block-container {
+  @apply flex flex-col items-center w-full gap-[20px] mb-[20px];
+  @apply md:flex-row-reverse md:gap-[40px];
+
   .text-content {
-    @apply text-[18px] text-center flex-1;
+    @apply flex-1 text-[18px] text-center;
     @apply lg:text-[20px] lg:text-left;
   }
-  @apply flex flex-col justify-start items-center w-full gap-[20px] mb-[20px];
-  @apply md:flex-row-reverse md:gap-[40px] md:text-left;
+
+  .block-image {
+    @apply shrink-0 rounded-[10px] object-cover w-[150px] h-[150px] lg:w-[200px] lg:h-[200px];
+  }
 }
