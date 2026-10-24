@@ -29,9 +29,9 @@ export const faqs = [
     answer: `We're at ${fullAddress}, on North Main Street in Baytown. Use the map on this page for directions.`,
   },
   {
+    id: "hours",
     question: "What are your opening hours?",
-    answer:
-      "We're open Monday to Saturday from 8:00 AM to 6:00 PM and closed on Sunday. Give us a call before you come in so we can make sure a bay is free.",
+    answer: "Give us a call before you come in so we can make sure a bay is free.",
   },
   {
     question: "What car repairs do you handle?",
