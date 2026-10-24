@@ -95,7 +95,9 @@ const trustPoints = [
         <h2 class="section-title">Why Baytown Drivers Choose Us</h2>
         <ul class="reasons">
           <li v-for="reason in reasons" :key="reason.title" class="reason">
-            <Icon :icon="reason.icon" width="36" height="36" class="reason-icon" aria-hidden="true" />
+            <span class="reason-icon">
+              <Icon :icon="reason.icon" width="26" height="26" aria-hidden="true" />
+            </span>
             <h3>{{ reason.title }}</h3>
             <p>{{ reason.text }}</p>
           </li>
