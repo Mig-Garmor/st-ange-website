@@ -127,7 +127,7 @@ const trustPoints = [
 
       <section class="page-section visit">
         <div class="visit-details">
-          <h2 class="section-title text-left">Visit Our Baytown Shop</h2>
+          <h2 class="section-title">Visit Our Baytown Shop</h2>
           <IconText icon="mdi:location" :text="fullAddress" :href="business.links.maps" external />
           <IconText icon="mdi:phone" :text="business.phone.display" :href="business.phone.href" />
           <HoursList class="mt-2" />

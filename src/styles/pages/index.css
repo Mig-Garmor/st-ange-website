@@ -110,6 +110,10 @@
   .visit {
     @apply grid md:grid-cols-2 items-center gap-8;
 
+    .section-title {
+      @apply text-left;
+    }
+
     .google-maps-widget {
       @apply max-w-none;
     }
