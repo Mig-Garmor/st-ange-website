@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { Icon } from "@iconify/vue";
 
 import MobileMenuOverlayComponent from "@components/modals/MobileMenuOverlayComponent.vue";
@@ -8,7 +8,39 @@ import { useScrollDirection } from "@composables/useScrollDirection";
 import { business, shortAddress } from "@/config/business";
 import { navLinks } from "@/config/navigation";
 
-const { isScrollingUp, isAtTop } = useScrollDirection();
+const SLIDE_MS = 300;
+
+const headerEl = ref(null);
+const { scrollY, isScrollingUp } = useScrollDirection();
+const isPinned = ref(false);
+const isSliding = ref(false);
+let slideTimer;
+
+const headerHeight = () => headerEl.value?.offsetHeight ?? 0;
+
+const setPinned = (pinned) => {
+  if (isPinned.value === pinned) return;
+  isPinned.value = pinned;
+  isSliding.value = true;
+  clearTimeout(slideTimer);
+  slideTimer = setTimeout(() => (isSliding.value = false), SLIDE_MS);
+};
+
+watch(scrollY, (y) => {
+  if (y <= 0) {
+    isPinned.value = false;
+  } else if (!isScrollingUp.value) {
+    setPinned(false);
+  } else if (y > headerHeight()) {
+    setPinned(true);
+  }
+});
+
+// Unpinned, the header moves with the page until it has scrolled fully out of view.
+const offset = computed(() =>
+  isPinned.value ? 0 : Math.min(scrollY.value, headerHeight())
+);
+
 const isMobileMenuOpen = ref(false);
 
 watch(isMobileMenuOpen, (isOpen) => {
@@ -18,8 +50,10 @@ watch(isMobileMenuOpen, (isOpen) => {
 
 <template>
   <header
+    ref="headerEl"
     class="site-header"
-    :class="{ 'is-hidden': !isScrollingUp && !isAtTop }"
+    :class="{ 'is-sliding': isSliding }"
+    :style="{ transform: `translateY(${-offset}px)` }"
   >
     <div class="header-brand">
       <RouterLink to="/" class="logo" :aria-label="`${business.name} home`">
