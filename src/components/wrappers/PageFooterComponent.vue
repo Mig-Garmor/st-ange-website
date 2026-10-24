@@ -10,7 +10,7 @@ const year = new Date().getFullYear();
 <template>
   <footer class="page-footer-component">
     <div class="footer-columns">
-      <div class="footer-column">
+      <div class="footer-column footer-column-wide">
         <p class="footer-heading">{{ business.name }}</p>
         <IconText
           icon="mdi:location"
@@ -27,7 +27,7 @@ const year = new Date().getFullYear();
         />
       </div>
 
-      <div class="footer-column">
+      <div class="footer-column footer-column-wide">
         <p class="footer-heading">Hours</p>
         <HoursList />
       </div>
