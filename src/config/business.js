@@ -18,14 +18,24 @@ export const business = {
   geo: { latitude: 29.7413353, longitude: -94.963613 },
   hours: [
     {
-      label: "Monday – Saturday",
-      days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      label: "Monday – Thursday",
+      shortLabel: "Mon – Thu",
+      days: ["Monday", "Tuesday", "Wednesday", "Thursday"],
       opens: "08:00",
       closes: "18:00",
       display: "8:00 AM – 6:00 PM",
     },
-    { label: "Sunday", days: [], display: "Closed" },
+    {
+      label: "Friday – Saturday",
+      shortLabel: "Fri – Sat",
+      days: ["Friday", "Saturday"],
+      opens: "08:00",
+      closes: "17:00",
+      display: "8:00 AM – 5:00 PM",
+    },
+    { label: "Sunday", shortLabel: "Sun", days: [], display: "Closed" },
   ],
+  hoursShort: "Open Mon–Sat from 8 AM",
   links: {
     maps: "https://maps.app.goo.gl/kRiqUGChingHzADh6",
     reviews:
@@ -41,6 +51,13 @@ export const business = {
 
 export const fullAddress = `${business.address.street}, ${business.address.city}, ${business.address.region} ${business.address.postalCode}`;
 export const shortAddress = `${business.address.street}, ${business.address.city}`;
+
+const openSlots = business.hours.filter((slot) => slot.days.length);
+const closedSlots = business.hours.filter((slot) => !slot.days.length);
+export const hoursSummary = [
+  ...openSlots.map((slot) => `${slot.label} ${slot.display}`),
+  `closed ${closedSlots.map((slot) => slot.label).join(" and ")}`,
+].join(", ");
 
 export const services = [
   {

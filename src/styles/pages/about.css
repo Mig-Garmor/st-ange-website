@@ -1,13 +1,31 @@
 .about-us-page-container {
-  @apply flex flex-col justify-center items-center gap-[50px];
+  @apply flex flex-col items-center w-full;
 
-  .text-container {
-    @apply flex flex-col items-center justify-center h-fit mt-[40px] p-[20px];
-    @apply w-[90%] md:w-[80%] lg:w-[70%] md:p-[40px] lg:p-[60px];
-    @apply rounded-[10px] bg-black/10 text-black text-[20px];
+  .about-hero {
+    @apply w-full px-[20px] py-[40px] md:py-[56px] bg-brand-navy text-white;
+  }
+
+  .about-hero-inner {
+    @apply flex flex-col gap-4 max-w-5xl mx-auto;
 
     h1 {
-      @apply mb-[20px] text-center font-bold text-[30px] md:text-[35px] lg:text-[40px];
+      @apply text-[32px] md:text-[44px] font-bold leading-tight;
+    }
+
+    p {
+      @apply text-[17px] md:text-[19px] text-white/90 max-w-2xl;
+    }
+  }
+
+  .story {
+    @apply flex flex-col gap-16 md:gap-20 w-full max-w-5xl px-[20px] py-[56px] md:py-[72px];
+  }
+
+  .find-us {
+    @apply flex flex-col items-center gap-6 w-full px-[20px] pt-[56px] pb-16;
+
+    h2 {
+      @apply text-[28px] md:text-[36px] font-bold text-center text-brand-navy;
     }
   }
 }

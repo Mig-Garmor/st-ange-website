@@ -3,6 +3,8 @@ import PageLayout from "@components/wrappers/PageLayout.vue";
 import ContactUsFormComponent from "@components/forms/ContactUsFormComponent.vue";
 import GoogleMapsWidget from "@components/blocks/GoogleMapsWidget.vue";
 import HoursList from "@components/utilities/HoursList.vue";
+import IconText from "@components/utilities/IconText.vue";
+import Badge from "@components/utilities/Badge.vue";
 import { usePageSeo } from "@composables/usePageSeo";
 import { business, fullAddress } from "@/config/business";
 
@@ -16,29 +18,44 @@ usePageSeo({
 
 <template>
   <PageLayout>
-    <main class="max-w-3xl mx-auto p-6">
-      <h1 class="text-[32px] md:text-[40px] font-bold text-center mb-6">
-        Contact St Ange Auto Service
-      </h1>
+    <main class="contact-page">
+      <header class="contact-intro">
+        <h1>Contact St Ange Auto Service</h1>
+        <p>
+          Have a question or need to schedule a repair? Call us or send a message and we'll get back to you.
+        </p>
+      </header>
 
-      <p class="text-center mb-8 text-[18px] text-gray-700">
-        Have a question or need to schedule a repair? Fill out the form below or
-        call us at
-        <a :href="business.phone.href" class="text-blue-600 underline font-semibold">{{
-          business.phone.display
-        }}</a>. We’re located at <strong>{{ fullAddress }}</strong>.
-      </p>
+      <div class="contact-grid">
+        <aside class="contact-details" aria-label="Call or visit">
+          <h2>Call or visit</h2>
+          <Badge
+            :text="`Call ${business.phone.display}`"
+            icon="mdi:phone"
+            :href="business.phone.href"
+            class="contact-call"
+          />
+          <IconText icon="mdi:location" :text="fullAddress" :href="business.links.maps" external :icon-size="20" />
+          <a :href="business.links.maps" target="_blank" rel="noopener" class="contact-directions">Get directions →</a>
+          <div class="contact-hours">
+            <h3>Hours</h3>
+            <HoursList compact />
+          </div>
+          <p class="contact-note">Give us a call before you stop by so we can make sure a bay is free.</p>
+        </aside>
 
-      <section>
-        <ContactUsFormComponent />
-      </section>
+        <section class="contact-form" aria-labelledby="contact-form-title">
+          <h2 id="contact-form-title">Send us a message</h2>
+          <ContactUsFormComponent />
+        </section>
+      </div>
 
-      <section class="mt-10 text-center flex flex-col items-center">
-        <h2 class="text-[28px] font-bold mb-4">Visit Our Shop</h2>
-        <HoursList class="mb-4 text-left" />
-        <p class="mb-4">Give us a call before you stop by so we can make sure a bay is free.</p>
+      <section class="find-us">
+        <h2>Find Us in Baytown</h2>
         <GoogleMapsWidget />
       </section>
     </main>
   </PageLayout>
 </template>
+
+<style src="@styles/pages/contact-us.css"></style>

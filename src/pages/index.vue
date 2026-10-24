@@ -25,7 +25,7 @@ const trustPoints = [
   { icon: "mdi:star", text: `${business.googleRating} Google rating` },
   { icon: "mdi:account-group", text: "Family-owned" },
   { icon: "mdi:wrench", text: `${business.yearsExperience} years experience` },
-  { icon: "mdi:clock-outline", text: "Mon–Sat 8 AM – 6 PM" },
+  { icon: "mdi:clock-outline", text: business.hoursShort },
 ];
 </script>
 
@@ -139,7 +139,12 @@ const trustPoints = [
 
       <section class="page-section faq-section">
         <h2 class="section-title">Frequently Asked Questions</h2>
-        <FaqList :items="faqs" />
+        <FaqList :items="faqs">
+          <template #answer="{ item }">
+            <HoursList v-if="item.id === 'hours'" />
+            <p>{{ item.answer }}</p>
+          </template>
+        </FaqList>
       </section>
     </main>
   </PageLayout>

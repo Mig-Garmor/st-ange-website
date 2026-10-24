@@ -29,7 +29,7 @@ const year = new Date().getFullYear();
 
       <div class="footer-column footer-column-wide">
         <p class="footer-heading">Hours</p>
-        <HoursList />
+        <HoursList compact />
       </div>
 
       <nav class="footer-column" aria-label="Services">

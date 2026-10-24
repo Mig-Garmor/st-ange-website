@@ -114,7 +114,7 @@ async function handleSubmit() {
 
 <style scoped>
 .form-wrapper {
-  @apply max-w-md mx-auto p-6 border rounded-lg shadow-lg bg-white;
+  @apply w-full p-6 border rounded-lg shadow-lg bg-white;
 }
 
 .submit-btn {
