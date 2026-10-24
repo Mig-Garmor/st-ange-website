@@ -7,6 +7,10 @@ import { relocationNotice } from "@/content/relocation";
 // Four copies keep the loop seamless up to ~2700px wide; only the first is exposed to assistive tech.
 const COPIES = 4;
 const isPaused = ref(false);
+
+// One cycle scrolls two copies; ~7.4px per character at 15px plus 88px of padding, at ~40px/s.
+const textLength = `${relocationNotice.lead} ${relocationNotice.parts.map((part) => part.text).join("")}`.length;
+const duration = `${Math.round(((textLength * 7.4 + 88) * 2) / 40)}s`;
 </script>
 
 <template>
@@ -33,7 +37,7 @@ const isPaused = ref(false);
     </a>
 
     <div class="ticker">
-      <div class="ticker-track">
+      <div class="ticker-track" :style="{ animationDuration: duration }">
         <p
           v-for="copy in COPIES"
           :key="copy"

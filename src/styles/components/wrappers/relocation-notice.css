@@ -1,5 +1,5 @@
 .relocation-notice {
-  @apply flex items-center gap-3 h-[42px] px-[20px] overflow-hidden;
+  @apply flex items-center gap-2 sm:gap-3 h-[42px] px-[20px] overflow-hidden;
   @apply bg-amber-100 text-brand-navy border-b border-brand-yellow;
 
   .notice-tag {
@@ -19,7 +19,7 @@
   }
 
   .ticker-item {
-    @apply shrink-0 pr-16 text-[15px] whitespace-nowrap;
+    @apply shrink-0 pl-6 pr-16 text-[15px] whitespace-nowrap;
 
     mark {
       @apply px-1 rounded-sm bg-brand-yellow text-brand-navy font-bold box-decoration-clone;
@@ -57,7 +57,7 @@
     }
 
     .ticker-item {
-      @apply pr-0 whitespace-normal;
+      @apply px-0 whitespace-normal;
     }
 
     .ticker-item[aria-hidden],
