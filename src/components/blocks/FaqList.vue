@@ -8,7 +8,11 @@ defineProps({
   <div class="faq-list">
     <details v-for="item in items" :key="item.question" class="faq-item">
       <summary>{{ item.question }}</summary>
-      <p>{{ item.answer }}</p>
+      <div class="faq-answer">
+        <slot name="answer" :item="item">
+          <p>{{ item.answer }}</p>
+        </slot>
+      </div>
     </details>
   </div>
 </template>
@@ -30,7 +34,7 @@ summary::after {
 .faq-item[open] summary::after {
   content: "–";
 }
-.faq-item p {
-  @apply mt-3 text-gray-700 leading-relaxed;
+.faq-answer {
+  @apply flex flex-col gap-3 mt-3 text-gray-700 leading-relaxed;
 }
 </style>

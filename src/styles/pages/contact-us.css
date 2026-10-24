@@ -1,0 +1,64 @@
+.contact-page {
+  @apply flex flex-col w-full max-w-5xl mx-auto px-[20px] pt-10 md:pt-14 pb-16 gap-12;
+
+  .contact-intro {
+    @apply flex flex-col gap-3 max-w-2xl;
+
+    h1 {
+      @apply text-[32px] md:text-[42px] font-bold leading-tight text-brand-navy;
+    }
+
+    p {
+      @apply text-[17px] md:text-[18px] text-gray-700;
+    }
+  }
+
+  .contact-grid {
+    @apply grid grid-cols-[minmax(0,1fr)] gap-10 md:grid-cols-[minmax(0,1fr)_340px] md:items-start;
+  }
+
+  .contact-form {
+    @apply flex flex-col gap-4 md:order-first;
+  }
+
+  .contact-form h2,
+  .contact-details h2 {
+    @apply text-[22px] md:text-[24px] font-bold text-brand-navy;
+  }
+
+  .contact-details {
+    @apply flex flex-col gap-4 p-6 rounded-lg bg-black/5;
+
+    .icon-text-container {
+      @apply text-[16px] font-normal;
+    }
+
+    .contact-address-note {
+      @apply -mt-3 pl-[30px] text-[15px] text-gray-700;
+    }
+  }
+
+  .contact-call {
+    @apply justify-center text-[18px];
+  }
+
+  .contact-directions {
+    @apply self-start font-bold text-brand-navy underline underline-offset-4 decoration-brand-yellow decoration-2 hover:decoration-brand-navy;
+  }
+
+  .contact-hours h3 {
+    @apply mb-2 font-bold text-brand-navy;
+  }
+
+  .contact-note {
+    @apply text-[15px] text-gray-700;
+  }
+
+  .find-us {
+    @apply flex flex-col items-center gap-6;
+
+    h2 {
+      @apply text-[28px] md:text-[36px] font-bold text-center text-brand-navy;
+    }
+  }
+}

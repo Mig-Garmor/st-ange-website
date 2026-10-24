@@ -2,7 +2,9 @@
 import PageLayout from "@components/wrappers/PageLayout.vue";
 import GoogleMapsWidget from "@components/blocks/GoogleMapsWidget.vue";
 import ImageTextBlock from "@components/blocks/ImageTextBlock.vue";
+import CallToActionBand from "@components/blocks/CallToActionBand.vue";
 import { usePageSeo } from "@composables/usePageSeo";
+import { business } from "@/config/business";
 
 usePageSeo({
   title: "About St Ange Auto Service | Family-Owned Mechanic in Baytown, TX",
@@ -16,26 +18,32 @@ const story = [
   {
     image: "/assets/st-lucia-family.webp",
     alt: "The St Ange family",
+    title: "A St. Lucian family in Baytown",
     text: "We’re a proud family-owned St. Lucian mechanic shop located right here in Baytown, Texas. Our story began with a passion for cars and helping people stay safely on the road.",
   },
   {
     image: "/assets/working-with-uncle.webp",
     alt: "The owner working at his uncle's tire shop",
+    title: "Over 30 years of hands-on work",
     text: "What started over 30 years ago with our owner lending a hand at his uncle's tire shop and later running a mobile mechanic business from his truck has grown into a full-service local auto repair shop known for honesty and quality workmanship.",
   },
   {
     image: "/assets/satisfied-customers.webp",
     alt: "Satisfied customers at the shop",
+    title: "Clear answers, fair prices",
     text: "Customer satisfaction is our top priority. We believe in clear communication, fair pricing, and reliable service that earns your trust.",
   },
   {
     image: "/assets/more-services.webp",
-    alt: "Mechanic working on a car",
+    alt: "Illustration of car repair services",
+    title: "The work we do",
     text: "Our experienced team specializes in alignments, brakes, A/C repair, suspension and steering work, and tire services — all done with professional care and attention to detail.",
+    link: { to: "/services", label: "See all our services" },
   },
   {
     image: "/assets/customer-deal.webp",
     alt: "Customer shaking hands with the mechanic",
+    title: "Treated like family",
     text: "Every customer is treated like family. When you visit St Ange Auto Service, you’ll receive personal service and leave confident your car is in great hands.",
   },
 ];
@@ -44,19 +52,29 @@ const story = [
 <template>
   <PageLayout>
     <main class="about-us-page-container">
-      <section class="text-container">
-        <h1>About St Ange Auto Service</h1>
+      <header class="about-hero">
+        <div class="about-hero-inner">
+          <h1>About St Ange Auto Service</h1>
+          <p>A family-owned St. Lucian mechanic shop on {{ business.address.area }} in Baytown, Texas.</p>
+        </div>
+      </header>
+
+      <section class="story" aria-label="Our story">
         <ImageTextBlock
-          v-for="block in story"
+          v-for="(block, index) in story"
           :key="block.image"
-          :image="block.image"
-          :alt="block.alt"
-          :text="block.text"
+          v-bind="block"
+          :reversed="index % 2 === 1"
         />
       </section>
 
-      <section class="flex flex-col items-center w-full px-4">
-        <h2 class="text-[32px] font-bold text-center mb-6">Find Us in Baytown</h2>
+      <CallToActionBand
+        title="Come meet the family"
+        text="Call us to talk through what your car needs, or book a time to bring it in."
+      />
+
+      <section class="find-us">
+        <h2>Find Us in Baytown</h2>
         <GoogleMapsWidget />
       </section>
     </main>

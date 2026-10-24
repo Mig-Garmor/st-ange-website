@@ -1,11 +1,15 @@
 <script setup>
 import { business } from "@/config/business";
+
+defineProps({
+  compact: { type: Boolean, default: false },
+});
 </script>
 
 <template>
   <dl class="hours-list">
     <template v-for="slot in business.hours" :key="slot.label">
-      <dt>{{ slot.label }}</dt>
+      <dt>{{ compact ? slot.shortLabel : slot.label }}</dt>
       <dd>{{ slot.display }}</dd>
     </template>
   </dl>
@@ -17,5 +21,8 @@ import { business } from "@/config/business";
 }
 dt {
   @apply font-semibold;
+}
+dd {
+  @apply whitespace-nowrap;
 }
 </style>

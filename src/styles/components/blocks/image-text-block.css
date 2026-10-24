@@ -1,13 +1,27 @@
 .image-text-block-container {
-  @apply flex flex-col items-center w-full gap-[20px] mb-[20px];
-  @apply md:flex-row-reverse md:gap-[40px];
+  @apply grid items-center gap-6 md:grid-cols-2 md:gap-12;
 
-  .text-content {
-    @apply flex-1 text-[18px] text-center;
-    @apply lg:text-[20px] lg:text-left;
+  &.is-reversed .block-image {
+    @apply md:order-2;
   }
 
   .block-image {
-    @apply shrink-0 rounded-[10px] object-cover w-[150px] h-[150px] lg:w-[200px] lg:h-[200px];
+    @apply w-full max-w-[440px] aspect-square mx-auto rounded-lg object-cover shadow-md;
+  }
+
+  .text-content {
+    @apply flex flex-col gap-3;
+
+    h2 {
+      @apply text-[26px] md:text-[30px] font-bold text-brand-navy leading-tight;
+    }
+
+    p {
+      @apply text-[17px] md:text-[18px] leading-relaxed text-gray-700;
+    }
+  }
+
+  .block-link {
+    @apply self-start font-bold text-brand-navy underline underline-offset-4 decoration-brand-yellow decoration-2 hover:decoration-brand-navy;
   }
 }
