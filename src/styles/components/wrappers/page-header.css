@@ -1,10 +1,10 @@
 .site-header {
   @apply sticky top-0 z-[999] flex items-center justify-between gap-4;
   @apply h-[100px] px-[20px] bg-brand-yellow text-brand-navy;
-  @apply transition-transform duration-300 ease-in-out;
 
-  &.is-hidden {
-    @apply -translate-y-full;
+  /* Only pin/unpin animates; tracking the scroll must not lag behind it. */
+  &.is-sliding {
+    @apply transition-transform duration-300 ease-in-out;
   }
 
   .header-brand {

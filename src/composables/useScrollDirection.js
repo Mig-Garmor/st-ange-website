@@ -2,29 +2,27 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 
 export function useScrollDirection() {
-  const isScrollingUp = ref(true); // true if user is scrolling up
-  const isAtTop = ref(true); // true if at the top of the page
-  let lastScroll = 0;
+  const scrollY = ref(0);
+  const isScrollingUp = ref(true);
+
+  const readScroll = () =>
+    Math.max(0, window.pageYOffset || document.documentElement.scrollTop);
 
   const handleScroll = () => {
-    const currentScroll =
-      window.pageYOffset || document.documentElement.scrollTop;
+    const currentScroll = readScroll();
 
-    // Update scroll direction
-    if (currentScroll < lastScroll && currentScroll > 50) {
+    if (currentScroll < scrollY.value) {
       isScrollingUp.value = true;
-    } else if (currentScroll > lastScroll) {
+    } else if (currentScroll > scrollY.value) {
       isScrollingUp.value = false;
     }
 
-    // Update if we're at the top
-    isAtTop.value = currentScroll <= 0;
-
-    lastScroll = currentScroll <= 0 ? 0 : currentScroll;
+    scrollY.value = currentScroll;
   };
 
   onMounted(() => {
-    window.addEventListener("scroll", handleScroll);
+    scrollY.value = readScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
   });
 
   onBeforeUnmount(() => {
@@ -32,7 +30,7 @@ export function useScrollDirection() {
   });
 
   return {
+    scrollY,
     isScrollingUp,
-    isAtTop,
   };
 }
