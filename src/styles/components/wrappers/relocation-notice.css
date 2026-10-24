@@ -3,8 +3,9 @@
   @apply bg-amber-100 text-brand-navy border-b border-brand-yellow;
 
   .notice-tag {
-    @apply shrink-0 px-2 py-[3px] rounded bg-brand-navy text-brand-yellow;
+    @apply shrink-0 flex items-center gap-1 px-2 py-[3px] rounded bg-brand-navy text-brand-yellow;
     @apply text-[12px] font-bold uppercase tracking-wide whitespace-nowrap;
+    @apply hover:bg-brand-navy/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-navy;
   }
 
   .ticker {
@@ -19,14 +20,13 @@
 
   .ticker-item {
     @apply shrink-0 pr-16 text-[15px] whitespace-nowrap;
-  }
 
-  a {
-    @apply font-semibold underline underline-offset-2 whitespace-nowrap;
+    mark {
+      @apply px-1 rounded-sm bg-brand-yellow text-brand-navy font-bold box-decoration-clone;
+    }
   }
 
   .ticker:hover .ticker-track,
-  .ticker:focus-within .ticker-track,
   &.is-paused .ticker-track {
     animation-play-state: paused;
   }

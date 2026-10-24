@@ -4,17 +4,26 @@ import { business, hasMoved, relocation } from "../config/business.js";
 const { previous, next, moveDay, moveDate, distance } = relocation;
 const { city, region, postalCode } = business.address;
 const nextFullAddress = `${next.street}, ${city}, ${region} ${postalCode}`;
+const nextShortAddress = `${next.street}, ${city}`;
 
 export const relocationNotice = hasMoved
   ? {
-      tag: "We've moved",
       lead: "We've moved to a bigger shop!",
-      text: `Due to high customer demand, we're now at ${next.street}, ${city}, and no longer work from ${previous.street}.`,
+      parts: [
+        { text: "Due to high customer demand, we're now at " },
+        { text: nextShortAddress, key: true },
+        { text: `, and no longer work from ${previous.street}.` },
+      ],
     }
   : {
-      tag: "Moving soon",
       lead: "We're moving to a bigger shop!",
-      text: `Due to high customer demand, from ${moveDay} we'll be at ${next.street}, ${city}.`,
+      parts: [
+        { text: "Due to high customer demand, from " },
+        { text: moveDay, key: true },
+        { text: " we'll be at " },
+        { text: nextShortAddress, key: true },
+        { text: "." },
+      ],
     };
 
 export const addressNote = hasMoved

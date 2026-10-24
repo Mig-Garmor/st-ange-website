@@ -16,7 +16,21 @@ const isPaused = ref(false);
     :class="{ 'is-paused': isPaused }"
     aria-label="Shop relocation"
   >
-    <span class="notice-tag">{{ relocationNotice.tag }}</span>
+    <a
+      :href="relocation.next.maps"
+      target="_blank"
+      rel="noopener"
+      class="notice-tag"
+      :aria-label="`New location, ${relocation.next.street}, opens Google Maps in a new tab`"
+    >
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path
+          d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"
+          fill="currentColor"
+        />
+      </svg>
+      New location
+    </a>
 
     <div class="ticker">
       <div class="ticker-track">
@@ -26,14 +40,7 @@ const isPaused = ref(false);
           class="ticker-item"
           :aria-hidden="copy > 1 ? 'true' : undefined"
         >
-          <strong>{{ relocationNotice.lead }}</strong>
-          {{ relocationNotice.text }}
-          <a
-            :href="relocation.next.maps"
-            target="_blank"
-            rel="noopener"
-            :tabindex="copy > 1 ? -1 : undefined"
-          >Get directions</a>
+          <strong>{{ relocationNotice.lead }}</strong>&#32;<template v-for="part in relocationNotice.parts" :key="part.text"><mark v-if="part.key">{{ part.text }}</mark><template v-else>{{ part.text }}</template></template>
         </p>
       </div>
     </div>

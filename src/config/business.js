@@ -2,8 +2,8 @@
 export const relocation = {
   movesAt: "2026-11-01T00:00:00-05:00",
   noticeUntil: "2027-01-01T00:00:00-06:00",
-  moveDay: "Sunday, November 1",
-  moveDate: "November 1, 2026",
+  moveDay: "Sunday, November 1st",
+  moveDate: "November 1st, 2026",
   distance: "about half a mile",
   previous: {
     street: "1300 N Main St",
