@@ -1,8 +1,3 @@
-export const previousLocation = {
-  street: "1300 N Main St",
-  distance: "about half a mile",
-};
-
 export const business = {
   name: "St Ange Auto Service",
   siteUrl: "https://www.stangeautoservice.com",
