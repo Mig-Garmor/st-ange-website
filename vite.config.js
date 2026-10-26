@@ -50,9 +50,6 @@ export default defineConfig({
       "@api": path.resolve(__dirname, "./src/api"),
     },
   },
-  define: {
-    __BUILD_TIME__: JSON.stringify(process.env.BUILD_TIME || new Date().toISOString()),
-  },
   publicDir: "public",
   build: {
     outDir: "dist",

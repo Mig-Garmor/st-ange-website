@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from "vue";
 
-import { relocation, showRelocationNotice } from "@/config/business";
+import { business } from "@/config/business";
 import { relocationNotice } from "@/content/relocation";
 
 // Four copies keep the loop seamless up to ~2700px wide; only the first is exposed to assistive tech.
@@ -15,17 +15,16 @@ const duration = `${Math.round(((textLength * 7.4 + 88) * 2) / 40)}s`;
 
 <template>
   <aside
-    v-if="showRelocationNotice"
     class="relocation-notice"
     :class="{ 'is-paused': isPaused }"
     aria-label="Shop relocation"
   >
     <a
-      :href="relocation.next.maps"
+      :href="business.links.maps"
       target="_blank"
       rel="noopener"
       class="notice-tag"
-      :aria-label="`New location, ${relocation.next.street}, opens Google Maps in a new tab`"
+      :aria-label="`New location, ${business.address.street}, opens Google Maps in a new tab`"
     >
       <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
         <path
