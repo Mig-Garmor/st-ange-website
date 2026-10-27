@@ -45,7 +45,6 @@ export const business = {
   },
   mapEmbedUrl: "https://www.google.com/maps?q=108+Schilling+Ave,+Baytown,+TX+77520&output=embed",
   defaultImage: "/assets/mechanic-bg.webp",
-  googleRating: "5.0",
   yearsExperience: "30+",
 };
 

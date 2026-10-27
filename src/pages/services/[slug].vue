@@ -14,9 +14,10 @@ import ServiceCard from "@components/ServiceCard.vue";
 import { usePageSeo } from "@composables/usePageSeo";
 import { business } from "@/config/business";
 import { findServicePage, servicePages } from "@/content/services";
-import { featuredReviews } from "@/content/reviews";
+import { reviewsForService } from "@/content/reviews";
 import { reasons } from "@/content/home";
 import { breadcrumbSchema, serviceSchema } from "@/seo/serviceSchema";
+import { reviewsSchema } from "@/seo/reviewsSchema";
 
 const route = useRoute();
 const service = computed(() => findServicePage(route.params.slug));
@@ -27,9 +28,7 @@ const crumbs = computed(() => [
   { label: service.value.name, to: `/services/${service.value.slug}` },
 ]);
 
-const review = computed(
-  () => featuredReviews.find((r) => r.serviceSlug === service.value.slug) ?? featuredReviews[1],
-);
+const serviceReviews = computed(() => reviewsForService(service.value.slug));
 const otherServices = computed(() => servicePages.filter((s) => s.slug !== service.value.slug));
 
 usePageSeo({
@@ -43,6 +42,7 @@ useHead({
   script: [
     { type: "application/ld+json", key: "service", innerHTML: JSON.stringify(serviceSchema(service.value)) },
     { type: "application/ld+json", key: "breadcrumbs", innerHTML: JSON.stringify(breadcrumbSchema(crumbs.value)) },
+    { type: "application/ld+json", key: "reviews", innerHTML: JSON.stringify(reviewsSchema(serviceReviews.value.cards)) },
   ],
 });
 </script>
@@ -101,7 +101,22 @@ useHead({
             </div>
           </li>
         </ul>
-        <ReviewCard v-bind="review" class="max-w-2xl mx-auto w-full" />
+      </section>
+
+      <section class="service-section">
+        <h2 class="service-section-title">
+          {{ serviceReviews.hasMatches ? `${service.name} reviews` : "What our customers say" }}
+        </h2>
+        <div class="service-reviews">
+          <ReviewCard v-for="card in serviceReviews.cards" :key="card.author" v-bind="card" />
+        </div>
+        <Badge
+          text="Read all reviews on Google"
+          icon="carbon:star-review"
+          :href="business.links.reviews"
+          external
+          class="mx-auto"
+        />
       </section>
 
       <section class="service-section">

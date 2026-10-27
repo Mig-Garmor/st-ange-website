@@ -96,6 +96,10 @@
     }
   }
 
+  .service-reviews {
+    @apply grid gap-6 md:grid-cols-3;
+  }
+
   .other-services-grid,
   .services-overview {
     @apply grid gap-x-6 gap-y-10 justify-items-center;
