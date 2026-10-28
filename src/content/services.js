@@ -8,7 +8,7 @@ const details = {
     h1: "Car Alignment in Baytown, TX",
     intro: [
       "A wheel alignment sets the angles of your wheels so they point straight ahead and sit evenly on the road. Potholes, curbs and worn steering parts slowly knock those angles out, and the result is a car that pulls to one side, a crooked steering wheel and tires that wear out long before they should.",
-      "At St Ange Auto Service we check your alignment, adjust it back to your vehicle's specifications and look for worn parts that would throw it out again. Getting it right protects your tires, which are usually the more expensive thing to replace.",
+      "At our Baytown auto repair shop we check your alignment, adjust it back to your vehicle's specifications and look for worn parts that would throw it out again. Getting it right protects your tires, which are usually the more expensive thing to replace.",
     ],
     signsTitle: "Signs your car needs an alignment",
     signs: [
@@ -52,7 +52,7 @@ const details = {
     h1: "Car A/C Repair in Baytown, TX",
     intro: [
       "In Baytown's heat and humidity, a weak car A/C is more than uncomfortable. When the air blows warm, smells musty or the system starts making new noises, there's a specific cause behind it, most often a refrigerant leak, a failing compressor or clutch, a blocked condenser or an electrical fault.",
-      "We find that cause before we replace anything, so you only pay for the repair your car actually needs. One of our customers says we saved them around $1,000 compared with the A/C replacement they expected.",
+      "At our Baytown auto repair shop we find that cause before we replace anything, so you only pay for the repair your car actually needs. One of our customers says we saved them around $1,000 compared with the A/C replacement they expected.",
     ],
     signsTitle: "Signs your A/C needs attention",
     signs: [
@@ -92,11 +92,11 @@ const details = {
   "brake-repair": {
     seoTitle: "Brake Repair in Baytown, TX | St Ange Auto Service",
     metaDescription:
-      "Squealing, grinding or a soft brake pedal? St Ange Auto Service in Baytown, TX inspects your whole brake system and replaces only what's worn. Call 832-572-7121.",
+      "Squealing, grinding or a soft brake pedal? Our Baytown, TX auto repair shop inspects your whole brake system and replaces only what's worn. Call 832-572-7121.",
     h1: "Brake Repair in Baytown, TX",
     intro: [
       "Your brakes are the most important safety system on your car. Pads and rotors wear a little with every stop, and brake fluid absorbs moisture over time. Catching problems early keeps repairs smaller and keeps your car stopping the way it should.",
-      "When you bring your car to St Ange Auto Service, we inspect the whole brake system, show you what we find and replace only the parts that are actually worn.",
+      "When you bring your car to our Baytown auto repair shop, we inspect the whole brake system, show you what we find and replace only the parts that are actually worn.",
     ],
     signsTitle: "Signs your brakes need checking",
     signs: [
@@ -140,7 +140,7 @@ const details = {
     h1: "Suspension & Steering Repair in Baytown, TX",
     intro: [
       "Shocks, struts, ball joints, tie rods and control arms keep your tires planted on the road and your steering precise. When they wear out, you feel it as a bouncy ride, clunks over bumps or steering that no longer feels tight. Worn parts also wear your tires faster and can make the car harder to control in an emergency.",
-      "We track down where the noise or looseness is coming from, show you the worn parts and give you a clear price to repair them.",
+      "At our Baytown auto repair shop we track down where the noise or looseness is coming from, show you the worn parts and give you a clear price to repair them.",
     ],
     signsTitle: "Signs of suspension or steering problems",
     signs: [
@@ -184,7 +184,7 @@ const details = {
     h1: "New & Used Tires in Baytown, TX",
     intro: [
       "Tires are the only part of your car that touches the road, so they affect your braking, handling and fuel economy. We sell both new tires and quality used tires, so you can choose the option that fits your car and your budget.",
-      "Tires are where our story started: our owner first learned the trade at his uncle's tire shop. We'll help you pick the right tire, mount and balance it, and send you off with the correct pressures.",
+      "Tires are where our story started: our owner first learned the trade at his uncle's tire shop. Today our Baytown auto repair shop helps you pick the right tire, mounts and balances it, and sends you off with the correct pressures.",
     ],
     signsTitle: "Signs it's time for new tires",
     signs: [

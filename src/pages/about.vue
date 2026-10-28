@@ -9,7 +9,7 @@ import { business } from "@/config/business";
 usePageSeo({
   title: "About St Ange Auto Service | Family-Owned Mechanic in Baytown, TX",
   description:
-    "Learn about St Ange Auto Service, a trusted family-owned mechanic shop in Baytown, TX. Over 30 years of experience in car repair, brakes, alignment, and A/C service.",
+    "St Ange Auto Service is a family-owned mechanic and auto repair shop in Baytown, TX, with over 30 years of experience in car repair and car service.",
   path: "/about",
   image: "/assets/st-lucia-family.webp",
 });
@@ -54,7 +54,7 @@ const story = [
     <main class="about-us-page-container">
       <header class="about-hero">
         <div class="about-hero-inner">
-          <h1>About St Ange Auto Service</h1>
+          <h1>About St Ange Auto Service in Baytown, TX</h1>
           <p>A family-owned St. Lucian mechanic shop on {{ business.address.area }} in Baytown, Texas.</p>
         </div>
       </header>

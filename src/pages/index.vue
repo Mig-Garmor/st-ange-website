@@ -27,9 +27,9 @@ useHead({
 });
 
 usePageSeo({
-  title: "Auto Repair & Mechanic in Baytown, TX | St Ange Auto Service",
+  title: "Auto Repair Shop & Mechanic in Baytown, TX | St Ange Auto Service",
   description:
-    `Family-owned auto repair shop on ${business.address.area} in Baytown, TX. Alignments, A/C repair, brakes, suspension and new & used tires with fair, upfront pricing. Call ${business.phone.display}.`,
+    `Family-owned auto repair shop and mechanic in Baytown, TX. Brakes, A/C, alignments, suspension and tires with upfront pricing. Call ${business.phone.display}.`,
   path: "/",
 });
 
@@ -78,8 +78,9 @@ const trustPoints = [
           wheel alignments, A/C repair, brakes, suspension and steering, and new and used tires.
         </p>
         <p>
-          Whether your car is making a new noise, the A/C is blowing warm or your tires are worn out,
-          we'll find the problem, explain it in plain language and give you a fair price before any work starts.
+          Whether your car needs routine car service or a car repair that can't wait, like a new noise, an A/C
+          blowing warm or worn-out tires, we'll find the problem, explain it in plain language and give you a fair
+          price before any work starts.
         </p>
       </section>
 
