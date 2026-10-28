@@ -18,7 +18,7 @@ const crumbs = [
 usePageSeo({
   title: "Auto Repair Services in Baytown, TX | St Ange Auto Service",
   description:
-    "Car alignment, A/C repair, brakes, suspension and steering, and new & used tires at St Ange Auto Service in Baytown, TX. Fair, upfront pricing. Call 832-572-7121.",
+    "Car repair and service in Baytown, TX: alignments, A/C, brakes, suspension and steering, and new & used tires. Upfront pricing. Call 832-572-7121.",
   path: "/services",
 });
 
@@ -37,8 +37,8 @@ useHead({
           <Breadcrumbs :crumbs="crumbs" />
           <h1>Auto Repair Services in Baytown, TX</h1>
           <p>
-            From alignments and brakes to A/C, suspension and tires, our family-owned shop on
-            {{ business.address.area }} keeps Baytown drivers on the road. Choose a service to learn more.
+            From alignments and brakes to A/C, suspension and tires, our family-owned auto repair shop on
+            {{ business.address.area }} handles the car repair and car service Baytown drivers need. Choose a service to learn more.
           </p>
         </div>
       </header>

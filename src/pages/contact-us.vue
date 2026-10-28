@@ -12,7 +12,7 @@ import { addressNote } from "@/content/relocation";
 usePageSeo({
   title: "Contact St Ange Auto Service | Auto Repair in Baytown, TX",
   description:
-    "Get in touch with St Ange Auto Service in Baytown, TX. Call 832-572-7121 or send us a message for expert car repair, brake, A/C, and alignment services.",
+    "Contact St Ange Auto Service, an auto repair shop in Baytown, TX. Call 832-572-7121 or send a message about brakes, A/C, alignment or any car repair.",
   path: "/contact-us",
 });
 </script>
@@ -21,7 +21,7 @@ usePageSeo({
   <PageLayout>
     <main class="contact-page">
       <header class="contact-intro">
-        <h1>Contact St Ange Auto Service</h1>
+        <h1>Contact St Ange Auto Service in Baytown, TX</h1>
         <p>
           Have a question or need to schedule a repair? Call us or send a message and we'll get back to you.
         </p>

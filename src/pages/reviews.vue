@@ -17,7 +17,7 @@ useHashHighlight();
 
 usePageSeo({
   title: "Customer Reviews | St Ange Auto Service, Baytown TX",
-  description: `Rated ${rating} out of 5 from ${googleReviews.count} Google reviews. Read every written review of St Ange Auto Service in Baytown, TX, copied word for word from Google with a link to each original.`,
+  description: `Rated ${rating} out of 5 from ${googleReviews.count} Google reviews. Every written review of St Ange Auto Service in Baytown, TX, word for word with a link to the original.`,
   path: "/reviews",
 });
 
@@ -33,7 +33,7 @@ useHead({
     <main class="reviews-page">
       <header class="reviews-hero">
         <div class="reviews-hero-inner">
-          <h1>Customer Reviews</h1>
+          <h1>St Ange Auto Service Reviews in Baytown, TX</h1>
           <p>
             Rated {{ rating }} out of 5 from {{ googleReviews.count }} Google reviews. Every written review below is
             copied word for word from Google, with a link to the original.
