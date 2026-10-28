@@ -11,3 +11,16 @@
     @apply bg-white text-black antialiased;
   }
 }
+
+/* Briefly marks the element a link jumped to; added and removed by useHashHighlight. */
+.is-highlighted {
+  animation: link-target-highlight 3s ease-out;
+}
+
+@keyframes link-target-highlight {
+  0%,
+  40% {
+    background-color: rgb(246 194 32 / 0.35);
+    box-shadow: 0 0 0 3px #f6c220;
+  }
+}

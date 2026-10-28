@@ -8,15 +8,18 @@ defineProps({
   text: { type: String, required: true },
   url: { type: String, required: true },
   service: { type: String, default: "" },
+  reviewId: { type: String, default: "" },
+  anchor: { type: Boolean, default: false },
+  full: { type: Boolean, default: false },
 });
 </script>
 
 <template>
-  <figure class="review-card">
+  <figure class="review-card" :id="anchor && reviewId ? `review-${reviewId}` : undefined">
     <div class="stars" role="img" :aria-label="`${rating} out of 5 stars`">
       <Icon v-for="n in rating" :key="n" icon="mdi:star" width="20" height="20" aria-hidden="true" />
     </div>
-    <blockquote class="review-text" :cite="url">
+    <blockquote class="review-text" :class="{ 'is-full': full }" :cite="url">
       <p>“{{ text }}”</p>
     </blockquote>
     <figcaption class="review-meta">
@@ -41,6 +44,12 @@ defineProps({
 /* The full review stays in the HTML for crawlers; long ones are only clipped on screen. */
 .review-text p {
   @apply whitespace-pre-line line-clamp-6;
+}
+.review-text.is-full p {
+  @apply line-clamp-none;
+}
+.review-card[id] {
+  @apply scroll-mt-40;
 }
 .review-meta {
   @apply flex flex-col gap-0.5;

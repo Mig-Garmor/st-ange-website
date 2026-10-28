@@ -9,6 +9,7 @@ import HoursList from "@components/utilities/HoursList.vue";
 import IconText from "@components/utilities/IconText.vue";
 import GoogleMapsWidget from "@components/blocks/GoogleMapsWidget.vue";
 import ReviewCard from "@components/blocks/ReviewCard.vue";
+import ReviewThemes from "@components/blocks/ReviewThemes.vue";
 import FaqList from "@components/blocks/FaqList.vue";
 import { usePageSeo } from "@composables/usePageSeo";
 import { business, fullAddress, services } from "@/config/business";
@@ -127,13 +128,16 @@ const trustPoints = [
             v-bind="review"
           />
         </div>
-        <Badge
-          text="Read all reviews on Google"
-          icon="carbon:star-review"
-          :href="business.links.reviews"
-          external
-          class="mx-auto"
-        />
+        <ReviewThemes />
+        <div class="review-actions">
+          <Badge text="See all written reviews" icon="mdi:format-list-bulleted" to="/reviews" />
+          <Badge
+            text="Read all reviews on Google"
+            icon="carbon:star-review"
+            :href="business.links.reviews"
+            external
+          />
+        </div>
       </section>
 
       <section class="page-section visit">
