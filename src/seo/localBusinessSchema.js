@@ -1,4 +1,5 @@
 import { business } from "@/config/business";
+import { googleReviews } from "@/content/reviews";
 
 export function localBusinessSchema() {
   const { address, geo, phone, links } = business;
@@ -37,6 +38,13 @@ export function localBusinessSchema() {
         opens: slot.opens,
         closes: slot.closes,
       })),
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: googleReviews.rating,
+      bestRating: 5,
+      worstRating: 1,
+      ratingCount: googleReviews.count,
+    },
     sameAs: [links.googleProfile, links.facebook],
     description:
       "Family-owned auto repair and mechanic shop offering car alignment, A/C repair, brake repair, suspension, and tire services in Baytown, Texas.",

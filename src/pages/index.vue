@@ -1,5 +1,6 @@
 <script setup>
 import { Icon } from "@iconify/vue";
+import { useHead } from "@unhead/vue";
 
 import PageLayout from "@components/wrappers/PageLayout.vue";
 import ServiceCard from "@components/ServiceCard.vue";
@@ -13,7 +14,16 @@ import { usePageSeo } from "@composables/usePageSeo";
 import { business, fullAddress, services } from "@/config/business";
 import { reasons, faqs } from "@/content/home";
 import { addressNote } from "@/content/relocation";
-import { featuredReviews } from "@/content/reviews";
+import { featuredReviews, googleReviews } from "@/content/reviews";
+import { reviewsSchema } from "@/seo/reviewsSchema";
+
+const rating = googleReviews.rating.toFixed(1);
+
+useHead({
+  script: [
+    { type: "application/ld+json", key: "reviews", innerHTML: JSON.stringify(reviewsSchema(featuredReviews)) },
+  ],
+});
 
 usePageSeo({
   title: "Auto Repair & Mechanic in Baytown, TX | St Ange Auto Service",
@@ -23,7 +33,7 @@ usePageSeo({
 });
 
 const trustPoints = [
-  { icon: "mdi:star", text: `${business.googleRating} Google rating` },
+  { icon: "mdi:star", text: `${rating} Google rating` },
   { icon: "mdi:account-group", text: "Family-owned" },
   { icon: "mdi:wrench", text: `${business.yearsExperience} years experience` },
   { icon: "mdi:clock-outline", text: business.hoursShort },
@@ -108,7 +118,7 @@ const trustPoints = [
       <section class="page-section reviews-section">
         <h2 class="section-title">What Our Customers Say</h2>
         <p class="section-lead">
-          Rated {{ business.googleRating }} out of 5 by our customers on Google.
+          Rated {{ rating }} out of 5 from {{ googleReviews.count }} Google reviews.
         </p>
         <div class="reviews">
           <ReviewCard
