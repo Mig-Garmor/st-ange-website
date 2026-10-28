@@ -41,7 +41,7 @@ const trustPoints = [
 </script>
 
 <template>
-  <PageLayout>
+  <PageLayout call-bar-hidden-over=".hero">
     <main class="index-page-container">
       <header class="hero">
         <div class="hero-overlay">
@@ -55,7 +55,7 @@ const trustPoints = [
 
           <div class="call-to-action">
             <Badge text="Call us" icon="mdi:phone" :href="business.phone.href" />
-            <Badge text="Request service" icon="mdi:calendar-check" to="/contact-us" />
+            <Badge text="Request service" icon="mdi:calendar-check" to="/contact-us" class="cta-request" />
             <Badge text="Find us" icon="mdi:location" :href="business.links.maps" external />
           </div>
 

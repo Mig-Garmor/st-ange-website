@@ -3,6 +3,10 @@ import PageHeaderComponent from "./PageHeaderComponent.vue";
 import PageFooterComponent from "./PageFooterComponent.vue";
 import MobileCallBar from "./MobileCallBar.vue";
 import RelocationNotice from "./RelocationNotice.vue";
+
+defineProps({
+  callBarHiddenOver: { type: String, default: "" },
+});
 </script>
 
 <template>
@@ -10,5 +14,5 @@ import RelocationNotice from "./RelocationNotice.vue";
   <RelocationNotice />
   <slot />
   <PageFooterComponent />
-  <MobileCallBar />
+  <MobileCallBar :hidden-over="callBarHiddenOver" />
 </template>

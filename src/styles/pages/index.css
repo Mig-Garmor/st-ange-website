@@ -7,27 +7,41 @@
   }
 
   .hero-overlay {
-    @apply flex flex-col justify-center items-center w-full gap-[28px] px-[20px] py-[40px] md:py-[56px] bg-black/50;
+    @apply flex flex-col justify-center items-center w-full gap-[20px] md:gap-[28px] px-[20px] py-[24px] md:py-[56px] bg-black/50;
   }
 
   .hero-heading {
-    @apply w-full max-w-4xl rounded-[10px] border border-white/10 bg-black/20 backdrop-blur-sm p-4 text-center text-white;
+    @apply w-full max-w-4xl rounded-[10px] border border-white/10 bg-black/20 backdrop-blur-sm p-3 md:p-4 text-center text-white;
   }
 
   .hero-eyebrow {
-    @apply text-brand-yellow font-bold uppercase tracking-wider text-[15px] md:text-[18px];
+    @apply text-brand-yellow font-bold uppercase tracking-wider text-[13px] md:text-[18px];
   }
 
   .hero-title {
-    @apply mt-1 text-[34px] md:text-[48px] font-bold leading-tight;
+    @apply mt-1 text-[28px] md:text-[48px] font-bold leading-tight;
   }
 
   .hero-subtitle {
-    @apply mt-3 text-[17px] md:text-[20px] text-white/90 max-w-2xl mx-auto;
+    @apply mt-2 md:mt-3 text-[15px] md:text-[20px] text-white/90 max-w-2xl mx-auto;
   }
 
+  /* Phones: Call and Find side by side, Request service full width below; desktop keeps one row. */
   .call-to-action {
-    @apply flex flex-wrap w-full justify-center gap-[16px];
+    @apply grid grid-cols-2 gap-3 w-full max-w-[340px];
+    @apply md:flex md:flex-wrap md:justify-center md:gap-[16px] md:max-w-none;
+
+    .badge-component {
+      @apply justify-center px-4 py-2 text-[17px] md:px-[20px] md:py-[10px] md:text-[20px];
+    }
+
+    .badge-component svg {
+      @apply w-5 h-5 md:w-6 md:h-6;
+    }
+
+    .cta-request {
+      @apply col-span-2 order-last md:order-none;
+    }
   }
 
   .trust-bar {
