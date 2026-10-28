@@ -1,0 +1,64 @@
+.reviews-page {
+  @apply flex flex-col items-center w-full;
+
+  .reviews-hero {
+    @apply w-full px-[20px] py-[40px] md:py-[56px] bg-brand-navy text-white;
+  }
+
+  .reviews-hero-inner {
+    @apply flex flex-col gap-4 max-w-5xl mx-auto;
+
+    h1 {
+      @apply text-[32px] md:text-[44px] font-bold leading-tight;
+    }
+
+    p {
+      @apply text-[17px] md:text-[19px] text-white/90 max-w-2xl;
+    }
+  }
+
+  .reviews-section {
+    @apply flex flex-col gap-6 w-full max-w-6xl px-[20px] py-[48px];
+
+    h2 {
+      @apply text-[28px] md:text-[36px] font-bold text-center text-brand-navy leading-tight;
+    }
+  }
+
+  .reviews-lead {
+    @apply -mt-3 text-center text-[16px] text-gray-600;
+  }
+
+  .themes {
+    @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .theme {
+    @apply flex flex-col gap-2 p-5 rounded-[10px] bg-black/5 scroll-mt-40;
+
+    h3 {
+      @apply text-[18px] font-bold text-brand-navy;
+    }
+
+    ul {
+      @apply flex flex-wrap gap-x-3 gap-y-1 text-[15px];
+    }
+
+    a {
+      @apply text-brand-navy underline underline-offset-2 decoration-brand-yellow hover:decoration-brand-navy;
+    }
+  }
+
+  .theme-count {
+    @apply text-[14px] text-gray-600;
+  }
+
+  /* Masonry columns: each card is only as tall as its text, and columns don't line up row by row. */
+  .all-reviews {
+    @apply columns-1 md:columns-2 lg:columns-3 gap-6;
+
+    .review-card {
+      @apply h-auto mb-6 break-inside-avoid;
+    }
+  }
+}

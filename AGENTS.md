@@ -2,6 +2,8 @@
 
 Marketing site for St Ange Auto Service, an auto repair shop in Baytown, TX. Its job is to rank in local search and to give search engines and AI assistants (ChatGPT, Gemini, Perplexity) accurate, verifiable information about the business. Treat every piece of business data as something an AI assistant may repeat to a customer.
 
+Open work, including items waiting on the owner, is tracked in `BACKLOG.md`.
+
 ## Stack and commands
 
 - Vue 3, `vite-ssg` (every route is pre-rendered to static HTML), `vite-plugin-pages` (routes from `src/pages/`), Tailwind 3, `@unhead/vue` for head tags. Hosted on Vercel with `cleanUrls`.
@@ -18,11 +20,13 @@ Never type business facts into a page or component. Change the source below and 
 | Service list (slug, name, image, summary) | `src/config/business.js` (`services`) | Homepage cards, footer, `/services`, pre-rendered routes, sitemap, `llms.txt` |
 | Service page copy (titles, intro, signs, process, FAQs) | `src/content/services.js` | `/services/<slug>`, Service JSON-LD |
 | Google reviews, rating and review count | `src/content/reviews.js` | Review cards, Review JSON-LD, AggregateRating, `llms.txt` |
+| Review themes and customer reports | `src/content/reviews.js` (`themes` tags, `customerReports`) | Homepage "What customers mention most", `/reviews`, `llms.txt` |
+| Reviews page | `src/pages/reviews.vue` | `/reviews`: theme index and every written review, each with an anchor (`#review-<id>`, `#theme-<id>`) |
 | Move notice (banner, FAQ, address note) | `src/content/relocation.js` | Banner on every page, homepage FAQ, `llms.txt` |
 | Homepage reasons and FAQs | `src/content/home.js` | Homepage |
 | Business JSON-LD | `src/seo/localBusinessSchema.js` | Every page |
 | Service and breadcrumb JSON-LD | `src/seo/serviceSchema.js` | Service pages |
-| Review JSON-LD | `src/seo/reviewsSchema.js` | Homepage and service pages |
+| Review JSON-LD | `src/seo/reviewsSchema.js` | Homepage, service pages and `/reviews` |
 | `llms.txt` (plain-text summary for AI assistants) | `src/seo/llmsTxt.js` | `/llms.txt`, generated at build |
 | `sitemap.xml` | `vite.config.js` (`writeSitemap`) | `/sitemap.xml`, generated at build from the pre-rendered routes |
 
@@ -47,14 +51,17 @@ The reviews exist so AI assistants can trust and verify them. These rules are wh
 5. **Dates.** Google only shows relative dates, so `postedAgo` is what it displayed on `capturedAt`. Update `capturedAt` and every `postedAgo` on each refresh.
 6. **Service tags.** Add a slug to a review's `services` only when its text clearly describes that service (for example, "alignment" for `car-alignment`). If in doubt, leave it untagged; untagged reviews are shown as general reviews and never labelled with a service.
 7. **No cherry-picking in `llms.txt`.** It lists every written review. Pages may feature a selection, but if a lower-rated review appears on Google it must be listed in the data like any other.
+8. **Theme tags.** Add a theme to a review's `themes` only when its text says it in so many words (for example "honest" or "transparency" for `honesty`, "quick" or "faster than expected" for `speed`). Never type a count anywhere: every "N of M reviews" figure is computed from the tags.
+9. **Customer reports are not shop claims.** Each entry in `customerReports` summarizes one review in plain words, points at it with `reviewId`, and is always presented as what a customer reported. Only state a detail as a shop fact (a service, equipment, a staff name, makes worked on) after the owner confirms it, and then put it in the business config or page copy, not in the reports.
+10. **Cite review-backed statements.** Any page copy or FAQ answer that relies on what customers said must list its sources with `reviewSource(id, about)`. The `about` text says what the linked review shows, so a reader or AI tool knows what to expect before following the link.
 
 ### Review refresh checklist (run on every release)
 
 1. Open the Google Business Profile: Google Maps, search "St Ange Auto Service Baytown", then the Reviews tab, sorted by Newest.
-2. Compare with `src/content/reviews.js`. For each new written review, add an entry with `id`, `author`, `rating`, `postedAgo`, `services`, `url`, `authorUrl` and `text`. Get `url` from the review's Share button, then Copy Link.
+2. Compare with `src/content/reviews.js`. For each new written review, add an entry with `id`, `author`, `rating`, `postedAgo`, `services`, `themes`, `url`, `authorUrl` and `text`. Get `url` from the review's Share button, then Copy Link. If the review reports a specific detail (a price comparison, a make, a turnaround time), consider adding it to `customerReports`.
 3. Update `googleReviews.rating`, `googleReviews.count` and `googleReviews.capturedAt`, and refresh `postedAgo` on existing entries.
 4. Re-check service tags. As of 2026-10-27 only `car-alignment` (3 reviews) and `ac-repair` (1 review) have matching reviews; `brake-repair`, `suspension-steering` and `tires` show general reviews. A new review naming one of those services should be tagged so it leads on that page.
-5. Run `npm run build`, then confirm the new reviews appear in `dist/llms.txt` and in the Review JSON-LD of the relevant pages.
+5. Run `npm run build`, then confirm the new reviews appear in `dist/llms.txt`, on `/reviews`, in the theme counts, and in the Review JSON-LD of the relevant pages.
 
 ## Planned: automated review check (not built yet)
 
