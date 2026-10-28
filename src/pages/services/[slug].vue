@@ -48,7 +48,7 @@ useHead({
 </script>
 
 <template>
-  <PageLayout>
+  <PageLayout call-bar-hidden-over=".service-hero">
     <main class="service-page">
       <header class="service-hero">
         <div class="service-hero-inner">
