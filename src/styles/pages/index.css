@@ -70,6 +70,10 @@
 
   .intro {
     @apply max-w-3xl text-[18px] leading-relaxed text-gray-800;
+
+    a {
+      @apply font-semibold text-brand-navy underline underline-offset-4 decoration-brand-yellow decoration-2 hover:decoration-brand-navy;
+    }
   }
 
   .services-section {

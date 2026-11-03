@@ -202,11 +202,18 @@ const details = {
       "Showing you the worn parts and giving you a price before work starts",
       "Replacing the parts and checking the alignment afterwards",
     ],
+    related: {
+      title: "Suspension work done? Check the alignment",
+      text: "New shocks, struts, tie rods or control arms can change your wheel angles. We set them back on our new alignment machine so the car drives straight and your tires wear evenly.",
+      slug: "car-alignment",
+      label: "See our wheel alignment service",
+    },
     faqs: [
       {
         question: "Do I need an alignment after suspension work?",
         answer:
           "Often, yes. Replacing steering or suspension parts can change your alignment angles, so we check it after the repair and let you know if it needs adjusting.",
+        link: { slug: "car-alignment", label: "Wheel alignment in Baytown" },
       },
       {
         question: "What's the difference between shocks and struts?",
@@ -217,6 +224,7 @@ const details = {
         question: "Can worn suspension affect braking?",
         answer:
           "Yes. Worn shocks and struts let the car dive forward under braking, which can lengthen your stopping distance.",
+        link: { slug: "brake-repair", label: "Brake repair in Baytown" },
       },
     ],
   },
@@ -262,7 +270,19 @@ const details = {
         answer:
           "Yes. Every tire we install is mounted and balanced so it rolls smoothly without vibration.",
       },
+      {
+        question: "Should I get an alignment with new tires?",
+        answer:
+          "It's worth checking. If your wheels are out of line, new tires start wearing unevenly straight away. We can check the alignment while your tires go on.",
+        link: { slug: "car-alignment", label: "Wheel alignment in Baytown" },
+      },
     ],
+    related: {
+      title: "New tires? Protect them with an alignment",
+      text: "Wheels that are out of line wear new tires unevenly from day one. We check and set your alignment on our new alignment machine while your tires go on.",
+      slug: "car-alignment",
+      label: "See our wheel alignment service",
+    },
   },
 };
 
