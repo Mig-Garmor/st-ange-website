@@ -34,12 +34,14 @@ useHead({
     <main class="service-page">
       <header class="service-hero service-hero--compact">
         <div class="service-hero-inner">
-          <Breadcrumbs :crumbs="crumbs" />
-          <h1>Auto Repair Services in Baytown, TX</h1>
-          <p>
-            From alignments and brakes to A/C, suspension and tires, our family-owned auto repair shop on
-            {{ business.address.area }} handles the car repair and car service Baytown drivers need. Choose a service to learn more.
-          </p>
+          <div class="service-hero-text">
+            <Breadcrumbs :crumbs="crumbs" />
+            <h1>Auto Repair Services in Baytown, TX</h1>
+            <p>
+              From alignments and brakes to A/C, suspension and tires, our family-owned auto repair shop on
+              {{ business.address.area }} handles the car repair and car service Baytown drivers need. Choose a service to learn more.
+            </p>
+          </div>
         </div>
       </header>
 

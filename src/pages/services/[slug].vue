@@ -52,19 +52,21 @@ useHead({
     <main class="service-page">
       <header class="service-hero">
         <div class="service-hero-inner">
-          <Breadcrumbs :crumbs="crumbs" />
-          <h1>{{ service.h1 }}</h1>
-          <p>{{ service.summary }}</p>
-          <div class="hero-actions">
-            <Badge text="Call us" icon="mdi:phone" :href="business.phone.href" />
-            <Badge
-              text="Request service"
-              icon="mdi:calendar-check"
-              :to="{ path: '/contact-us', query: { subject: service.name } }"
-            />
+          <div class="service-hero-text">
+            <Breadcrumbs :crumbs="crumbs" />
+            <h1>{{ service.h1 }}</h1>
+            <p>{{ service.summary }}</p>
+            <div class="hero-actions">
+              <Badge text="Call us" icon="mdi:phone" :href="business.phone.href" />
+              <Badge
+                text="Request service"
+                icon="mdi:calendar-check"
+                :to="{ path: '/contact-us', query: { subject: service.name } }"
+              />
+            </div>
           </div>
+          <img :src="service.image" :alt="service.name" class="service-hero-image" width="260" height="260" />
         </div>
-        <img :src="service.image" :alt="service.name" class="service-hero-image" width="260" height="260" />
       </header>
 
       <section class="service-section service-intro">

@@ -2,18 +2,22 @@
   @apply flex flex-col items-center w-full;
 
   .service-hero {
-    @apply flex items-center justify-center gap-10 w-full px-[20px] py-[40px] md:py-[56px] bg-brand-navy text-white;
+    @apply w-full px-[20px] py-[40px] md:py-[56px] bg-brand-navy text-white;
   }
 
   .service-hero-inner {
-    @apply flex flex-col gap-4 max-w-3xl;
+    @apply flex items-center justify-between gap-10 max-w-5xl mx-auto;
+  }
+
+  .service-hero-text {
+    @apply flex flex-col gap-4 flex-1 min-w-0;
 
     h1 {
       @apply text-[32px] md:text-[44px] font-bold leading-tight;
     }
 
     p {
-      @apply text-[17px] md:text-[19px] text-white/90;
+      @apply text-[17px] md:text-[19px] text-white/90 max-w-2xl;
     }
   }
 
@@ -26,7 +30,7 @@
   }
 
   .service-section {
-    @apply flex flex-col gap-6 w-full max-w-5xl px-[20px] py-[44px];
+    @apply flex flex-col gap-6 w-full max-w-content px-[20px] py-[44px];
   }
 
   .service-section-title {
@@ -34,11 +38,15 @@
   }
 
   .service-intro {
-    @apply max-w-3xl gap-4 text-[18px] leading-relaxed text-gray-800;
+    @apply gap-4 text-[18px] leading-relaxed text-gray-800;
+
+    p {
+      @apply max-w-3xl;
+    }
   }
 
   .service-columns {
-    @apply grid gap-6 w-full max-w-5xl px-[20px] md:grid-cols-2;
+    @apply grid gap-6 w-full max-w-content px-[20px] md:grid-cols-2;
   }
 
   .service-panel {
