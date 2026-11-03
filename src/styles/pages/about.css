@@ -18,7 +18,7 @@
   }
 
   .story {
-    @apply flex flex-col gap-16 md:gap-20 w-full max-w-5xl px-[20px] py-[56px] md:py-[72px];
+    @apply flex flex-col gap-16 md:gap-20 w-full max-w-content px-[20px] py-[56px] md:py-[72px];
   }
 
   .find-us {

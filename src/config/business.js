@@ -51,6 +51,10 @@ export const business = {
 export const fullAddress = `${business.address.street}, ${business.address.city}, ${business.address.region} ${business.address.postalCode}`;
 export const shortAddress = `${business.address.street}, ${business.address.city}`;
 
+// ZIP codes people search with, from Search Console; the shop's own ZIP is first.
+export const serviceZips = ["77520", "77521", "77523"];
+export const serviceZipsText = `${serviceZips.slice(0, -1).join(", ")} and ${serviceZips.at(-1)}`;
+
 const openSlots = business.hours.filter((slot) => slot.days.length);
 const closedSlots = business.hours.filter((slot) => !slot.days.length);
 export const hoursSummary = [

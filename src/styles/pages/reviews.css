@@ -18,7 +18,7 @@
   }
 
   .reviews-section {
-    @apply flex flex-col gap-6 w-full max-w-6xl px-[20px] py-[48px];
+    @apply flex flex-col gap-6 w-full max-w-content px-[20px] py-[48px];
 
     h2 {
       @apply text-[28px] md:text-[36px] font-bold text-center text-brand-navy leading-tight;
