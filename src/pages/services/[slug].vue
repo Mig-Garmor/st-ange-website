@@ -11,6 +11,7 @@ import ReviewCard from "@components/blocks/ReviewCard.vue";
 import FaqList from "@components/blocks/FaqList.vue";
 import CallToActionBand from "@components/blocks/CallToActionBand.vue";
 import ServiceCard from "@components/ServiceCard.vue";
+import QuoteForm from "@components/forms/QuoteForm.vue";
 import { usePageSeo } from "@composables/usePageSeo";
 import { business } from "@/config/business";
 import { findServicePage, servicePages } from "@/content/services";
@@ -58,7 +59,9 @@ useHead({
             <p>{{ service.summary }}</p>
             <div class="hero-actions">
               <Badge text="Call us" icon="mdi:phone" :href="business.phone.href" />
+              <Badge v-if="service.quote" :text="service.quote.button" icon="mdi:calculator" :to="{ hash: '#quote' }" />
               <Badge
+                v-else
                 text="Request service"
                 icon="mdi:calendar-check"
                 :to="{ path: '/contact-us', query: { subject: service.name } }"
@@ -71,6 +74,17 @@ useHead({
 
       <section class="service-section service-intro">
         <p v-for="paragraph in service.intro" :key="paragraph">{{ paragraph }}</p>
+      </section>
+
+      <section v-if="service.feature" class="service-section service-feature">
+        <h2 class="service-section-title">{{ service.feature.title }}</h2>
+        <ul v-if="service.feature.items" class="feature-items">
+          <li v-for="item in service.feature.items" :key="item.title">
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.text }}</p>
+          </li>
+        </ul>
+        <p v-for="paragraph in service.feature.paragraphs" :key="paragraph">{{ paragraph }}</p>
       </section>
 
       <div class="service-columns">
@@ -91,6 +105,16 @@ useHead({
           </ol>
         </section>
       </div>
+
+      <section v-if="service.quote" id="quote" class="service-section service-quote">
+        <div class="quote-text">
+          <h2>{{ service.quote.title }}</h2>
+          <p>{{ service.quote.text }}</p>
+          <p>Prefer to talk? Call us and we'll give you a price over the phone.</p>
+          <Badge :text="`Call ${business.phone.display}`" icon="mdi:phone" :href="business.phone.href" class="quote-call" />
+        </div>
+        <QuoteForm :subject="service.quote.subject" />
+      </section>
 
       <section class="service-section">
         <h2 class="service-section-title">Why choose St Ange Auto Service</h2>

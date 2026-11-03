@@ -104,6 +104,54 @@
     }
   }
 
+  .service-feature {
+    @apply gap-5 text-[18px] leading-relaxed text-gray-800;
+
+    .service-section-title {
+      @apply text-left;
+    }
+
+    p {
+      @apply max-w-3xl;
+    }
+  }
+
+  .feature-items {
+    @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3;
+
+    li {
+      @apply flex flex-col gap-1 p-5 rounded-[10px] bg-black/5;
+    }
+
+    h3 {
+      @apply font-bold text-[17px] text-brand-navy;
+    }
+
+    p {
+      @apply text-[15px] text-gray-700 leading-relaxed;
+    }
+  }
+
+  .service-quote {
+    @apply grid gap-8 md:grid-cols-2 md:items-start scroll-mt-[160px];
+
+    .quote-text {
+      @apply flex flex-col gap-3;
+
+      h2 {
+        @apply text-[28px] md:text-[36px] font-bold text-brand-navy leading-tight;
+      }
+
+      p {
+        @apply text-[17px] text-gray-700 leading-relaxed;
+      }
+    }
+
+    .quote-call {
+      @apply self-start mt-2;
+    }
+  }
+
   .service-reviews {
     @apply grid gap-6 md:grid-cols-3;
   }

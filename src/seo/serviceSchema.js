@@ -24,6 +24,14 @@ export function serviceSchema(service) {
     description: service.metaDescription,
     url: absolute(`/services/${service.slug}`),
     provider: { "@id": `${business.siteUrl}/#business` },
-    areaServed: { "@type": "City", name: "Baytown, TX" },
+    areaServed: service.zips
+      ? [
+          { "@type": "City", name: "Baytown, TX" },
+          ...service.zips.map((postalCode) => ({
+            "@type": "Place",
+            address: { "@type": "PostalAddress", addressLocality: "Baytown", addressRegion: "TX", postalCode },
+          })),
+        ]
+      : { "@type": "City", name: "Baytown, TX" },
   };
 }

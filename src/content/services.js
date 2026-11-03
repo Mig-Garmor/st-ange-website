@@ -1,11 +1,25 @@
-import { business, services } from "@/config/business";
+import { business, serviceZips, serviceZipsText, services } from "@/config/business";
 
 const details = {
   "car-alignment": {
-    seoTitle: "Wheel Alignment in Baytown, TX | St Ange Auto Service",
+    seoTitle: "Wheel Alignment in Baytown, TX | New Machine | St Ange Auto Service",
     metaDescription:
-      `Car pulling or tires wearing unevenly? Get a wheel alignment at St Ange Auto Service, ${business.address.street}, Baytown, TX. Fair, upfront pricing. Call 832-572-7121.`,
-    h1: "Car Alignment in Baytown, TX",
+      "Wheel alignment on our new alignment machine in Baytown, TX (77520, 77521, 77523). Rated 5.0 on Google, upfront pricing. Call 832-572-7121.",
+    h1: "Car & Wheel Alignment in Baytown, TX",
+    zips: serviceZips,
+    quote: {
+      button: "Get an alignment quote",
+      title: "Get an alignment quote",
+      text: "Tell us your vehicle and we'll call you back with a price and a time to bring it in.",
+      subject: "Alignment quote request",
+    },
+    feature: {
+      title: "Aligned on our new alignment machine",
+      paragraphs: [
+        "We've invested in a new alignment machine for our Baytown shop. It measures the angles of each wheel precisely, so we can set them back to your vehicle's specifications accurately and get you back on the road quickly.",
+        `If your car pulls, your steering wheel sits crooked or you've just fitted new tires, bring it to us at ${business.address.street}. We serve drivers across Baytown, including the ${serviceZipsText} ZIP codes.`,
+      ],
+    },
     intro: [
       "A wheel alignment sets the angles of your wheels so they point straight ahead and sit evenly on the road. Potholes, curbs and worn steering parts slowly knock those angles out, and the result is a car that pulls to one side, a crooked steering wheel and tires that wear out long before they should.",
       "At our Baytown auto repair shop we check your alignment, adjust it back to your vehicle's specifications and look for worn parts that would throw it out again. Getting it right protects your tires, which are usually the more expensive thing to replace.",
@@ -36,6 +50,11 @@ const details = {
         question: "Is an alignment the same as wheel balancing?",
         answer:
           "No. Balancing evens out the weight around each wheel so it doesn't vibrate at speed. An alignment sets the angle of the wheels so the car drives straight and the tires wear evenly.",
+      },
+      {
+        question: "Do I need an alignment after buying new tires?",
+        answer:
+          "It's a good idea. New tires wear unevenly if the wheels are out of line, so an alignment protects them from the start. We can check it when your tires go on.",
       },
       {
         question: "How long does an alignment take?",
@@ -90,10 +109,30 @@ const details = {
   },
 
   "brake-repair": {
-    seoTitle: "Brake Repair in Baytown, TX | St Ange Auto Service",
+    seoTitle: "Brake Repair & Brake Service in Baytown, TX | St Ange Auto Service",
     metaDescription:
-      "Squealing, grinding or a soft brake pedal? Our Baytown, TX auto repair shop inspects your whole brake system and replaces only what's worn. Call 832-572-7121.",
-    h1: "Brake Repair in Baytown, TX",
+      "Brake pads, rotors, calipers and brake fluid service in Baytown, TX (77520, 77521, 77523). Rated 5.0 on Google, upfront pricing. Call 832-572-7121.",
+    h1: "Brake Repair & Brake Service in Baytown, TX",
+    zips: serviceZips,
+    quote: {
+      button: "Get a brake quote",
+      title: "Get a brake quote",
+      text: "Tell us your vehicle and what you're noticing, and we'll call you back with a price and a time to bring it in.",
+      subject: "Brake quote request",
+    },
+    feature: {
+      title: "Brake services we offer",
+      items: [
+        { title: "Brake pad replacement", text: "New pads fitted, with an honest read on how much life your old ones had left." },
+        { title: "Rotor replacement", text: "We measure your rotors and replace them only when they're worn or warped." },
+        { title: "Calipers and brake hoses", text: "Sticking calipers and leaking hoses found and repaired." },
+        { title: "Brake fluid service", text: "Old, moisture-laden fluid replaced so the pedal stays firm." },
+        { title: "Brake warning light", text: "We find out why the light is on before replacing anything." },
+      ],
+      paragraphs: [
+        `Brake work is usually quick to turn around. We serve drivers across Baytown, including the ${serviceZipsText} ZIP codes.`,
+      ],
+    },
     intro: [
       "Your brakes are the most important safety system on your car. Pads and rotors wear a little with every stop, and brake fluid absorbs moisture over time. Catching problems early keeps repairs smaller and keeps your car stopping the way it should.",
       "When you bring your car to our Baytown auto repair shop, we inspect the whole brake system, show you what we find and replace only the parts that are actually worn.",
@@ -124,6 +163,11 @@ const details = {
         question: "Do I always need new rotors with new pads?",
         answer:
           "No. If your rotors are smooth and still thick enough, they can stay. We measure them and only recommend replacing them when they're worn or warped.",
+      },
+      {
+        question: "How much does a brake job cost?",
+        answer:
+          "It depends on what's worn: pads only, or pads and rotors, and on your vehicle. We inspect the brakes and give you the price before any work starts. Request a quote or call us to get started.",
       },
       {
         question: "Is it safe to drive with grinding brakes?",
