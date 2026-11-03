@@ -12,6 +12,9 @@ defineProps({
         <slot name="answer" :item="item">
           <p>{{ item.answer }}</p>
         </slot>
+        <RouterLink v-if="item.link" :to="`/services/${item.link.slug}`" class="faq-link">
+          {{ item.link.label }} →
+        </RouterLink>
         <div v-if="item.sources?.length" class="faq-sources">
           <p class="faq-sources-title">Sources</p>
           <ul>
@@ -44,6 +47,9 @@ summary::after {
 }
 .faq-answer {
   @apply flex flex-col gap-3 mt-3 text-gray-700 leading-relaxed;
+}
+.faq-link {
+  @apply self-start font-bold text-brand-navy underline underline-offset-4 decoration-brand-yellow decoration-2 hover:decoration-brand-navy;
 }
 .faq-sources {
   @apply pt-3 border-t border-black/10 text-[14px];

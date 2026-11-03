@@ -132,6 +132,22 @@
     }
   }
 
+  .related-callout {
+    @apply flex flex-col gap-3 p-6 md:p-8 rounded-[10px] bg-brand-navy text-white;
+
+    h2 {
+      @apply text-[24px] md:text-[28px] font-bold leading-tight;
+    }
+
+    p {
+      @apply max-w-3xl text-[17px] text-white/90 leading-relaxed;
+    }
+
+    .badge-component {
+      @apply self-start mt-1;
+    }
+  }
+
   .service-quote {
     @apply grid gap-8 md:grid-cols-2 md:items-start scroll-mt-[160px];
 

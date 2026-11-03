@@ -106,6 +106,14 @@ useHead({
         </section>
       </div>
 
+      <section v-if="service.related" class="service-section">
+        <div class="related-callout">
+          <h2>{{ service.related.title }}</h2>
+          <p>{{ service.related.text }}</p>
+          <Badge :text="service.related.label" icon="mdi:arrow-right" :to="`/services/${service.related.slug}`" />
+        </div>
+      </section>
+
       <section v-if="service.quote" id="quote" class="service-section service-quote">
         <div class="quote-text">
           <h2>{{ service.quote.title }}</h2>
