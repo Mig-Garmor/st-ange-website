@@ -40,7 +40,7 @@ create table requests (
 create table ai_usage_daily (
   site text not null, day date not null,
   input_tokens bigint not null default 0, cached_input_tokens bigint not null default 0,
-  output_tokens bigint not null default 0, cost_eur numeric(10,4) not null default 0,
+  output_tokens bigint not null default 0, cost_eur numeric(12,6) not null default 0,
   calls int not null default 0, created_at timestamptz not null default now(),
   primary key (site, day)
 );

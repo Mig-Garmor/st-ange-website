@@ -100,7 +100,10 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("data access", () => {
     const a = await newConversation({ site: s, visitorId: "a" });
     const b = await newConversation({ site: s, visitorId: "b" });
     for (const conv of [a, b]) await db.saveMessage({ site: s, conversationId: conv.id, role: "user", content: "x" });
-    await sql`update messages set created_at = '2026-01-15 18:00:00+00' where site = ${s}`;
+    const c = await newConversation({ site: s, visitorId: "c" });
+    await db.saveMessage({ site: s, conversationId: c.id, role: "user", content: "outside" });
+    await sql`update messages set created_at = '2026-01-16 03:00:00+00' where site = ${s} and content = 'x'`;
+    await sql`update messages set created_at = '2026-01-16 07:00:00+00' where site = ${s} and content = 'outside'`;
     expect(await db.dayStats(s, day)).toEqual({ messages: 2, visitors: 2 });
   });
 });
