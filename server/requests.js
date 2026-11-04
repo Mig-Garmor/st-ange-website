@@ -19,7 +19,7 @@ export function createRequestService({ db, email, site, logger = console }) {
       );
 
       const duplicate = Boolean(request?.duplicate);
-      if (duplicate && request.emailStatus !== "failed") return { emailStatus: "sent", duplicate: true };
+      if (duplicate && request.emailStatus !== "failed") return { emailStatus: "sent", duplicate: true, leadId: saved?.id ?? null };
 
       let emailStatus = "sent";
       let error = null;
@@ -32,7 +32,7 @@ export function createRequestService({ db, email, site, logger = console }) {
       }
 
       if (request?.id) await safe("setRequestEmailStatus", () => db.setRequestEmailStatus(request.id, { status: emailStatus, error }));
-      return { emailStatus, duplicate };
+      return { emailStatus, duplicate, leadId: saved?.id ?? null };
     },
   };
 }

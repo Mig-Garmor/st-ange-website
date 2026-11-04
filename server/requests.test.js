@@ -30,7 +30,7 @@ describe("request service", () => {
   it("sends the email and records sent", async () => {
     const { service, calls } = setup();
     const r = await service.submit(input);
-    expect(r).toEqual({ emailStatus: "sent", duplicate: false });
+    expect(r).toEqual({ emailStatus: "sent", duplicate: false, leadId: 7 });
     expect(calls.upsert[0]).toMatchObject({ site: "st-ange", phone: "8325727121" });
     expect(calls.record[0]).toMatchObject({ site: "st-ange", leadId: 7, source: "quote_form", service: "car-alignment" });
     expect(calls.sent).toEqual([{ subject: "Quote", text: "body" }]);
@@ -49,7 +49,7 @@ describe("request service", () => {
   it("duplicate of a failed request re-sends and records sent", async () => {
     const { service, calls } = setup({ dbOverrides: dup("failed") });
     const r = await service.submit(input);
-    expect(r).toEqual({ emailStatus: "sent", duplicate: true });
+    expect(r).toEqual({ emailStatus: "sent", duplicate: true, leadId: 7 });
     expect(calls.sent).toHaveLength(1);
     expect(calls.status).toEqual([{ id: 11, status: "sent", error: null }]);
   });
@@ -57,7 +57,7 @@ describe("request service", () => {
   it("duplicate of a sent request sends nothing", async () => {
     const { service, calls } = setup({ dbOverrides: dup("sent") });
     const r = await service.submit(input);
-    expect(r).toEqual({ emailStatus: "sent", duplicate: true });
+    expect(r).toEqual({ emailStatus: "sent", duplicate: true, leadId: 7 });
     expect(calls.sent).toHaveLength(0);
     expect(calls.status).toHaveLength(0);
   });
@@ -65,7 +65,7 @@ describe("request service", () => {
   it("duplicate still in flight sends nothing and reports sent", async () => {
     const { service, calls } = setup({ dbOverrides: dup(null) });
     const r = await service.submit(input);
-    expect(r).toEqual({ emailStatus: "sent", duplicate: true });
+    expect(r).toEqual({ emailStatus: "sent", duplicate: true, leadId: 7 });
     expect(calls.sent).toHaveLength(0);
   });
 
