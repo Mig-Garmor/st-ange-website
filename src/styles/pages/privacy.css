@@ -1,0 +1,40 @@
+.privacy-page-container {
+  @apply flex flex-col items-center w-full;
+
+  .privacy-hero {
+    @apply w-full px-[20px] py-[40px] md:py-[56px] bg-brand-navy text-white;
+  }
+
+  .privacy-hero-inner {
+    @apply flex flex-col gap-4 max-w-5xl mx-auto;
+
+    h1 {
+      @apply text-[32px] md:text-[44px] font-bold leading-tight;
+    }
+
+    p {
+      @apply text-[17px] md:text-[19px] text-white/90 max-w-2xl;
+    }
+  }
+
+  .privacy-content {
+    @apply flex flex-col gap-8 w-full max-w-3xl px-[20px] py-[48px] md:py-[64px];
+
+    h2 {
+      @apply text-[22px] md:text-[26px] font-bold text-brand-navy mb-2;
+    }
+
+    p,
+    li {
+      @apply text-[16px] md:text-[17px] leading-relaxed;
+    }
+
+    ul {
+      @apply list-disc pl-6 mt-2 flex flex-col gap-1;
+    }
+
+    a {
+      @apply underline underline-offset-2;
+    }
+  }
+}
