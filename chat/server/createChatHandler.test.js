@@ -71,7 +71,7 @@ const body = (over = {}) => ({
 
 const existing = (verifiedAt) => vi.fn(async () => ({ id: ID, verifiedAt, messageCount: 3 }));
 
-const setup = ({ db = fakeDb(), ai = fakeAi(), verify = true, model = "m", ipSalt = "salt", waitUntil } = {}) => {
+const setup = ({ db = fakeDb(), ai = fakeAi(), verify = true, model = "m", ipSalt = "salt", waitUntil, settleTimeoutMs } = {}) => {
   const email = { send: vi.fn(async () => {}) };
   const turnstile = { verify: vi.fn(async () => verify) };
   const handler = createChatHandler(settings, {
@@ -82,6 +82,7 @@ const setup = ({ db = fakeDb(), ai = fakeAi(), verify = true, model = "m", ipSal
     ipSalt,
     model,
     waitUntil,
+    settleTimeoutMs,
     now: () => new Date("2026-11-04T15:00:00Z"),
   });
   return { handler, db, ai, email, turnstile };
@@ -376,28 +377,50 @@ describe("createChatHandler", () => {
     error.mockRestore();
   });
 
-  it("keeps the function alive until the finish callback settles", async () => {
+  const watchSettled = (waitUntil) => {
+    const state = { settled: false };
+    waitUntil.mock.calls[0][0].then(() => (state.settled = true));
+    return state;
+  };
+
+  it("keeps the function alive until the stream has settled, after usage is recorded", async () => {
     const waitUntil = vi.fn();
     const { handler, ai, db } = setup({ waitUntil });
     await handler(post(body()));
     expect(waitUntil).toHaveBeenCalledOnce();
-    let settled = false;
-    waitUntil.mock.calls[0][0].then(() => (settled = true));
-    await Promise.resolve();
-    expect(settled).toBe(false);
-    await ai.streamReply.mock.calls[0][0].onFinish({ text: "Hi", toolCall: null, usage: {} });
-    await vi.waitFor(() => expect(settled).toBe(true));
+    const state = watchSettled(waitUntil);
+    const { onFinish, onSettled } = ai.streamReply.mock.calls[0][0];
+    await onFinish({ text: "Hi", toolCall: null, usage: {} });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(state.settled).toBe(false);
     expect(db.addUsage).toHaveBeenCalled();
+    onSettled();
+    await vi.waitFor(() => expect(state.settled).toBe(true));
   });
 
-  it("a stream error also settles the waitUntil promise", async () => {
+  it("a stream error does not settle the waitUntil promise before usage can be recorded", async () => {
     const waitUntil = vi.fn();
-    const { handler, ai } = setup({ waitUntil });
+    const { handler, ai, db } = setup({ waitUntil });
     await handler(post(body()));
-    let settled = false;
-    waitUntil.mock.calls[0][0].then(() => (settled = true));
-    ai.streamReply.mock.calls[0][0].onError(new Error("boom"));
-    await vi.waitFor(() => expect(settled).toBe(true));
+    const state = watchSettled(waitUntil);
+    const { onError, onFinish, onSettled } = ai.streamReply.mock.calls[0][0];
+    onError?.(new Error("boom"));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(state.settled).toBe(false);
+    await onFinish({ text: "Partial", toolCall: null, usage: { inputTokens: 500, outputTokens: 3 } });
+    expect(db.addUsage).toHaveBeenCalledWith(expect.objectContaining({ inputTokens: 500, outputTokens: 3 }));
+    onSettled();
+    await vi.waitFor(() => expect(state.settled).toBe(true));
+  });
+
+  it("settles the waitUntil promise after the safety timeout if the stream never settles", async () => {
+    const waitUntil = vi.fn();
+    const { handler } = setup({ waitUntil, settleTimeoutMs: 20 });
+    await handler(post(body()));
+    const state = watchSettled(waitUntil);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    expect(state.settled).toBe(false);
+    await vi.waitFor(() => expect(state.settled).toBe(true), { timeout: 1000 });
   });
 
   it("streamReply throwing settles the waitUntil promise", async () => {

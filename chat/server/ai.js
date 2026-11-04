@@ -28,7 +28,7 @@ export function createAi({ apiKey, model, cacheKey, reasoningEffort, provider = 
   const openai = { promptCacheKey: cacheKey, ...(reasoningEffort && { reasoningEffort }) };
 
   return {
-    streamReply({ system, messages, maxOutputTokens, tools, onFinish, onError, errorText }) {
+    streamReply({ system, messages, maxOutputTokens, tools, onFinish, onError, onSettled, errorText }) {
       const result = streamText({
         model: provider(model),
         instructions: system,
@@ -50,7 +50,10 @@ export function createAi({ apiKey, model, cacheKey, reasoningEffort, provider = 
         },
       });
       // Without this, a client disconnect stops the stream before onEnd, so billed tokens are never recorded.
-      result.consumeStream();
+      // It resolves only after onEnd has finished, or once onEnd can no longer run (even after an error).
+      result
+        .consumeStream({ onError: (error) => console.error("Chat stream failed", error) })
+        .finally(() => onSettled?.());
       return result.toUIMessageStreamResponse(errorText ? { onError: () => errorText } : undefined);
     },
 
