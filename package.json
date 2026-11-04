@@ -12,14 +12,17 @@
     "test:db": "node --env-file-if-exists=.env.local node_modules/vitest/vitest.mjs run server/db"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.108",
     "@iconify/vue": "^5.0.0",
     "@neon/config": "^1.10.1",
     "@neon/env": "^1.6.9",
     "@neondatabase/serverless": "^1.2.0",
     "@sendinblue/client": "^3.3.1",
     "@unhead/vue": "^2.1.17",
+    "ai": "^7.0.162",
     "vue": "^3.5.18",
-    "vue-router": "^4.5.1"
+    "vue-router": "^4.5.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",

@@ -51,7 +51,14 @@ export const chatServerSettings = {
   limits: { maxChars: 500, maxUserMessages: 20, perHour: 40 },
   maxOutputTokens: 150,
   dailyCapEur: Number(process.env.CHAT_DAILY_CAP_EUR ?? 5),
-  models: {},
-  eurPerUsd: null,
+  // OpenAI standard-tier USD per 1M tokens, read 2026-11-04 from developers.openai.com/api/docs/pricing.
+  models: { "gpt-6-luna": { inputUsd: 0.1, cachedInputUsd: 0.01, outputUsd: 0.5, reasoningEffort: "none" } },
+  // ECB reference rate for 2026-11-04: 1 EUR = 1.1267 USD.
+  eurPerUsd: 0.8875,
+  copy: {
+    offline: `Our chat is offline right now. Call us at ${business.phone.display} or send a quote request.`,
+    limit: `Let's pick this up by phone: call us at ${business.phone.display}.`,
+    unavailable: `Chat is unavailable right now. Call us at ${business.phone.display}.`,
+  },
   hours: business.hours,
 };
