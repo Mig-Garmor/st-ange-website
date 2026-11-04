@@ -62,6 +62,12 @@ export const hoursSummary = [
   `closed ${closedSlots.map((slot) => slot.label).join(" and ")}`,
 ].join(", ");
 
+export const hoursAndLocation = [
+  `We're at ${fullAddress}.`,
+  ...business.hours.map((slot) => `${slot.label}: ${slot.display}`),
+  `Questions? Call us at ${business.phone.display}.`,
+].join("\n");
+
 export const services = [
   {
     slug: "car-alignment",

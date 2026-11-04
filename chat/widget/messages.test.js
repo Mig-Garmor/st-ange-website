@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasUnsentFirstMessage, isVerified, textOf } from "./messages.js";
+import { hasUnsentFirstMessage, isLocal, isVerified, localExchange, textOf } from "./messages.js";
 
 const user = (text) => ({ role: "user", parts: [{ type: "text", text }] });
 const reply = (text) => ({ role: "assistant", parts: [{ type: "text", text }] });
@@ -22,5 +22,25 @@ describe("widget messages", () => {
     expect(hasUnsentFirstMessage([])).toBe(false);
     expect(hasUnsentFirstMessage([user("hi"), reply("hello"), user("again")])).toBe(false);
     expect(hasUnsentFirstMessage([user("hi"), notice("offline")])).toBe(false);
+  });
+
+  it("localExchange builds a local question and answer pair", () => {
+    let n = 0;
+    const pair = localExchange("Hours & location", "Open 8 to 6.", () => `id-${++n}`);
+    expect(pair).toEqual([
+      { id: "id-1", role: "user", metadata: { local: true }, parts: [{ type: "text", text: "Hours & location" }] },
+      { id: "id-2", role: "assistant", metadata: { local: true }, parts: [{ type: "text", text: "Open 8 to 6." }] },
+    ]);
+    expect(pair.every(isLocal)).toBe(true);
+    expect(isLocal(user("hi"))).toBe(false);
+    expect(localExchange("a", "b").map((m) => m.id)).toHaveLength(2);
+  });
+
+  it("a local answer does not verify the chat, so the next real message is still the first", () => {
+    const local = localExchange("Hours & location", "Open 8 to 6.");
+    expect(isVerified(local)).toBe(false);
+    expect(hasUnsentFirstMessage(local)).toBe(false);
+    expect(hasUnsentFirstMessage([...local, user("my brakes squeal")])).toBe(true);
+    expect(isVerified([...local, user("my brakes squeal"), reply("Sorry to hear")])).toBe(true);
   });
 });

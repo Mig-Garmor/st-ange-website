@@ -37,7 +37,7 @@ function notice(state, text) {
 
 export function createChatHandler(
   settings,
-  { db, ai, email, turnstile, ipSalt, model, waitUntil = () => {}, now = () => new Date() },
+  { db, ai, email, turnstile, ipSalt, model, waitUntil = () => {}, now = () => new Date(), settleTimeoutMs = 30_000 },
 ) {
   const { site, copy } = settings;
   const tools = { proposeRequest: createProposeRequest(settings.services.map((s) => s.slug)) };
@@ -81,15 +81,25 @@ export function createChatHandler(
       return unavailable();
     }
 
-    let history;
+    let stored = null;
     try {
-      await db.saveMessage({ site, conversationId: id, role: "user", content: text });
-      const stored = await db.getMessages(id);
-      history = stored.map(({ role, content }) => ({ role, content })).slice(-HISTORY);
+      stored = (await db.getMessages(id)).map(({ role, content }) => ({ role, content }));
     } catch (error) {
       console.error("Chat history failed, using client text", error);
-      history = clientHistory(messages);
     }
+    const latest = stored?.at(-1);
+    // A reload mid-reply re-sends a message that was stored but never answered.
+    const unanswered = latest?.role === "user" && latest.content === text;
+    if (!unanswered) {
+      try {
+        await db.saveMessage({ site, conversationId: id, role: "user", content: text });
+        stored?.push({ role: "user", content: text });
+      } catch (error) {
+        console.error("Chat message save failed, using client text", error);
+        stored = null;
+      }
+    }
+    const history = stored ? stored.slice(-HISTORY) : clientHistory(messages);
 
     let playbooks = [];
     try {
@@ -100,7 +110,9 @@ export function createChatHandler(
     const { stable, variable } = buildInstructions(settings, { playbooks, now: now(), pageUrl });
 
     let settle;
-    waitUntil(new Promise((resolve) => (settle = resolve)));
+    const settled = new Promise((resolve) => (settle = resolve));
+    const timer = setTimeout(settle, settleTimeoutMs);
+    waitUntil(settled.then(() => clearTimeout(timer)));
 
     const onFinish = async ({ text: reply, toolCall, usage }) => {
       try {
@@ -116,8 +128,6 @@ export function createChatHandler(
         await recordUsage({ db, email, settings, model, usage, now: now() });
       } catch (error) {
         console.error("Chat usage record failed", error);
-      } finally {
-        settle();
       }
     };
 
@@ -128,7 +138,7 @@ export function createChatHandler(
         maxOutputTokens: settings.maxOutputTokens,
         tools,
         onFinish,
-        onError: settle,
+        onSettled: settle,
         errorText: copy.unavailable,
       });
     } catch (error) {

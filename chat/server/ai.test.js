@@ -110,6 +110,57 @@ describe("createAi", () => {
     await vi.waitFor(() => expect(onError).toHaveBeenCalled());
   });
 
+  const settleOrder = async (doStream) => {
+    const order = [];
+    const res = setup(new MockLanguageModelV4({ doStream })).streamReply({
+      system: "Rules",
+      messages: [{ role: "user", content: "Hello" }],
+      maxOutputTokens: 150,
+      tools: {},
+      onFinish: async ({ text, usage }) => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        order.push(["finish", text, usage.outputTokens]);
+      },
+      onError: () => order.push(["error"]),
+      onSettled: () => order.push(["settled"]),
+      errorText: "Unavailable.",
+    });
+    await res.text().catch(() => {});
+    await vi.waitFor(() => expect(order.at(-1)).toEqual(["settled"]), { timeout: 2000 });
+    return order;
+  };
+
+  it("onSettled runs after onFinish has recorded the usage of a stream that errors partway", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const order = await settleOrder(async () => ({
+      stream: simulateReadableStream({
+        chunks: [
+          { type: "text-start", id: "t" },
+          { type: "text-delta", id: "t", delta: "Partial" },
+          { type: "error", error: new Error("provider down") },
+          { type: "finish", finishReason: { unified: "error", raw: undefined }, usage },
+        ],
+      }),
+    }));
+    expect(order).toEqual([["error"], ["finish", "Partial", 12], ["settled"]]);
+    error.mockRestore();
+  });
+
+  it("onSettled runs when the model call fails or the stream breaks, without onFinish", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(await settleOrder(async () => { throw new Error("provider down"); })).toEqual([["error"], ["settled"]]);
+    const broken = await settleOrder(async () => ({
+      stream: new ReadableStream({
+        start(controller) {
+          controller.enqueue({ type: "text-start", id: "t" });
+          controller.error(new Error("socket closed"));
+        },
+      }),
+    }));
+    expect(broken).toEqual([["settled"]]);
+    error.mockRestore();
+  });
+
   it("generateInsights returns the parsed object and usage", async () => {
     const model = new MockLanguageModelV4({
       doGenerate: {

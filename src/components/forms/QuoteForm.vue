@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, watch } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 
 import InputFieldComponent from "@components/forms/InputFieldComponent.vue";
 import { validateName, validatePhone } from "@modules/validate.js";
@@ -15,6 +15,7 @@ const emptyForm = () => ({ name: "", phone: "", vehicle: "", notes: "" });
 const form = reactive(emptyForm());
 const errors = reactive(emptyForm());
 const status = ref(""); // "" | "sending" | "success" | "error"
+const hasErrors = computed(() => Object.values(errors).some(Boolean));
 
 let idempotencyKey = null;
 watch(form, () => {
@@ -28,10 +29,17 @@ function validateForm() {
   return !errors.name && !errors.phone && !errors.vehicle;
 }
 
+const FIELDS = { name: "name", phone: "phone", vehicle: "vehicle", message: "notes" };
+
+function showServerErrors(serverErrors) {
+  for (const [key, field] of Object.entries(FIELDS)) if (serverErrors[key]) errors[field] = serverErrors[key];
+}
+
 async function handleSubmit() {
   if (!validateForm()) return;
 
   status.value = "sending";
+  errors.notes = "";
   status.value = await submitForm("send-email", {
     subject: `${props.subject} from ${form.name}`,
     name: form.name,
@@ -43,7 +51,7 @@ async function handleSubmit() {
     service: props.service,
     pageUrl: location.href,
     idempotencyKey,
-  });
+  }, { onFieldErrors: showServerErrors });
 
   if (status.value === "success") {
     Object.assign(form, emptyForm());
@@ -54,7 +62,13 @@ async function handleSubmit() {
 
 <template>
   <form class="quote-form" novalidate @submit.prevent="handleSubmit">
-    <InputFieldComponent v-model="form.name" label="Name" autocomplete="name" :error="errors.name" />
+    <InputFieldComponent
+      v-model="form.name"
+      label="Name"
+      autocomplete="name"
+      :maxlength="100"
+      :error="errors.name"
+    />
     <InputFieldComponent
       v-model="form.phone"
       label="Phone"
@@ -65,9 +79,16 @@ async function handleSubmit() {
     <InputFieldComponent
       v-model="form.vehicle"
       label="Vehicle (year, make, model)"
+      :maxlength="100"
       :error="errors.vehicle"
     />
-    <InputFieldComponent v-model="form.notes" label="What are you noticing? (optional)" type="textarea" />
+    <InputFieldComponent
+      v-model="form.notes"
+      label="What are you noticing? (optional)"
+      type="textarea"
+      :maxlength="1800"
+      :error="errors.notes"
+    />
 
     <button class="submit-btn" type="submit" :disabled="status === 'sending'">
       {{ status === "sending" ? "Sending…" : "Request my quote" }}
@@ -77,7 +98,7 @@ async function handleSubmit() {
       Thanks, we got your request. We'll call you back shortly.
     </div>
     <div v-if="status === 'error'" class="banner-error" role="alert">
-      Something went wrong. Try again or call us.
+      {{ hasErrors ? "Please check the fields above." : "Something went wrong. Try again or call us." }}
     </div>
   </form>
 </template>

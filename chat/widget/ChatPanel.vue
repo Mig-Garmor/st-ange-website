@@ -5,7 +5,7 @@ import { DefaultChatTransport } from "ai";
 import RequestCard from "./RequestCard.vue";
 import { createTurnstile } from "./turnstile.js";
 import { loadSession, saveSession, visitorId } from "./storage.js";
-import { chatState, hasUnsentFirstMessage, isVerified, textOf } from "./messages.js";
+import { chatState, hasUnsentFirstMessage, isVerified, localExchange, textOf } from "./messages.js";
 
 const props = defineProps({
   settings: { type: Object, required: true },
@@ -82,6 +82,13 @@ function send(text) {
   sendMessage({ text: value });
 }
 
+function ask(reply) {
+  const answer = props.settings.localAnswers?.[reply];
+  if (!answer) return send(reply);
+  if (busy.value) return;
+  messages.value = [...messages.value, ...localExchange(reply, answer)];
+}
+
 function submit() {
   if (busy.value || !draft.value.trim()) return;
   send(draft.value);
@@ -142,7 +149,7 @@ onBeforeUnmount(() => turnstile?.remove());
       </p>
 
       <div v-if="!messages.length" class="quick-replies">
-        <button v-for="reply in settings.quickReplies" :key="reply" type="button" @click="send(reply)">
+        <button v-for="reply in settings.quickReplies" :key="reply" type="button" @click="ask(reply)">
           {{ reply }}
         </button>
       </div>

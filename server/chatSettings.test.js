@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { services } from "../src/config/business.js";
+import { business, hoursAndLocation, services } from "../src/config/business.js";
 import { allReviews } from "../src/content/reviews.js";
 import { chatServerSettings } from "./chatSettings.js";
 
@@ -34,5 +34,12 @@ describe("chatServerSettings", () => {
     const price = chatServerSettings.models["gpt-6-luna"];
     expect(price).toMatchObject({ inputUsd: 0.1, cachedInputUsd: 0.01, cacheWriteUsd: 0.125, outputUsd: 0.5 });
     expect(chatServerSettings.eurPerUsd).toBeGreaterThan(0);
+  });
+
+  it("the instant hours and location answer lists the address, every hours slot and the phone", () => {
+    expect(hoursAndLocation).toContain("108 Schilling Ave, Baytown, TX 77520");
+    for (const slot of business.hours) expect(hoursAndLocation).toContain(`${slot.label}: ${slot.display}`);
+    expect(hoursAndLocation).toContain(business.phone.display);
+    expect(hoursAndLocation.split("\n").length).toBeLessThanOrEqual(6);
   });
 });
