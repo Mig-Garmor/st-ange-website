@@ -305,6 +305,7 @@ describe("OpenRouter cost, caching and reasoning", () => {
     };
     expect(reasoningEffortFor(settings, "openai/a")).toBe("none");
     expect(reasoningEffortFor(settings, "anthropic/unpriced")).toBe("none");
+    expect(reasoningEffortFor(settings, "nvidia/nemotron-3-ultra-550b-a55b:free")).toBe("none");
     expect(reasoningEffortFor(settings, "google/gemma-4-31b-it:free")).toBeUndefined();
     expect(reasoningEffortFor(settings, undefined)).toBeUndefined();
     expect(reasoningEffortFor(settings, "x/b")).toBe("low");

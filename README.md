@@ -35,7 +35,7 @@ The chat and the insight job both go through [OpenRouter](https://openrouter.ai)
 - Free models end in `:free`, for example `nvidia/nemotron-3-ultra-550b-a55b:free` (worked in local testing on 2026-11-04; `google/gemma-4-31b-it:free` was rate-limited upstream). They are rate-limited and suited to testing, not the live site.
 - When switching models on Vercel, replace an old `CHAT_MODEL` value such as `gpt-6-luna` with the full OpenRouter id (`openai/gpt-6-luna`): an unknown id makes the chat unavailable without an alert.
 
-Pick a model that supports tools (the request card needs them). For `openai/` and `anthropic/` models the code asks for no hidden reasoning, so the 150-token reply budget goes to the answer; other models get no reasoning option. To change that for one model, add `reasoningEffort` (or `null` to send none) to its entry in `models` in `server/chatSettings.js`.
+Pick a model that supports tools (the request card needs them). For `openai/`, `anthropic/` and `nvidia/` models the code asks for no hidden reasoning, so the 150-token reply budget goes to the answer; other models get no reasoning option, because some reject it ("Reasoning is mandatory"). A model that reasons by default and gets no option can use up the whole budget and reply with nothing. To change that for one model, add `reasoningEffort` (or `null` to send none) to its entry in `models` in `server/chatSettings.js`.
 
 ### Switching the bubble on
 

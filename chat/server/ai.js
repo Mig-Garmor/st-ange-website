@@ -1,6 +1,7 @@
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { generateText, NoObjectGeneratedError, Output, streamText, tool } from "ai";
 import { z } from "zod";
+import { humanize, humanizeTransform } from "./humanText.js";
 
 export const toUsage = (usage = {}, costUsd) => ({
   inputTokens: usage.inputTokens,
@@ -17,7 +18,7 @@ export function reportedCostUsd(steps = []) {
   return costs.reduce((sum, c) => sum + c, 0);
 }
 
-const REASONING_DEFAULT = /^(openai|anthropic)\//;
+const REASONING_DEFAULT = /^(openai|anthropic|nvidia)\//;
 
 // A model's own entry wins (null sends nothing); the default goes only to families known to accept effort "none".
 export const reasoningEffortFor = (settings, model) => {
@@ -78,6 +79,7 @@ export function createAi({ apiKey, model, reasoningEffort, provider = openRouter
         maxOutputTokens,
         tools,
         providerOptions,
+        experimental_transform: humanizeTransform(),
         onError: ({ error }) => {
           console.error("Chat stream failed", error);
           onError?.(error);
@@ -85,7 +87,7 @@ export function createAi({ apiKey, model, reasoningEffort, provider = openRouter
         onEnd: async (event) => {
           const call = event.toolCalls?.find((c) => c.toolName === "proposeRequest");
           await onFinish?.({
-            text: event.text,
+            text: humanize(event.text ?? ""),
             toolCall: call ? { toolName: call.toolName, input: call.input } : null,
             usage: toUsage(event.totalUsage ?? event.usage, reportedCostUsd(event.steps)),
           });
