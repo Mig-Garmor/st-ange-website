@@ -52,7 +52,15 @@ export const chatServerSettings = {
   maxOutputTokens: 150,
   dailyCapEur: Number(process.env.CHAT_DAILY_CAP_EUR ?? 5),
   // OpenAI standard-tier USD per 1M tokens, read 2026-11-04 from developers.openai.com/api/docs/pricing.
-  models: { "gpt-6-luna": { inputUsd: 0.1, cachedInputUsd: 0.01, outputUsd: 0.5, reasoningEffort: "none" } },
+  models: {
+    "gpt-6-luna": {
+      inputUsd: 0.1,
+      cachedInputUsd: 0.01,
+      cacheWriteUsd: 0.125,
+      outputUsd: 0.5,
+      reasoningEffort: "none",
+    },
+  },
   // ECB reference rate for 2026-11-04: 1 EUR = 1.1267 USD.
   eurPerUsd: 0.8875,
   copy: {

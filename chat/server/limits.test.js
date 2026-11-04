@@ -31,6 +31,45 @@ describe("cost", () => {
   });
 });
 
+describe("cache write cost", () => {
+  it("charges cache writes at cacheWriteUsd and only the rest of the input at inputUsd", () => {
+    const price = { inputUsd: 1, cachedInputUsd: 0.1, cacheWriteUsd: 1.25, outputUsd: 2 };
+    const usage = { inputTokens: 1_000_000, cachedInputTokens: 300_000, cacheWriteTokens: 500_000, outputTokens: 0 };
+    expect(costEur(usage, price, 1)).toBeCloseTo(0.2 * 1 + 0.3 * 0.1 + 0.5 * 1.25, 10);
+  });
+
+  it("charges cache writes at inputUsd when cacheWriteUsd is absent", () => {
+    const price = { inputUsd: 1, cachedInputUsd: 0.1, outputUsd: 2 };
+    const usage = { inputTokens: 1_000_000, cacheWriteTokens: 400_000 };
+    expect(costEur(usage, price, 1)).toBeCloseTo(1, 10);
+  });
+
+  it("never charges negative uncached input", () => {
+    const price = { inputUsd: 1, cachedInputUsd: 0.1, cacheWriteUsd: 1.25, outputUsd: 2 };
+    const usage = { inputTokens: 100, cachedInputTokens: 100, cacheWriteTokens: 100 };
+    expect(costEur(usage, price, 1)).toBeCloseTo((100 * 0.1 + 100 * 1.25) / 1e6, 12);
+  });
+
+  it("recordUsage prices cache writes but keeps the addUsage fields", async () => {
+    const db = fakeDb();
+    const priced = { ...settings, models: { m: { inputUsd: 1, cachedInputUsd: 0.5, cacheWriteUsd: 4, outputUsd: 2 } } };
+    await recordUsage({
+      db, email: { send: vi.fn() }, settings: priced, model: "m",
+      usage: { inputTokens: 1_000_000, cachedInputTokens: 0, cacheWriteTokens: 1_000_000, outputTokens: 0 }, now,
+    });
+    const arg = db.addUsage.mock.calls[0][0];
+    expect(arg.costEur).toBeCloseTo(4 * 0.5, 10);
+    expect(arg).not.toHaveProperty("cacheWriteTokens");
+  });
+
+  it("a non-finite cacheWriteUsd throws before recording", async () => {
+    const db = fakeDb();
+    const bad = { ...settings, models: { m: { inputUsd: 1, cachedInputUsd: 0.5, cacheWriteUsd: NaN, outputUsd: 2 } } };
+    await expect(recordUsage({ db, email: { send: vi.fn() }, settings: bad, model: "m", usage, now })).rejects.toThrow();
+    expect(db.addUsage).not.toHaveBeenCalled();
+  });
+});
+
 describe("cost defaults", () => {
   it("costEur with no cachedInputTokens charges all input at the input price", () => {
     const price = { inputUsd: 1, cachedInputUsd: 0.1, outputUsd: 2 };

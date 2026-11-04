@@ -37,6 +37,7 @@ const fakeDb = (over = {}) => ({
   pauseChat: vi.fn(async () => true),
   dayStats: vi.fn(async () => ({ messages: 1, visitors: 1 })),
   userMessagesLastHour: vi.fn(async () => 0),
+  getConversation: vi.fn(async () => null),
   ensureConversation: vi.fn(async ({ verified }) => ({ id: ID, verifiedAt: verified ? new Date() : null, messageCount: 0 })),
   saveMessage: vi.fn(async () => {}),
   getMessages: vi.fn(async () => stored),
@@ -68,7 +69,9 @@ const body = (over = {}) => ({
   ...over,
 });
 
-const setup = ({ db = fakeDb(), ai = fakeAi(), verify = true, model = "m", ipSalt = "salt" } = {}) => {
+const existing = (verifiedAt) => vi.fn(async () => ({ id: ID, verifiedAt, messageCount: 3 }));
+
+const setup = ({ db = fakeDb(), ai = fakeAi(), verify = true, model = "m", ipSalt = "salt", waitUntil } = {}) => {
   const email = { send: vi.fn(async () => {}) };
   const turnstile = { verify: vi.fn(async () => verify) };
   const handler = createChatHandler(settings, {
@@ -78,6 +81,7 @@ const setup = ({ db = fakeDb(), ai = fakeAi(), verify = true, model = "m", ipSal
     turnstile,
     ipSalt,
     model,
+    waitUntil,
     now: () => new Date("2026-11-04T15:00:00Z"),
   });
   return { handler, db, ai, email, turnstile };
@@ -104,30 +108,55 @@ describe("createChatHandler", () => {
     expect(db.saveMessage).not.toHaveBeenCalled();
   });
 
-  it("new conversation without a valid turnstile token is 403", async () => {
+  it("new conversation without a valid turnstile token is 403 and inserts nothing", async () => {
     const { handler, ai, db, turnstile } = setup({ verify: false });
     const res = await handler(post(body()));
     expect(res.status).toBe(403);
+    expect(db.getConversation).toHaveBeenCalledWith(ID);
     expect(turnstile.verify).toHaveBeenCalledWith("token", "203.0.113.9");
-    expect(db.ensureConversation).toHaveBeenCalledWith(expect.objectContaining({ verified: false }));
+    expect(db.ensureConversation).not.toHaveBeenCalled();
     expect(ai.streamReply).not.toHaveBeenCalled();
   });
 
+  it("new conversation without a token is 403 and inserts nothing", async () => {
+    const { handler, db, turnstile } = setup();
+    expect((await handler(post(body({ turnstileToken: undefined })))).status).toBe(403);
+    expect(turnstile.verify).not.toHaveBeenCalled();
+    expect(db.ensureConversation).not.toHaveBeenCalled();
+  });
+
+  it("new conversation with a valid token is inserted as verified", async () => {
+    const { handler, db, ai } = setup();
+    expect((await handler(post(body()))).status).toBe(200);
+    expect(db.ensureConversation).toHaveBeenCalledWith(expect.objectContaining({ id: ID, visitorId: "visitor-1", verified: true }));
+    expect(ai.streamReply).toHaveBeenCalledOnce();
+  });
+
   it("existing unverified conversation is 403", async () => {
-    const db = fakeDb({ ensureConversation: vi.fn(async () => ({ id: ID, verifiedAt: null, messageCount: 3 })) });
-    const { handler, ai } = setup({ db });
+    const db = fakeDb({ getConversation: existing(null) });
+    const { handler, ai, turnstile } = setup({ db });
     expect((await handler(post(body()))).status).toBe(403);
+    expect(turnstile.verify).not.toHaveBeenCalled();
+    expect(db.ensureConversation).not.toHaveBeenCalled();
     expect(ai.streamReply).not.toHaveBeenCalled();
     expect(db.saveMessage).not.toHaveBeenCalled();
   });
 
-  it("existing verified conversation needs no token", async () => {
-    const db = fakeDb({ ensureConversation: vi.fn(async () => ({ id: ID, verifiedAt: new Date(), messageCount: 3 })) });
+  it("existing verified conversation does not call turnstile", async () => {
+    const db = fakeDb({ getConversation: existing(new Date()) });
     const { handler, ai, turnstile } = setup({ db });
-    const res = await handler(post(body({ turnstileToken: undefined })));
+    const res = await handler(post(body()));
     expect(res.status).toBe(200);
     expect(turnstile.verify).not.toHaveBeenCalled();
+    expect(db.ensureConversation).not.toHaveBeenCalled();
     expect(ai.streamReply).toHaveBeenCalledOnce();
+  });
+
+  it("limits use the existing conversation's message count", async () => {
+    const db = fakeDb({ getConversation: vi.fn(async () => ({ id: ID, verifiedAt: new Date(), messageCount: 20 })) });
+    const { handler, ai } = setup({ db });
+    expect(await (await handler(post(body()))).text()).toContain(COPY.limit);
+    expect(ai.streamReply).not.toHaveBeenCalled();
   });
 
   it("501 characters returns the limit copy and saves nothing", async () => {
@@ -290,6 +319,43 @@ describe("createChatHandler", () => {
       expect(ai.streamReply).not.toHaveBeenCalled();
       expect(db.saveMessage).not.toHaveBeenCalled();
     }
+    error.mockRestore();
+  });
+
+  it("keeps the function alive until the finish callback settles", async () => {
+    const waitUntil = vi.fn();
+    const { handler, ai, db } = setup({ waitUntil });
+    await handler(post(body()));
+    expect(waitUntil).toHaveBeenCalledOnce();
+    let settled = false;
+    waitUntil.mock.calls[0][0].then(() => (settled = true));
+    await Promise.resolve();
+    expect(settled).toBe(false);
+    await ai.streamReply.mock.calls[0][0].onFinish({ text: "Hi", toolCall: null, usage: {} });
+    await vi.waitFor(() => expect(settled).toBe(true));
+    expect(db.addUsage).toHaveBeenCalled();
+  });
+
+  it("a stream error also settles the waitUntil promise", async () => {
+    const waitUntil = vi.fn();
+    const { handler, ai } = setup({ waitUntil });
+    await handler(post(body()));
+    let settled = false;
+    waitUntil.mock.calls[0][0].then(() => (settled = true));
+    ai.streamReply.mock.calls[0][0].onError(new Error("boom"));
+    await vi.waitFor(() => expect(settled).toBe(true));
+  });
+
+  it("streamReply throwing settles the waitUntil promise", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const waitUntil = vi.fn();
+    const ai = fakeAi({ streamReply: vi.fn(() => { throw new Error("no key"); }) });
+    const { handler } = setup({ ai, waitUntil });
+    await handler(post(body()));
+    expect(waitUntil).toHaveBeenCalledOnce();
+    let settled = false;
+    waitUntil.mock.calls[0][0].then(() => (settled = true));
+    await vi.waitFor(() => expect(settled).toBe(true));
     error.mockRestore();
   });
 });

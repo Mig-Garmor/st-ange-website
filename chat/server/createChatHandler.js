@@ -34,7 +34,10 @@ function notice(state, text) {
   return createUIMessageStreamResponse({ stream });
 }
 
-export function createChatHandler(settings, { db, ai, email, turnstile, ipSalt, model, now = () => new Date() }) {
+export function createChatHandler(
+  settings,
+  { db, ai, email, turnstile, ipSalt, model, waitUntil = () => {}, now = () => new Date() },
+) {
   const { site, copy } = settings;
   const tools = { proposeRequest: createProposeRequest(settings.services.map((s) => s.slug)) };
   const unavailable = () => notice("error", copy.unavailable);
@@ -62,9 +65,12 @@ export function createChatHandler(settings, { db, ai, email, turnstile, ipSalt, 
       const ipHash = hashIp(ip, ipSalt);
       if (!(await isAvailable({ db, settings, now: now() }))) return notice("offline", copy.offline);
 
-      const verified = turnstileToken ? await turnstile.verify(turnstileToken, ip) : false;
-      const conversation = await db.ensureConversation({ site, id, visitorId, pageUrl, ipHash, verified });
-      if (!conversation.verifiedAt) return Response.json({ error: "Verification failed" }, { status: 403 });
+      let conversation = await db.getConversation(id);
+      if (!conversation) {
+        const verified = Boolean(turnstileToken) && (await turnstile.verify(turnstileToken, ip));
+        if (verified) conversation = await db.ensureConversation({ site, id, visitorId, pageUrl, ipHash, verified });
+      }
+      if (!conversation?.verifiedAt) return Response.json({ error: "Verification failed" }, { status: 403 });
 
       const limits = await checkLimits({ db, settings, conversation, ipHash, text });
       if (!limits.ok) return notice("limit", copy.limit);
@@ -91,6 +97,9 @@ export function createChatHandler(settings, { db, ai, email, turnstile, ipSalt, 
     }
     const { stable, variable } = buildInstructions(settings, { playbooks, now: now(), pageUrl });
 
+    let settle;
+    waitUntil(new Promise((resolve) => (settle = resolve)));
+
     const onFinish = async ({ text: reply, toolCall, usage }) => {
       try {
         if (reply) await db.saveMessage({ site, conversationId: id, role: "assistant", content: reply });
@@ -105,6 +114,8 @@ export function createChatHandler(settings, { db, ai, email, turnstile, ipSalt, 
         await recordUsage({ db, email, settings, model, usage, now: now() });
       } catch (error) {
         console.error("Chat usage record failed", error);
+      } finally {
+        settle();
       }
     };
 
@@ -115,10 +126,12 @@ export function createChatHandler(settings, { db, ai, email, turnstile, ipSalt, 
         maxOutputTokens: settings.maxOutputTokens,
         tools,
         onFinish,
+        onError: settle,
         errorText: copy.unavailable,
       });
     } catch (error) {
       console.error("Chat AI failed", error);
+      settle();
       return unavailable();
     }
   };

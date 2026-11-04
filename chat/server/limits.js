@@ -22,8 +22,9 @@ export async function checkLimits({ db, settings, conversation, ipHash, text }) 
 const chicagoTime = (now, timeZone) =>
   new Intl.DateTimeFormat("en-US", { timeZone, dateStyle: "medium", timeStyle: "short" }).format(now);
 
+const finite = (n) => typeof n === "number" && Number.isFinite(n);
 const validPrice = (p) =>
-  p && [p.inputUsd, p.cachedInputUsd, p.outputUsd].every((n) => typeof n === "number" && Number.isFinite(n));
+  p && [p.inputUsd, p.cachedInputUsd, p.outputUsd].every(finite) && (p.cacheWriteUsd === undefined || finite(p.cacheWriteUsd));
 
 export async function recordUsage({ db, email, settings, model, usage: rawUsage, now }) {
   const price = settings.models[model];

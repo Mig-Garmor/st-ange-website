@@ -9,6 +9,11 @@ export function conversationsDb(sql) {
       return { id: row.id, verifiedAt: row.verified_at, messageCount: row.message_count };
     },
 
+    async getConversation(id) {
+      const [row] = await sql`select id, verified_at, message_count from conversations where id = ${id}`;
+      return row ? { id: row.id, verifiedAt: row.verified_at, messageCount: row.message_count } : null;
+    },
+
     async saveMessage({ site, conversationId, role, content }) {
       const insert = sql`insert into messages (site, conversation_id, role, content) values (${site}, ${conversationId}, ${role}, ${content})`;
       if (role !== "user") return void (await insert);

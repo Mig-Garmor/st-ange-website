@@ -1,3 +1,4 @@
+import { waitUntil } from "@vercel/functions";
 import { createAi } from "../chat/server/ai.js";
 import { createChatHandler } from "../chat/server/createChatHandler.js";
 import { createTurnstile } from "../chat/server/turnstile.js";
@@ -28,6 +29,7 @@ export async function POST(request) {
     turnstile: createTurnstile({ secret: process.env.TURNSTILE_SECRET_KEY }),
     ipSalt: process.env.IP_HASH_SALT,
     model,
+    waitUntil,
   });
   return handler(request);
 }

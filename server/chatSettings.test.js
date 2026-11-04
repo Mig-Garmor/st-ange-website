@@ -32,7 +32,7 @@ describe("chatServerSettings", () => {
 
   it("prices the default chat model", () => {
     const price = chatServerSettings.models["gpt-6-luna"];
-    expect(price).toMatchObject({ inputUsd: 0.1, cachedInputUsd: 0.01, outputUsd: 0.5 });
+    expect(price).toMatchObject({ inputUsd: 0.1, cachedInputUsd: 0.01, cacheWriteUsd: 0.125, outputUsd: 0.5 });
     expect(chatServerSettings.eurPerUsd).toBeGreaterThan(0);
   });
 });

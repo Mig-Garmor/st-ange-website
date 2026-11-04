@@ -5,6 +5,7 @@ import { z } from "zod";
 export const toUsage = (usage = {}) => ({
   inputTokens: usage.inputTokens,
   cachedInputTokens: usage.inputTokenDetails?.cacheReadTokens,
+  cacheWriteTokens: usage.inputTokenDetails?.cacheWriteTokens,
   outputTokens: usage.outputTokens,
 });
 
@@ -27,7 +28,7 @@ export function createAi({ apiKey, model, cacheKey, reasoningEffort, provider = 
   const openai = { promptCacheKey: cacheKey, ...(reasoningEffort && { reasoningEffort }) };
 
   return {
-    streamReply({ system, messages, maxOutputTokens, tools, onFinish, errorText }) {
+    streamReply({ system, messages, maxOutputTokens, tools, onFinish, onError, errorText }) {
       const result = streamText({
         model: provider(model),
         instructions: system,
@@ -35,15 +36,21 @@ export function createAi({ apiKey, model, cacheKey, reasoningEffort, provider = 
         maxOutputTokens,
         tools,
         providerOptions: { openai },
+        onError: ({ error }) => {
+          console.error("Chat stream failed", error);
+          onError?.(error);
+        },
         onEnd: async (event) => {
           const call = event.toolCalls?.find((c) => c.toolName === "proposeRequest");
           await onFinish?.({
             text: event.text,
             toolCall: call ? { toolName: call.toolName, input: call.input } : null,
-            usage: toUsage(event.usage),
+            usage: toUsage(event.totalUsage ?? event.usage),
           });
         },
       });
+      // Without this, a client disconnect stops the stream before onEnd, so billed tokens are never recorded.
+      result.consumeStream();
       return result.toUIMessageStreamResponse(errorText ? { onError: () => errorText } : undefined);
     },
 

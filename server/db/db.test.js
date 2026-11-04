@@ -60,6 +60,21 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("data access", () => {
     expect(usage.calls).toBe(10);
   });
 
+  it("getConversation returns null for an unknown id and never inserts", async () => {
+    const id = randomUUID();
+    expect(await db.getConversation(id)).toBeNull();
+    expect(await sql`select id from conversations where id = ${id}`).toHaveLength(0);
+  });
+
+  it("getConversation returns the verification and message count", async () => {
+    const verified = await newConversation({ verified: true });
+    await db.saveMessage({ site, conversationId: verified.id, role: "user", content: "q" });
+    const found = await db.getConversation(verified.id);
+    expect(found).toMatchObject({ id: verified.id, messageCount: 1 });
+    expect(found.verifiedAt).toBeInstanceOf(Date);
+    expect((await db.getConversation((await newConversation()).id)).verifiedAt).toBeNull();
+  });
+
   it("saveMessage counts only user messages", async () => {
     const conv = await newConversation();
     await db.saveMessage({ site, conversationId: conv.id, role: "user", content: "q" });
