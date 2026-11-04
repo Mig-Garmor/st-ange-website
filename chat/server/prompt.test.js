@@ -75,4 +75,18 @@ describe("buildInstructions", () => {
     const { variable } = buildInstructions(settings, { playbooks: [], now: new Date(iso), pageUrl: "/" });
     expect(variable).toContain(expected);
   });
+
+  it("asks for email and a US phone, names the local area codes, and treats the page as context", () => {
+    const { stable } = buildInstructions({ ...settings, localAreaCodes: ["281", "832", "346", "713"] }, { now: monday10, pageUrl: "/" });
+    expect(stable).toContain("ask for their name, phone, email and vehicle");
+    expect(stable).not.toContain("email is optional");
+    expect(stable).toContain("Baytown numbers start with 281, 832, 346 or 713");
+    expect(stable).toContain("needs a US number");
+    expect(stable).toContain("The current page is only context");
+    expect(stable).toContain("Only the proposeRequest tool shows the request card");
+    expect(stable).not.toContain("Here are your details");
+    expect(stable).not.toMatch(/[\u2013\u2014]/);
+    const without = buildInstructions(settings, { now: monday10, pageUrl: "/" }).stable;
+    expect(without).toContain("ask for the area code.");
+  });
 });

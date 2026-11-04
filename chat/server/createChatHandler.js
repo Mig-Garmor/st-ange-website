@@ -7,6 +7,10 @@ import { buildInstructions } from "./prompt.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const HISTORY = 20;
+const NOTE = /^\[[^\]]*\]$/;
+const CARD_NOTE = /^\[Request card shown/;
+const SENT_NOTE = /^\[Request sent/;
+const CLAIMS_CARD = /tap (the )?send request|send request (button|below)/i;
 
 const textOf = (message) =>
   (message?.parts ?? [])
@@ -37,10 +41,10 @@ function notice(state, text) {
 
 export function createChatHandler(
   settings,
-  { db, ai, email, turnstile, ipSalt, model, waitUntil = () => {}, now = () => new Date(), settleTimeoutMs = 30_000 },
+  { db, ai, email, turnstile, ipSalt, model, validateLead, waitUntil = () => {}, now = () => new Date(), settleTimeoutMs = 30_000 },
 ) {
   const { site, copy } = settings;
-  const tools = { proposeRequest: createProposeRequest(settings.services.map((s) => s.slug)) };
+  const tools = { proposeRequest: createProposeRequest(settings.services.map((s) => s.slug), { validateLead }) };
   const unavailable = () => notice("error", copy.unavailable);
 
   return async function handleChat(request) {
@@ -99,7 +103,13 @@ export function createChatHandler(
         stored = null;
       }
     }
-    const history = stored ? stored.slice(-HISTORY) : clientHistory(messages);
+    // Bracketed notes are for transcripts; the model copied them verbatim, so it gets them as context instead.
+    const history = stored ? stored.filter((m) => m.role !== "assistant" || !NOTE.test(m.content)).slice(-HISTORY) : clientHistory(messages);
+    const cardShown = Boolean(stored?.some((m) => m.role === "assistant" && CARD_NOTE.test(m.content)));
+    const earlier = [
+      cardShown && "A request card was shown earlier in this chat.",
+      stored?.some((m) => m.role === "assistant" && SENT_NOTE.test(m.content)) && "The visitor already sent a request to the shop in this chat.",
+    ].filter(Boolean);
 
     let playbooks = [];
     try {
@@ -107,7 +117,7 @@ export function createChatHandler(
     } catch (error) {
       console.error("Chat playbooks failed", error);
     }
-    const { stable, variable } = buildInstructions(settings, { playbooks, now: now(), pageUrl });
+    const { stable, variable } = buildInstructions(settings, { playbooks, now: now(), pageUrl, earlier });
 
     let settle;
     const settled = new Promise((resolve) => (settle = resolve));
@@ -116,9 +126,12 @@ export function createChatHandler(
 
     const onFinish = async ({ text: reply, toolCall, usage }) => {
       try {
-        if (reply) await db.saveMessage({ site, conversationId: id, role: "assistant", content: reply });
-        if (toolCall) {
-          const line = `[Request card shown: ${toolCall.input?.service ?? "no service"}]`;
+        const deadEnd = !toolCall?.output?.ok && !cardShown && CLAIMS_CARD.test(reply ?? "");
+        // Unsaved, so a retry starts from the visitor's message instead of a card that never rendered.
+        if (deadEnd) console.warn("Chat reply pointed at a card that was not shown");
+        else if (reply) await db.saveMessage({ site, conversationId: id, role: "assistant", content: reply });
+        if (toolCall?.output?.ok) {
+          const line = `[Request card shown: ${toolCall.output.card?.service ?? "no service"}]`;
           await db.saveMessage({ site, conversationId: id, role: "assistant", content: line });
         }
       } catch (error) {

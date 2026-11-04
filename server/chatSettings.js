@@ -20,7 +20,9 @@ const servicePageKnowledge = (page) =>
     .filter(Boolean)
     .join("\n");
 
-const hoursText = business.hours.map((slot) => `${slot.label}: ${slot.display}`).join("; ");
+const hoursText = business.hours
+  .map((slot) => `${slot.label}: ${slot.display}`.replace(/\s*[–—]\s*/g, " to "))
+  .join("; ");
 
 const knowledge = `## Business knowledge
 
@@ -45,6 +47,7 @@ export const chatServerSettings = {
   site: "st-ange",
   timeZone: "America/Chicago",
   phoneDisplay: business.phone.display,
+  localAreaCodes: business.localAreaCodes,
   knowledge,
   featured,
   services: services.map(({ slug, name }) => ({ slug, name })),
@@ -53,12 +56,20 @@ export const chatServerSettings = {
   dailyCapEur: Number(process.env.CHAT_DAILY_CAP_EUR ?? 5),
   // OpenRouter reports each call's real cost, so this table is only a fallback for calls that report none.
   providerReportsCost: true,
-  // For openai/ and anthropic/ models, unless an entry sets its own reasoningEffort; keeps the 150-token budget for text.
+  // For openai/, anthropic/ and nvidia/ models, unless an entry sets its own reasoningEffort; keeps the 150-token budget for text.
   defaultReasoningEffort: "none",
   // OpenRouter USD per 1M tokens, read 2026-11-04 from openrouter.ai/api/v1/models.
   models: {
     "openai/gpt-6-luna": { inputUsd: 0.1, cachedInputUsd: 0.01, cacheWriteUsd: 0.125, outputUsd: 0.5 },
     "anthropic/claude-haiku-5.5": { inputUsd: 0.1, cachedInputUsd: 0.01, cacheWriteUsd: 0.125, outputUsd: 0.5 },
+    // Reasons by default; off so the 150-token budget goes to the reply. Prices for prompts under 32k tokens.
+    "qwen/qwen3.7-flash": {
+      inputUsd: 0.03,
+      cachedInputUsd: 0.006,
+      cacheWriteUsd: 0.038,
+      outputUsd: 0.13,
+      reasoningEffort: "none",
+    },
   },
   // ECB reference rate for 2026-11-04: 1 EUR = 1.1267 USD.
   eurPerUsd: 0.8875,

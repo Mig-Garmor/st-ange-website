@@ -271,24 +271,49 @@ describe("createChatHandler", () => {
     );
   });
 
-  it("onFinish with a tool call also saves the request-card line", async () => {
+  it("onFinish saves the request-card line only for an ok card, and records usage either way", async () => {
     const { handler, ai, db } = setup();
     await handler(post(body()));
     const { onFinish } = ai.streamReply.mock.calls[0][0];
-    db.saveMessage.mockClear();
-    await onFinish({
-      text: "Here is your request.",
-      toolCall: { toolName: "proposeRequest", input: { service: "brakes", name: "Ann" } },
-      usage: { inputTokens: 10, outputTokens: 5 },
+    const okCall = (service) => ({
+      toolName: "proposeRequest",
+      input: { service: "Brakes" },
+      output: { ok: true, card: { service, name: "Ann", phone: "832-555-0100", email: "a@b.co", vehicle: "Civic", notes: "" } },
     });
+    db.saveMessage.mockClear();
+    await onFinish({ text: "Here is your request.", toolCall: okCall("brakes"), usage: { inputTokens: 10, outputTokens: 5 } });
     expect(db.saveMessage.mock.calls.map(([m]) => m.content)).toEqual([
       "Here is your request.",
       "[Request card shown: brakes]",
     ]);
 
     db.saveMessage.mockClear();
-    await onFinish({ text: "", toolCall: { toolName: "proposeRequest", input: { service: null } }, usage: {} });
+    await onFinish({ text: "", toolCall: okCall(null), usage: {} });
     expect(db.saveMessage.mock.calls.map(([m]) => m.content)).toEqual(["[Request card shown: no service]"]);
+
+    db.saveMessage.mockClear();
+    db.addUsage.mockClear();
+    const invalid = { toolName: "proposeRequest", input: { service: "brakes" }, output: { ok: false, errors: { phone: "x" } } };
+    await onFinish({ text: "What's your US number?", toolCall: invalid, usage: { inputTokens: 20, outputTokens: 8 } });
+    expect(db.saveMessage.mock.calls.map(([m]) => m.content)).toEqual(["What's your US number?"]);
+    expect(db.addUsage).toHaveBeenCalledWith(expect.objectContaining({ inputTokens: 20, outputTokens: 8 }));
+
+    db.saveMessage.mockClear();
+    await onFinish({ text: "", toolCall: { toolName: "proposeRequest", input: { service: "brakes" }, output: null }, usage: {} });
+    expect(db.saveMessage).not.toHaveBeenCalled();
+  });
+
+  it("the proposeRequest tool validates with the injected validator", async () => {
+    const validateLead = vi.fn(() => ({ ok: false, errors: { phone: "bad" }, lead: {} }));
+    const ai = fakeAi();
+    await createChatHandler(settings, {
+      db: fakeDb(), ai, email: { send: vi.fn() }, turnstile: { verify: async () => true },
+      ipSalt: "salt", model: "m", validateLead, now: () => new Date("2026-11-04T15:00:00Z"),
+    })(post(body()));
+    const { tools } = ai.streamReply.mock.calls[0][0];
+    const result = await tools.proposeRequest.execute({ service: "brakes", name: "Ann", phone: "1", email: "a@b.co", vehicle: "Civic" });
+    expect(result).toMatchObject({ ok: false, errors: { phone: "bad" } });
+    expect(validateLead).toHaveBeenCalledWith(expect.objectContaining({ phone: "1" }), { requireVehicle: true, requireEmail: true });
   });
 
   it("onFinish logs errors instead of throwing, and still records usage", async () => {
@@ -303,6 +328,39 @@ describe("createChatHandler", () => {
     await expect(onFinish({ text: "Hi", toolCall: null, usage: {} })).resolves.toBeUndefined();
     expect(error).toHaveBeenCalled();
     error.mockRestore();
+  });
+
+  it("stored notes reach the model as context lines, not as assistant messages it could copy", async () => {
+    const withNotes = [
+      { role: "user", content: "Book alignment" },
+      { role: "assistant", content: "Here are your details." },
+      { role: "assistant", content: "[Request card shown: car-alignment]" },
+      { role: "assistant", content: "[Request sent to the shop]" },
+      { role: "user", content: "[sic] my brakes" },
+    ];
+    const db = fakeDb({ getMessages: vi.fn(async () => withNotes) });
+    const { handler, ai } = setup({ db });
+    await handler(post(body()));
+    const { messages: sent, system } = ai.streamReply.mock.calls[0][0];
+    expect(sent.map((m) => m.content)).toEqual(["Book alignment", "Here are your details.", "[sic] my brakes", "Brakes squeal"]);
+    expect(system[1]).toContain("A request card was shown earlier in this chat.");
+    expect(system[1]).toContain("The visitor already sent a request to the shop in this chat.");
+  });
+
+  it("a reply that points at a card that was never shown is not saved", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { handler, ai, db } = setup();
+    await handler(post(body()));
+    const { onFinish } = ai.streamReply.mock.calls[0][0];
+    db.saveMessage.mockClear();
+    await onFinish({ text: "Here are your details, tap Send request to confirm.", toolCall: null, usage: { inputTokens: 5, outputTokens: 5 } });
+    const failed = { toolName: "proposeRequest", input: {}, output: { ok: false, errors: { phone: "x" } } };
+    await onFinish({ text: "Tap Send request below.", toolCall: failed, usage: {} });
+    expect(db.saveMessage).not.toHaveBeenCalled();
+    expect(db.addUsage).toHaveBeenCalled();
+    await onFinish({ text: "Once that's fixed you can send requests any time.", toolCall: null, usage: {} });
+    expect(db.saveMessage).toHaveBeenCalledOnce();
+    warn.mockRestore();
   });
 
   it("system prompt is the stable part, then the variable part", async () => {

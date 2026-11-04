@@ -12,5 +12,6 @@ export const chatClientSettings = {
   localAnswers: { "Hours & location": hoursAndLocation },
   phoneDisplay: business.phone.display,
   phoneHref: business.phone.href,
+  localAreaCodes: business.localAreaCodes,
   services: services.map(({ slug, name }) => ({ slug, name })),
 };

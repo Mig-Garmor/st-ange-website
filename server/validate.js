@@ -1,7 +1,9 @@
-import { validateName, validateEmail } from "../src/modules/validate.js";
+import { isSevenDigits, missingAreaCode, validateName, validateEmail } from "../src/modules/validate.js";
 import { normalizePhone } from "./phone.js";
 
 const MAX_LENGTH = { name: 100, vehicle: 100, email: 200 };
+
+const phoneError = (phone) => (isSevenDigits(phone) ? missingAreaCode() : "Enter a 10-digit US phone number");
 
 export function validateLead({ name, phone, email, vehicle }, { requireVehicle = false, requireEmail = false } = {}) {
   const errors = {};
@@ -10,7 +12,7 @@ export function validateLead({ name, phone, email, vehicle }, { requireVehicle =
 
   const nameError = validateName(lead.name);
   if (nameError) errors.name = nameError;
-  if (!lead.phone) errors.phone = "Enter a 10-digit US phone number";
+  if (!lead.phone) errors.phone = phoneError(phone);
   if (lead.email || requireEmail) {
     const emailError = validateEmail(lead.email);
     if (emailError) errors.email = emailError;

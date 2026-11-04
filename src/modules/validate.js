@@ -1,3 +1,11 @@
+import { business } from "../config/business.js";
+
+const orList = (items) => (items.length > 1 ? `${items.slice(0, -1).join(", ")} or ${items.at(-1)}` : items.join(""));
+
+export const missingAreaCode = (codes = business.localAreaCodes) => `Add the area code (${orList(codes)})`;
+
+export const isSevenDigits = (phone) => String(phone ?? "").replace(/\D/g, "").length === 7;
+
 export function validateName(name) {
   return name.trim().length > 0 ? "" : "Name is required";
 }
@@ -8,6 +16,7 @@ export function validateEmail(email) {
 }
 
 export function validatePhone(phone) {
+  if (isSevenDigits(phone)) return missingAreaCode();
   const regex = /^\(?([0-9]{3})\)?[-.●]?([0-9]{3})[-.●]?([0-9]{4})$/;
   return regex.test(phone) ? "" : "Invalid phone number";
 }
