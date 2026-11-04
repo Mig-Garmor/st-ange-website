@@ -55,6 +55,8 @@ const year = new Date().getFullYear();
       © {{ year }} {{ business.name }}. All rights reserved.
       <span aria-hidden="true">·</span>
       <RouterLink to="/privacy">Privacy</RouterLink>
+      <span aria-hidden="true">·</span>
+      Deploy check 4 Nov 2026
     </p>
   </footer>
 </template>
