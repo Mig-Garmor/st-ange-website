@@ -66,12 +66,24 @@ watch(error, async (err) => {
   if (text) send(text);
 });
 
+const awayFromBottom = ref(false);
+
+function onLogScroll() {
+  const el = log.value;
+  if (el) awayFromBottom.value = el.scrollHeight - el.scrollTop - el.clientHeight > 80;
+}
+
+async function scrollToBottom(behavior = "auto") {
+  await nextTick();
+  const el = log.value;
+  if (!el) return;
+  el.scrollTo({ top: el.scrollHeight, behavior });
+  awayFromBottom.value = false;
+}
+
 watch(
   () => [messages.value.length, messages.value.at(-1)],
-  async () => {
-    await nextTick();
-    if (log.value) log.value.scrollTop = log.value.scrollHeight;
-  },
+  () => scrollToBottom(),
 );
 
 function send(text) {
@@ -107,7 +119,11 @@ function focusInput() {
 
 watch(
   () => props.open,
-  (open) => open && focusInput(),
+  (open) => {
+    if (!open) return;
+    scrollToBottom();
+    focusInput();
+  },
 );
 
 onMounted(() => {
@@ -115,7 +131,10 @@ onMounted(() => {
   if (!isVerified(messages.value)) turnstile.warm();
   if (hasUnsentFirstMessage(messages.value)) verifyFailed.value = true;
   emit("ready");
-  if (props.open) focusInput();
+  if (props.open) {
+    scrollToBottom();
+    focusInput();
+  }
 });
 
 onBeforeUnmount(() => turnstile?.remove());
@@ -141,7 +160,7 @@ onBeforeUnmount(() => turnstile?.remove());
       </button>
     </header>
 
-    <div ref="log" class="log" aria-live="polite">
+    <div ref="log" class="log" aria-live="polite" @scroll.passive="onLogScroll">
       <p class="bubble from-shop">{{ settings.greeting }}</p>
       <p class="notice">
         {{ settings.notice }}
@@ -203,6 +222,18 @@ onBeforeUnmount(() => turnstile?.remove());
       </div>
     </div>
 
+    <button
+      v-if="awayFromBottom"
+      type="button"
+      class="to-bottom"
+      aria-label="Jump to the latest message"
+      @click="scrollToBottom('smooth')"
+    >
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <path fill="currentColor" d="M12 16.6 5.4 10l1.4-1.4 5.2 5.2 5.2-5.2 1.4 1.4z" />
+      </svg>
+    </button>
+
     <div ref="challenge" class="challenge"></div>
 
     <form v-if="!verifyFailed" class="composer" @submit.prevent="submit">
@@ -242,6 +273,9 @@ onBeforeUnmount(() => turnstile?.remove());
 }
 .log {
   @apply flex flex-1 flex-col gap-2 overflow-y-auto bg-gray-50 p-3;
+}
+.to-bottom {
+  @apply absolute bottom-[4.5rem] right-4 grid h-9 w-9 place-items-center rounded-full bg-brand-navy text-white shadow-md hover:bg-brand-yellow hover:text-brand-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow;
 }
 .bubble {
   @apply max-w-[85%] whitespace-pre-wrap break-words rounded-lg px-3 py-2 text-[15px];
