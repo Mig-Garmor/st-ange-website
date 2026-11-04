@@ -5,7 +5,8 @@ import { DefaultChatTransport } from "ai";
 import RequestCard from "./RequestCard.vue";
 import { createTurnstile } from "./turnstile.js";
 import { loadSession, saveSession, visitorId } from "./storage.js";
-import { chatState, hasUnsentFirstMessage, isVerified, localExchange, textOf } from "./messages.js";
+import { okCard } from "./card.js";
+import { chatState, hasUnsentFirstMessage, isVerified, lastReplyMissing, localExchange, textOf } from "./messages.js";
 
 const props = defineProps({
   settings: { type: Object, required: true },
@@ -44,6 +45,7 @@ const { id, messages, status, error, sendMessage, regenerate, clearError } = use
 const busy = computed(() => status.value === "submitted" || status.value === "streaming");
 const unavailable = computed(() => `Chat is unavailable right now. Call us at ${props.settings.phoneDisplay}.`);
 const failed = computed(() => status.value === "error" && !verifyFailed.value);
+const noReply = computed(() => status.value === "ready" && !verifyFailed.value && lastReplyMissing(messages.value));
 
 watch([id, messages, status], () => {
   if (status.value !== "streaming") saveSession({ id: id.value, messages: messages.value });
@@ -191,7 +193,7 @@ onBeforeUnmount(() => turnstile?.remove());
               {{ part.text }}
             </p>
             <RequestCard
-              v-else-if="part.type === 'tool-proposeRequest' && part.state !== 'input-streaming' && part.input"
+              v-else-if="okCard(part)"
               :proposal="part"
               :conversation-id="id"
               :services="settings.services"
@@ -208,6 +210,13 @@ onBeforeUnmount(() => turnstile?.remove());
 
       <div v-if="verifyFailed" class="state-view" role="alert">
         <p>We couldn't start the chat. Please try again.</p>
+        <div class="state-links">
+          <button type="button" class="call" @click="retry">Try again</button>
+          <a :href="settings.phoneHref" class="quote">Call {{ settings.phoneDisplay }}</a>
+        </div>
+      </div>
+      <div v-else-if="noReply" class="state-view" role="status">
+        <p>Sorry, that didn't come through.</p>
         <div class="state-links">
           <button type="button" class="call" @click="retry">Try again</button>
           <a :href="settings.phoneHref" class="quote">Call {{ settings.phoneDisplay }}</a>
@@ -272,7 +281,7 @@ onBeforeUnmount(() => turnstile?.remove());
   @apply rounded-full p-1 text-white hover:text-brand-yellow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow;
 }
 .log {
-  @apply flex flex-1 flex-col gap-2 overflow-y-auto bg-gray-50 p-3;
+  @apply flex flex-1 flex-col gap-2 overflow-y-auto overscroll-contain bg-gray-50 p-3;
 }
 .to-bottom {
   @apply absolute bottom-[4.5rem] right-4 grid h-9 w-9 place-items-center rounded-full bg-brand-navy text-white shadow-md hover:bg-brand-yellow hover:text-brand-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow;

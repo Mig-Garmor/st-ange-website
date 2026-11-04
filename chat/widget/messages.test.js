@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasUnsentFirstMessage, isLocal, isVerified, localExchange, textOf } from "./messages.js";
+import { hasUnsentFirstMessage, isLocal, isVerified, lastReplyMissing, localExchange, textOf } from "./messages.js";
 
 const user = (text) => ({ role: "user", parts: [{ type: "text", text }] });
 const reply = (text) => ({ role: "assistant", parts: [{ type: "text", text }] });
@@ -42,5 +42,26 @@ describe("widget messages", () => {
     expect(hasUnsentFirstMessage(local)).toBe(false);
     expect(hasUnsentFirstMessage([...local, user("my brakes squeal")])).toBe(true);
     expect(isVerified([...local, user("my brakes squeal"), reply("Sorry to hear")])).toBe(true);
+  });
+
+  it("lastReplyMissing when a verified chat ends without anything the visitor can see", () => {
+    const cardPart = (output) => ({ type: "tool-proposeRequest", toolCallId: "t1", state: "output-available", input: {}, output });
+    const card = { service: null, name: "Ann", phone: "832-555-0100", email: "a@b.co", vehicle: "Civic", notes: "" };
+    const verified = [user("hi"), reply("Hello")];
+    expect(lastReplyMissing([...verified, user("brakes")])).toBe(true);
+    expect(lastReplyMissing([...verified, user("brakes"), { role: "assistant", parts: [] }])).toBe(true);
+    expect(lastReplyMissing([...verified, user("brakes"), reply("  ")])).toBe(true);
+    expect(lastReplyMissing([...verified, user("book"), { role: "assistant", parts: [cardPart({ ok: false, errors: { phone: "x" } })] }])).toBe(true);
+    expect(lastReplyMissing([...verified, user("book"), { role: "assistant", parts: [cardPart({ ok: true, card })] }])).toBe(false);
+    expect(lastReplyMissing([...verified, user("book"), { role: "assistant", parts: [cardPart({ ok: false, errors: {} }), { type: "text", text: "Your US number?" }] }])).toBe(false);
+    expect(lastReplyMissing(verified)).toBe(false);
+    const claim = { type: "text", text: "Here are your details, tap Send request to confirm." };
+    expect(lastReplyMissing([...verified, user("832-572-7121"), { role: "assistant", parts: [claim] }])).toBe(true);
+    expect(lastReplyMissing([...verified, user("832-572-7121"), { role: "assistant", parts: [cardPart({ ok: false, errors: {} }), claim] }])).toBe(true);
+    expect(lastReplyMissing([...verified, user("832-572-7121"), { role: "assistant", parts: [cardPart({ ok: true, card }), claim] }])).toBe(false);
+    const earlier = { role: "assistant", parts: [cardPart({ ok: true, card })] };
+    expect(lastReplyMissing([...verified, user("book"), earlier, user("ok?"), { role: "assistant", parts: [claim] }])).toBe(false);
+    expect(lastReplyMissing([user("hi")])).toBe(false);
+    expect(lastReplyMissing([])).toBe(false);
   });
 });

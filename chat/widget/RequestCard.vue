@@ -1,5 +1,6 @@
 <script setup>
 import { computed, reactive, ref, useId } from "vue";
+import { fieldError, initialForm, okCard } from "./card.js";
 
 const props = defineProps({
   proposal: { type: Object, required: true },
@@ -9,12 +10,14 @@ const props = defineProps({
   phoneHref: { type: String, required: true },
 });
 
-const FIELDS = ["service", "name", "phone", "email", "vehicle", "notes"];
-const str = (v) => (typeof v === "string" ? v : "");
-
-const input = props.proposal.input ?? {};
-const form = reactive(Object.fromEntries(FIELDS.map((f) => [f, str(input[f])])));
+const form = reactive(initialForm(okCard(props.proposal)));
 const errors = reactive({});
+
+function check(field) {
+  const message = fieldError(field, form[field]);
+  if (message) errors[field] = message;
+  else delete errors[field];
+}
 const editing = ref(false);
 const status = ref("");
 const uid = useId();
@@ -25,9 +28,15 @@ const serviceName = computed(
   () => props.services.find((s) => s.slug === form.service)?.name ?? "Not sure yet",
 );
 const locked = computed(() => status.value === "sending" || status.value === "sent");
+const invalid = computed(() => Object.keys(errors).length > 0);
 
 async function send() {
   if (locked.value) return;
+  for (const field of ["name", "phone", "email", "vehicle"]) check(field);
+  if (invalid.value) {
+    editing.value = true;
+    return;
+  }
   status.value = "sending";
   for (const key of Object.keys(errors)) delete errors[key];
   try {
@@ -62,30 +71,30 @@ async function send() {
 
     <form v-if="editing && !locked" class="fields" novalidate @submit.prevent="send">
       <label :for="`${uid}-service`">Service</label>
-      <select :id="`${uid}-service`" v-model="form.service">
+      <select :id="`${uid}-service`" v-model="form.service" @change="check('service')">
         <option value="">Not sure yet</option>
         <option v-for="service in services" :key="service.slug" :value="service.slug">{{ service.name }}</option>
       </select>
       <p v-if="errors.service" class="error">{{ errors.service }}</p>
 
       <label :for="`${uid}-name`">Name</label>
-      <input :id="`${uid}-name`" v-model="form.name" autocomplete="name" :aria-invalid="!!errors.name" />
+      <input :id="`${uid}-name`" v-model="form.name" @input="check('name')" autocomplete="name" :aria-invalid="!!errors.name" />
       <p v-if="errors.name" class="error">{{ errors.name }}</p>
 
       <label :for="`${uid}-phone`">Phone</label>
-      <input :id="`${uid}-phone`" v-model="form.phone" type="tel" autocomplete="tel" :aria-invalid="!!errors.phone" />
+      <input :id="`${uid}-phone`" v-model="form.phone" @input="check('phone')" type="tel" autocomplete="tel" :aria-invalid="!!errors.phone" />
       <p v-if="errors.phone" class="error">{{ errors.phone }}</p>
 
-      <label :for="`${uid}-email`">Email (optional)</label>
-      <input :id="`${uid}-email`" v-model="form.email" type="email" autocomplete="email" :aria-invalid="!!errors.email" />
+      <label :for="`${uid}-email`">Email</label>
+      <input :id="`${uid}-email`" v-model="form.email" @input="check('email')" type="email" autocomplete="email" :aria-invalid="!!errors.email" />
       <p v-if="errors.email" class="error">{{ errors.email }}</p>
 
       <label :for="`${uid}-vehicle`">Vehicle</label>
-      <input :id="`${uid}-vehicle`" v-model="form.vehicle" :aria-invalid="!!errors.vehicle" />
+      <input :id="`${uid}-vehicle`" v-model="form.vehicle" @input="check('vehicle')" :aria-invalid="!!errors.vehicle" />
       <p v-if="errors.vehicle" class="error">{{ errors.vehicle }}</p>
 
       <label :for="`${uid}-notes`">Notes</label>
-      <textarea :id="`${uid}-notes`" v-model="form.notes" rows="3"></textarea>
+      <textarea :id="`${uid}-notes`" v-model="form.notes" @input="check('notes')" rows="3"></textarea>
       <p v-if="errors.notes" class="error">{{ errors.notes }}</p>
     </form>
 
@@ -108,7 +117,7 @@ async function send() {
       <button type="button" class="send" :disabled="locked" @click="send">
         {{ status === "sending" ? "Sending…" : "Send request" }}
       </button>
-      <button type="button" class="edit" :disabled="locked" @click="editing = !editing">
+      <button type="button" class="edit" :disabled="locked || (editing && invalid)" @click="editing = !editing">
         {{ editing ? "Done" : "Edit" }}
       </button>
     </div>
