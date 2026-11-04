@@ -137,7 +137,15 @@ watch(
   },
 );
 
+// Starts hidden and is shown a frame later, so the first open animates like every other.
+const shown = ref(false);
+watch(
+  () => props.open,
+  (open) => (shown.value = open),
+);
+
 onMounted(() => {
+  requestAnimationFrame(() => requestAnimationFrame(() => (shown.value = props.open)));
   turnstile = createTurnstile(challenge.value, props.settings.turnstileSiteKey);
   if (!isVerified(messages.value)) turnstile.warm();
   if (hasUnsentFirstMessage(messages.value)) verifyFailed.value = true;
@@ -154,6 +162,8 @@ onBeforeUnmount(() => turnstile?.remove());
 <template>
   <section
     class="chat-panel"
+    :class="{ 'is-open': shown }"
+    :aria-hidden="!shown"
     role="dialog"
     aria-modal="false"
     aria-labelledby="chat-panel-title"
@@ -275,11 +285,42 @@ onBeforeUnmount(() => turnstile?.remove());
 .chat-panel {
   @apply fixed inset-x-2 top-2 z-[1000] flex flex-col overflow-hidden rounded-lg border-2 border-brand-navy bg-white shadow-[0_8px_24px_rgba(0,0,0,0.25)];
   bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px) + 0.5rem);
+  @apply pointer-events-none invisible opacity-0;
+  transform: translateY(16px);
+  transition:
+    opacity 150ms ease-in,
+    transform 150ms ease-in,
+    visibility 0s linear 150ms;
+}
+.chat-panel.is-open {
+  @apply pointer-events-auto visible opacity-100;
+  transform: none;
+  transition:
+    opacity 200ms ease-out,
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    visibility 0s linear 0s;
 }
 @media (min-width: 768px) {
   .chat-panel {
     @apply inset-x-auto top-auto right-4 bottom-4 w-[22rem];
     height: min(36rem, calc(100vh - 2rem));
+    transform-origin: bottom right;
+    transform: translateY(12px) scale(0.92);
+  }
+  .chat-panel.is-open {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-panel,
+  .chat-panel.is-open {
+    transform: none;
+    transition:
+      opacity 120ms linear,
+      visibility 0s linear 120ms;
+  }
+  .chat-panel.is-open {
+    transition: opacity 120ms linear;
   }
 }
 .head {
