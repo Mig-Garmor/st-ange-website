@@ -1,6 +1,7 @@
-import { business, fullAddress } from "@/config/business";
-import { relocationFaq } from "@/content/relocation";
-import { reviewSource } from "@/content/reviews";
+// Imported by server code in Node, so only relative imports work here.
+import { business, fullAddress } from "../config/business.js";
+import { relocationFaq } from "./relocation.js";
+import { reviewSource } from "./reviews.js";
 
 export const reasons = [
   {

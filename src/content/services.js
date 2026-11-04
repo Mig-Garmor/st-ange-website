@@ -1,4 +1,5 @@
-import { business, serviceZips, serviceZipsText, services } from "@/config/business";
+// Imported by server code in Node, so only relative imports work here.
+import { business, serviceZips, serviceZipsText, services } from "../config/business.js";
 
 const details = {
   "car-alignment": {
