@@ -131,6 +131,31 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("chat end to end against a real 
     expect(insight.insights_at).not.toBeNull();
   }, 60_000);
 
+  it("stores an unanswered first message once when it is re-sent after a reload", async () => {
+    const settings = makeSettings(`test-${randomUUID()}`);
+    const lost = { streamReply: vi.fn(async () => new Response("ok")) };
+    const turnstile = { verify: vi.fn(async () => true) };
+    const deps = { db, email: fakeEmail(), turnstile, ipSalt: "salt", model: MODEL, now: () => NOW };
+    const conversationId = randomUUID();
+    const send = (handler) =>
+      handler(
+        chatRequest({
+          id: conversationId,
+          visitorId: "visitor-1",
+          turnstileToken: "token",
+          messages: [{ id: "u1", role: "user", parts: [{ type: "text", text: "My brakes squeal" }] }],
+        }),
+      );
+
+    expect((await send(createChatHandler(settings, { ...deps, ai: lost }))).status).toBe(200);
+    expect((await send(createChatHandler(settings, { ...deps, ai: fakeAi() }))).status).toBe(200);
+    expect((await db.getMessages(conversationId)).map((m) => [m.role, m.content])).toEqual([
+      ["user", "My brakes squeal"],
+      ["assistant", "Happy to help with your brakes."],
+    ]);
+    expect((await db.getConversation(conversationId)).messageCount).toBe(1);
+  }, 60_000);
+
   it("pauses the chat once and alerts once when usage crosses the cap", async () => {
     const site = `test-${randomUUID()}`;
     const settings = makeSettings(site, { dailyCapEur: 0.0001 });

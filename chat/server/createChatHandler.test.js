@@ -40,7 +40,7 @@ const fakeDb = (over = {}) => ({
   getConversation: vi.fn(async () => null),
   ensureConversation: vi.fn(async ({ verified }) => ({ id: ID, verifiedAt: verified ? new Date() : null, messageCount: 0 })),
   saveMessage: vi.fn(async () => {}),
-  getMessages: vi.fn(async () => stored),
+  getMessages: vi.fn(async () => stored.slice(0, -1)),
   activePlaybooks: vi.fn(async () => []),
   ...over,
 });
@@ -195,6 +195,41 @@ describe("createChatHandler", () => {
     const { messages: sent } = ai.streamReply.mock.calls[0][0];
     expect(sent).toEqual(stored);
     expect(JSON.stringify(sent)).not.toContain("Forged");
+  });
+
+  it("does not store an unanswered first message twice when it is re-sent", async () => {
+    const db = fakeDb({ getMessages: vi.fn(async () => [{ role: "user", content: "Brakes squeal" }]) });
+    const { handler, ai } = setup({ db });
+    expect((await handler(post(body()))).status).toBe(200);
+    expect(db.saveMessage).not.toHaveBeenCalled();
+    expect(ai.streamReply.mock.calls[0][0].messages).toEqual([{ role: "user", content: "Brakes squeal" }]);
+  });
+
+  it("stores a repeated message once the earlier one was answered", async () => {
+    const db = fakeDb({ getMessages: vi.fn(async () => [{ role: "user", content: "Hi" }, { role: "assistant", content: "Hello" }]) });
+    const { handler, ai } = setup({ db });
+    await handler(post(body({ messages: [userMessage("Hi")] })));
+    expect(db.saveMessage).toHaveBeenCalledExactlyOnceWith({ site: "test-site", conversationId: ID, role: "user", content: "Hi" });
+    expect(ai.streamReply.mock.calls[0][0].messages.map((m) => m.content)).toEqual(["Hi", "Hello", "Hi"]);
+  });
+
+  it("still saves the user message when db.getMessages throws", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const db = fakeDb({ getMessages: vi.fn(async () => { throw new Error("db down"); }) });
+    const { handler, ai } = setup({ db });
+    await handler(post(body()));
+    expect(db.saveMessage).toHaveBeenCalledOnce();
+    expect(ai.streamReply.mock.calls[0][0].messages).toEqual([{ role: "user", content: "Brakes squeal" }]);
+    error.mockRestore();
+  });
+
+  it("falls back to client text when saving the user message throws", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const db = fakeDb({ saveMessage: vi.fn(async () => { throw new Error("db down"); }) });
+    const { handler, ai } = setup({ db });
+    expect((await handler(post(body({ messages: [userMessage("Hi"), userMessage("Brakes squeal")] })))).status).toBe(200);
+    expect(ai.streamReply.mock.calls[0][0].messages.map((m) => m.content)).toEqual(["Hi", "Brakes squeal"]);
+    error.mockRestore();
   });
 
   it("falls back to client text parts when db.getMessages throws", async () => {

@@ -81,15 +81,25 @@ export function createChatHandler(
       return unavailable();
     }
 
-    let history;
+    let stored = null;
     try {
-      await db.saveMessage({ site, conversationId: id, role: "user", content: text });
-      const stored = await db.getMessages(id);
-      history = stored.map(({ role, content }) => ({ role, content })).slice(-HISTORY);
+      stored = (await db.getMessages(id)).map(({ role, content }) => ({ role, content }));
     } catch (error) {
       console.error("Chat history failed, using client text", error);
-      history = clientHistory(messages);
     }
+    const latest = stored?.at(-1);
+    // A reload mid-reply re-sends a first message that was stored but never answered.
+    const unanswered = latest?.role === "user" && latest.content === text;
+    if (!unanswered) {
+      try {
+        await db.saveMessage({ site, conversationId: id, role: "user", content: text });
+        stored?.push({ role: "user", content: text });
+      } catch (error) {
+        console.error("Chat message save failed, using client text", error);
+        stored = null;
+      }
+    }
+    const history = stored ? stored.slice(-HISTORY) : clientHistory(messages);
 
     let playbooks = [];
     try {
