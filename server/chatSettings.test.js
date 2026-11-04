@@ -30,9 +30,12 @@ describe("chatServerSettings", () => {
     });
   });
 
-  it("prices the default chat model", () => {
-    const price = chatServerSettings.models["gpt-6-luna"];
-    expect(price).toMatchObject({ inputUsd: 0.1, cachedInputUsd: 0.01, cacheWriteUsd: 0.125, outputUsd: 0.5 });
+  it("prices the default chat model and its Anthropic alternative as a fallback", () => {
+    for (const model of ["openai/gpt-6-luna", "anthropic/claude-haiku-5.5"]) {
+      expect(chatServerSettings.models[model]).toMatchObject({ inputUsd: 0.1, cachedInputUsd: 0.01, cacheWriteUsd: 0.125, outputUsd: 0.5 });
+    }
+    expect(chatServerSettings.providerReportsCost).toBe(true);
+    expect(chatServerSettings.defaultReasoningEffort).toBe("none");
     expect(chatServerSettings.eurPerUsd).toBeGreaterThan(0);
   });
 

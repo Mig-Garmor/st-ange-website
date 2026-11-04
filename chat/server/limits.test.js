@@ -263,3 +263,69 @@ describe("recordUsage", () => {
     expect(db.addUsage).not.toHaveBeenCalled();
   });
 });
+
+describe("reported cost", () => {
+  const reporting = { ...settings, providerReportsCost: true };
+
+  it("uses costUsd x eurPerUsd instead of the price table", async () => {
+    const db = fakeDb();
+    await recordUsage({ db, email: { send: vi.fn() }, settings, model: "m", usage: { ...usage, costUsd: 0.004 }, now });
+    expect(db.addUsage.mock.calls[0][0]).toMatchObject({ inputTokens: 1000, cachedInputTokens: 0, outputTokens: 100 });
+    expect(db.addUsage.mock.calls[0][0].costEur).toBeCloseTo(0.004 * 0.5, 12);
+  });
+
+  it("falls back to the price table when no valid cost is reported", async () => {
+    for (const costUsd of [undefined, null, NaN, -1, "0.1"]) {
+      const db = fakeDb();
+      await recordUsage({ db, email: { send: vi.fn() }, settings, model: "m", usage: { ...usage, costUsd }, now });
+      expect(db.addUsage.mock.calls[0][0].costEur).toBeCloseTo(costEur(usage, settings.models.m, 0.5), 12);
+    }
+  });
+
+  it("assertPriced accepts an unpriced model only when the provider reports cost", () => {
+    expect(assertPriced(reporting, "openai/new-model")).toBeUndefined();
+    expect(() => assertPriced(settings, "openai/new-model")).toThrow("No price for model openai/new-model");
+    expect(() => assertPriced(reporting, undefined)).toThrow("No price for model undefined");
+    expect(() => assertPriced(reporting, "")).toThrow("No price for model");
+    expect(() => assertPriced({ ...reporting, models: { x: { inputUsd: 1 } } }, "x")).toThrow("No price for model x");
+    expect(assertPriced({ ...reporting, models: { x: { reasoningEffort: "low" } } }, "x")).toBeUndefined();
+    expect(() => assertPriced({ ...settings, models: { x: { reasoningEffort: "low" } } }, "x")).toThrow("No price for model x");
+    expect(() => assertPriced({ ...reporting, eurPerUsd: 0 }, "openai/new-model")).toThrow("eurPerUsd");
+  });
+
+  it("an unpriced model with a reported cost records it and follows the normal cap", async () => {
+    const db = fakeDb();
+    const email = { send: vi.fn() };
+    await recordUsage({ db, email, settings: reporting, model: "openai/new-model", usage: { ...usage, costUsd: 0.01 }, now });
+    expect(db.addUsage.mock.calls[0][0].costEur).toBeCloseTo(0.005, 12);
+    expect(db.pauseChat).not.toHaveBeenCalled();
+  });
+
+  it("a :free model's reported cost of 0 is a valid cost, so it runs unpriced without pausing", async () => {
+    const db = fakeDb({ addUsage: vi.fn(async () => ({ costEur: 0 })) });
+    const email = { send: vi.fn() };
+    const model = "google/gemma-4-31b-it:free";
+    expect(assertPriced(reporting, model)).toBeUndefined();
+    await recordUsage({ db, email, settings: reporting, model, usage: { ...usage, costUsd: 0 }, now });
+    expect(db.addUsage.mock.calls[0][0]).toMatchObject({ inputTokens: 1000, outputTokens: 100, costEur: 0 });
+    expect(db.pauseChat).not.toHaveBeenCalled();
+    expect(email.send).not.toHaveBeenCalled();
+  });
+
+  it("an unpriced model without a reported cost records the tokens, pauses the chat and alerts once", async () => {
+    let first = true;
+    const db = fakeDb({ pauseChat: vi.fn(async () => (first ? ((first = false), true) : false)) });
+    const email = { send: vi.fn(async () => {}) };
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    await Promise.all([1, 2].map(() => recordUsage({ db, email, settings: reporting, model: "openai/new-model", usage, now })));
+    expect(db.addUsage.mock.calls[0][0]).toMatchObject({ inputTokens: 1000, outputTokens: 100, costEur: 0 });
+    expect(db.pauseChat).toHaveBeenCalledWith("st-ange", "unpriced call without a reported cost");
+    expect(email.send).toHaveBeenCalledTimes(1);
+    const { subject, text } = email.send.mock.calls[0][0];
+    expect(subject).toBe("Chat paused: a call's cost is unknown");
+    expect(text).toContain("openai/new-model");
+    expect(text).toContain("UPDATE chat_state");
+    expect(log).toHaveBeenCalledWith(expect.stringContaining("reported no cost"), expect.anything());
+    log.mockRestore();
+  });
+});

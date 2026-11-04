@@ -51,15 +51,14 @@ export const chatServerSettings = {
   limits: { maxChars: 500, maxUserMessages: 20, perHour: 40 },
   maxOutputTokens: 150,
   dailyCapEur: Number(process.env.CHAT_DAILY_CAP_EUR ?? 5),
-  // OpenAI standard-tier USD per 1M tokens, read 2026-11-04 from developers.openai.com/api/docs/pricing.
+  // OpenRouter reports each call's real cost, so this table is only a fallback for calls that report none.
+  providerReportsCost: true,
+  // For openai/ and anthropic/ models, unless an entry sets its own reasoningEffort; keeps the 150-token budget for text.
+  defaultReasoningEffort: "none",
+  // OpenRouter USD per 1M tokens, read 2026-11-04 from openrouter.ai/api/v1/models.
   models: {
-    "gpt-6-luna": {
-      inputUsd: 0.1,
-      cachedInputUsd: 0.01,
-      cacheWriteUsd: 0.125,
-      outputUsd: 0.5,
-      reasoningEffort: "none",
-    },
+    "openai/gpt-6-luna": { inputUsd: 0.1, cachedInputUsd: 0.01, cacheWriteUsd: 0.125, outputUsd: 0.5 },
+    "anthropic/claude-haiku-5.5": { inputUsd: 0.1, cachedInputUsd: 0.01, cacheWriteUsd: 0.125, outputUsd: 0.5 },
   },
   // ECB reference rate for 2026-11-04: 1 EUR = 1.1267 USD.
   eurPerUsd: 0.8875,
