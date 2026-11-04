@@ -1,5 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { neon } from "@neondatabase/serverless";
 import { getSql } from "./client.js";
 
 const migrationsDir = fileURLToPath(new URL("./migrations/", import.meta.url));
@@ -33,7 +34,9 @@ export async function migrate(sql) {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  migrate(getSql())
+  // Neon advises the direct (unpooled) connection for schema changes.
+  const directUrl = process.env.DATABASE_URL_UNPOOLED;
+  migrate(directUrl ? neon(directUrl) : getSql())
     .then((applied) => {
       console.log(applied.length ? `Applied: ${applied.join(", ")}` : "Nothing to apply");
     })
