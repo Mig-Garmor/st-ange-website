@@ -22,9 +22,9 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("migrate", () => {
     return sql;
   }
 
-  it("applies 001_init.sql once", async () => {
+  it("applies every migration once", async () => {
     const sql = await reset();
-    expect(await migrate(sql)).toEqual(["001_init.sql"]);
+    expect(await migrate(sql)).toEqual(["001_init.sql", "002_resume_allowance.sql"]);
     expect(await migrate(sql)).toEqual([]);
   });
 
@@ -32,6 +32,6 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("migrate", () => {
     const sql = await reset();
     await migrate(sql);
     const rows = await sql`select name from schema_migrations`;
-    expect(rows.map((row) => row.name)).toEqual(["001_init.sql"]);
+    expect(rows.map((row) => row.name).sort()).toEqual(["001_init.sql", "002_resume_allowance.sql"]);
   });
 });

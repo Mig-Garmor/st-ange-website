@@ -87,4 +87,44 @@ describe("createInsightsJob", () => {
     expect(schema.safeParse(insight).success).toBe(true);
     expect(schema.safeParse({ ...insight, summary: "x".repeat(301) }).success).toBe(false);
   });
+
+  it("500 and no claim or AI call when the model has no valid price", async () => {
+    for (const model of [undefined, "unpriced"]) {
+      const db = fakeDb();
+      const ai = { generateInsights: vi.fn() };
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const res = await job(db, ai, { model })(req("Bearer s3cret"));
+      expect(res.status).toBe(500);
+      expect((await res.json()).error).toContain("No price for model");
+      expect(db.claimForInsights).not.toHaveBeenCalled();
+      expect(ai.generateInsights).not.toHaveBeenCalled();
+    }
+  });
+
+  it("records usage before saving insights, even when the save fails", async () => {
+    const order = [];
+    const db = fakeDb({
+      addUsage: vi.fn(async () => (order.push("usage"), { costEur: 0.01 })),
+      saveInsights: vi.fn(async () => {
+        order.push("save");
+        throw new Error("db write failed");
+      }),
+    });
+    const ai = { generateInsights: vi.fn(async () => ({ object: insight, usage })) };
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const res = await job(db, ai)(req("Bearer s3cret"));
+    expect(await res.json()).toEqual({ processed: 0, failed: 2 });
+    expect(order).toEqual(["usage", "save", "usage", "save"]);
+  });
+
+  it("a schema failure records the billed usage and marks the conversation abandoned so it is not retried", async () => {
+    const db = fakeDb();
+    const ai = { generateInsights: vi.fn(async () => ({ object: null, usage })) };
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const res = await job(db, ai)(req("Bearer s3cret"));
+    expect(await res.json()).toEqual({ processed: 0, failed: 2 });
+    expect(db.addUsage).toHaveBeenCalledTimes(2);
+    expect(db.saveInsights).toHaveBeenCalledWith("a", { outcome: "abandoned" });
+    expect(db.saveInsights).toHaveBeenCalledWith("b", { outcome: "abandoned" });
+  });
 });

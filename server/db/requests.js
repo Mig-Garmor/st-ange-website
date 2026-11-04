@@ -11,6 +11,13 @@ export function requestsDb(sql) {
       return { id: existing.id, duplicate: true, emailStatus: existing.email_status };
     },
 
+    async countRequestsForConversation(conversationId, exceptKey = null) {
+      const [row] = await sql`
+        select count(*)::int as n from requests
+        where conversation_id = ${conversationId} and idempotency_key is distinct from ${exceptKey}`;
+      return row.n;
+    },
+
     async setRequestEmailStatus(id, { status, error = null }) {
       await sql`update requests set email_status = ${status}, email_error = ${error} where id = ${id}`;
     },

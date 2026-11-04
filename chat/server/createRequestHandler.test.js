@@ -1,6 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
 import { createRequestService } from "../../server/requests.js";
-import { createRequestHandler } from "./createRequestHandler.js";
+import { validateLead } from "../../server/validate.js";
+import { createRequestHandler as create } from "./createRequestHandler.js";
+
+const createRequestHandler = (settings, deps) => create(settings, { validateLead, ...deps });
 
 const settings = {
   site: "test-site",
@@ -16,6 +19,7 @@ const fakeDb = (over = {}) => ({
     { role: "user", content: "My car pulls left" },
     { role: "assistant", content: "An alignment may help." },
   ]),
+  countRequestsForConversation: vi.fn(async () => 0),
   linkLead: vi.fn(async () => {}),
   saveMessage: vi.fn(async () => {}),
   ...over,
@@ -163,5 +167,73 @@ describe("createRequestHandler", () => {
     const res = await createRequestHandler(settings, { db, requests })(post(body()));
     expect(await res.json()).toEqual({ status: "sent" });
     expect(requests.submit.mock.calls[0][0].text).toContain("Conversation:");
+  });
+
+  it("429 limit and no email once the conversation has 3 other requests", async () => {
+    const requests = fakeRequests();
+    const db = fakeDb({ countRequestsForConversation: vi.fn(async () => 3) });
+    const res = await createRequestHandler(settings, { db, requests })(post(body()));
+    expect(res.status).toBe(429);
+    expect(await res.json()).toEqual({ status: "limit" });
+    expect(requests.submit).not.toHaveBeenCalled();
+    expect(db.countRequestsForConversation).toHaveBeenCalledWith(ID, "key-1");
+  });
+
+  it("a third request is still allowed", async () => {
+    const requests = fakeRequests();
+    const db = fakeDb({ countRequestsForConversation: vi.fn(async () => 2) });
+    const res = await createRequestHandler(settings, { db, requests })(post(body()));
+    expect(await res.json()).toEqual({ status: "sent" });
+  });
+
+  it("400 with field errors when free text is over its cap", async () => {
+    const requests = fakeRequests();
+    const handler = createRequestHandler(settings, { db: fakeDb(), requests });
+    const res = await handler(
+      post(body({ name: "n".repeat(101), vehicle: "v".repeat(101), email: `${"e".repeat(195)}@x.com`, notes: "x".repeat(1001) })),
+    );
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.status).toBe("invalid");
+    expect(Object.keys(json.errors).sort()).toEqual(["email", "name", "notes", "vehicle"]);
+    expect(requests.submit).not.toHaveBeenCalled();
+
+    const atCap = await handler(
+      post(body({ name: "n".repeat(100), vehicle: "v".repeat(100), email: `${"e".repeat(194)}@x.com`, notes: "x".repeat(1000) })),
+    );
+    expect(await atCap.json()).toEqual({ status: "sent" });
+  });
+
+  it("an unknown service slug is stored as null with the Service subject", async () => {
+    const requests = fakeRequests();
+    await createRequestHandler(settings, { db: fakeDb(), requests })(post(body({ service: "x".repeat(5000) })));
+    expect(requests.submit.mock.calls[0][0]).toMatchObject({ service: null, subject: "[Chat] Service request from Jane" });
+  });
+
+  it("pageUrl is reduced to a same-site path", async () => {
+    const requests = fakeRequests();
+    const handler = createRequestHandler(settings, { db: fakeDb(), requests });
+    await handler(post(body({ pageUrl: "https://example.com/services/brakes?a=1#b" })));
+    await handler(post(body({ pageUrl: `/${"a".repeat(5000)}` })));
+    expect(requests.submit.mock.calls[0][0].pageUrl).toBe("/services/brakes");
+    expect(requests.submit.mock.calls[0][0].text).toContain("Page: /services/brakes");
+    expect(requests.submit.mock.calls[1][0].pageUrl).toBeNull();
+  });
+
+  it("a duplicate of an already-sent request does not re-link or save another note", async () => {
+    const db = fakeDb();
+    const requests = fakeRequests({ submit: vi.fn(async () => ({ emailStatus: "sent", duplicate: true, leadId: 9 })) });
+    const res = await createRequestHandler(settings, { db, requests })(post(body()));
+    expect(await res.json()).toEqual({ status: "sent" });
+    expect(db.linkLead).not.toHaveBeenCalled();
+    expect(db.saveMessage).not.toHaveBeenCalled();
+  });
+
+  it("a duplicate that re-sent a failed email links and saves the note", async () => {
+    const db = fakeDb();
+    const requests = fakeRequests({ submit: vi.fn(async () => ({ emailStatus: "sent", duplicate: true, resent: true, leadId: 9 })) });
+    await createRequestHandler(settings, { db, requests })(post(body()));
+    expect(db.linkLead).toHaveBeenCalledWith(ID, 9);
+    expect(db.saveMessage).toHaveBeenCalledOnce();
   });
 });

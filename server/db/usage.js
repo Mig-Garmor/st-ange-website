@@ -21,8 +21,14 @@ export function usageDb(sql) {
 
     async getChatState(site) {
       await sql`insert into chat_state (site) values (${site}) on conflict (site) do nothing`;
-      const [row] = await sql`select status, paused_at, pause_reason from chat_state where site = ${site}`;
-      return { status: row.status, pausedAt: row.paused_at, pauseReason: row.pause_reason };
+      const [row] = await sql`select status, paused_at, pause_reason, resumed_at, resume_cost_eur from chat_state where site = ${site}`;
+      return {
+        status: row.status,
+        pausedAt: row.paused_at,
+        pauseReason: row.pause_reason,
+        resumedAt: row.resumed_at,
+        resumeCostEur: Number(row.resume_cost_eur),
+      };
     },
 
     async pauseChat(site, reason) {

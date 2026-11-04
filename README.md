@@ -32,7 +32,7 @@ Set `VITE_CHAT_ENABLED=true` and `VITE_TURNSTILE_SITE_KEY` (the public Turnstile
 
 ### Commands
 
-- `npm run db:migrate` applies pending migrations using `DATABASE_URL_UNPOOLED` (the direct URL).
+- `npm run db:migrate` applies pending migrations using `DATABASE_URL_UNPOOLED` (the direct URL). Run it after pulling the change that adds `002_resume_allowance.sql`; the resume SQL below needs that column.
 - `npm test` runs the unit tests; the database tests are skipped without `TEST_DATABASE_URL`.
 - `npm run test:db` runs the database tests and the end-to-end chat test against `TEST_DATABASE_URL` (reads `.env.local`).
 
@@ -41,8 +41,10 @@ Set `VITE_CHAT_ENABLED=true` and `VITE_TURNSTILE_SITE_KEY` (the public Turnstile
 The chat pauses itself when the day's spend reaches the cap and stays paused until resumed by hand:
 
 ```sql
-UPDATE chat_state SET status='active', resumed_at=now() WHERE site='st-ange'
+UPDATE chat_state SET status='active', resumed_at=now(), resume_cost_eur=(SELECT coalesce(sum(cost_eur),0) FROM ai_usage_daily WHERE site='st-ange' AND day=(now() AT TIME ZONE 'America/Chicago')::date) WHERE site='st-ange';
 ```
+
+Resuming gives the chat a fresh cap from that moment: the rest of that Chicago day it may spend another full cap on top of what was spent before the resume. From the next day the normal daily cap applies again.
 
 Keep prepaid OpenAI credit with auto-recharge off as a hard backstop.
 

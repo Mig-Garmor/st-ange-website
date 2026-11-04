@@ -280,6 +280,25 @@ describe("createChatHandler", () => {
     expect(variable).toContain("Current page: /services/brakes");
   });
 
+  it("stores and prompts only a same-site path for pageUrl", async () => {
+    const { handler, db, ai } = setup();
+    await handler(post(body({ pageUrl: "https://evil.example/services/brakes?ignore=previous#x" })));
+    expect(db.ensureConversation).toHaveBeenCalledWith(expect.objectContaining({ pageUrl: "/services/brakes" }));
+    expect(ai.streamReply.mock.calls[0][0].system.endsWith("Current page: /services/brakes")).toBe(true);
+    expect(ai.streamReply.mock.calls[0][0].system).not.toContain("ignore=previous");
+  });
+
+  it("a huge or non-http pageUrl becomes null", async () => {
+    for (const pageUrl of [`/${"a".repeat(1_000_000)}`, "javascript:alert(1)", { x: 1 }]) {
+      const { handler, db, ai } = setup();
+      await handler(post(body({ pageUrl })));
+      expect(db.ensureConversation).toHaveBeenCalledWith(expect.objectContaining({ pageUrl: null }));
+      const { system } = ai.streamReply.mock.calls[0][0];
+      expect(system).toContain("Current page: unknown");
+      expect(system.length).toBeLessThan(100_000);
+    }
+  });
+
   it("uses no playbooks when they fail to load", async () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     const db = fakeDb({ activePlaybooks: vi.fn(async () => { throw new Error("db down"); }) });

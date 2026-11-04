@@ -115,7 +115,7 @@ The row is written even when the email fails.
 
 **ai_usage_daily**: one row per `(site, day)`: `input_tokens`, `cached_input_tokens`, `output_tokens`, `cost_eur`, `calls`. Updated with additive upserts.
 
-**chat_state**: one row per site: `status` (`active`/`paused`), `paused_at`, `pause_reason`, `resumed_at`.
+**chat_state**: one row per site: `status` (`active`/`paused`), `paused_at`, `pause_reason`, `resumed_at`, `resume_cost_eur` (the day's spend at the last resume, added in `002`).
 
 **playbooks**
 
@@ -184,7 +184,8 @@ If the database fails, the reply still streams and the error is logged. If the A
 
 - The price per million tokens for each model (input, cached input, output) lives in the settings. Each call's usage is converted to euros and added to `ai_usage_daily`.
 - The daily cap is €5 and is checked before every AI call.
-- Pausing is sticky: it does not reset at midnight. Resume is manual: `UPDATE chat_state SET status='active', resumed_at=now() WHERE site='st-ange'`, run by hand or through MCP for now, and a dashboard button later.
+- Pausing is sticky: it does not reset at midnight. Resume is manual: `UPDATE chat_state SET status='active', resumed_at=now(), resume_cost_eur=(SELECT coalesce(sum(cost_eur),0) FROM ai_usage_daily WHERE site='st-ange' AND day=(now() AT TIME ZONE 'America/Chicago')::date) WHERE site='st-ange';`, run by hand or through MCP for now, and a dashboard button later.
+- A resume stores the day's spend so far in `resume_cost_eur` (migration `002_resume_allowance.sql`). For the rest of that Chicago day, the cap checks measure spend as today's cost minus `resume_cost_eur`, so a resumed chat gets another full cap; from the next day the normal daily cap applies.
 - The alert email reports the time, the day's cost, the number of messages and the number of distinct visitors.
 - Possible overshoot is limited to replies already in flight when the cap is hit (a few cents).
 - Outside the code: prepaid OpenAI credit with auto-recharge off, as a hard backstop.

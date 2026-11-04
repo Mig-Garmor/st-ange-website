@@ -42,7 +42,7 @@ export function buildInstructions(settings, { playbooks = [], now, pageUrl }) {
   const variable = [
     `Today is ${p.weekday}, ${p.month} ${p.day}, ${p.year}, ${p.hour}:${p.minute} (${settings.timeZone}).`,
     open ? "Open now" : "Closed now",
-    `Current page: ${pageUrl}`,
+    `Current page: ${pageUrl ?? "unknown"}`,
   ].join("\n");
 
   return { stable, variable };

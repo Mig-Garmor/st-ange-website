@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { migrate } from "./migrate.js";
 import { getTestSql } from "./testDb.js";
 import { createDb } from "./index.js";
+import { chicagoDay, isAvailable, resumeSql } from "../../chat/server/limits.js";
 
 describe.skipIf(!process.env.TEST_DATABASE_URL)("data access", () => {
   let sql, db;
@@ -101,6 +102,40 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("data access", () => {
 
   it("getChatState creates an active row", async () => {
     expect(await db.getChatState(`${site}-fresh`)).toMatchObject({ status: "active", pausedAt: null });
+  });
+
+  it("getChatState returns no resume for a fresh site", async () => {
+    expect(await db.getChatState(`${site}-noresume`)).toMatchObject({ resumedAt: null, resumeCostEur: 0 });
+  });
+
+  it("the documented resume SQL reactivates and stores today's spend, so the chat is available again", async () => {
+    const s = `${site}-resume`;
+    const settings = { site: s, timeZone: "America/Chicago", dailyCapEur: 5 };
+    const today = chicagoDay(new Date(), "America/Chicago");
+    await db.addUsage({ site: s, day: today, costEur: 5.25 });
+    await db.pauseChat(s, "daily cap reached");
+    expect(await isAvailable({ db, settings, now: new Date() })).toBe(false);
+
+    await sql.query(resumeSql(s, "America/Chicago"));
+    const state = await db.getChatState(s);
+    expect(state).toMatchObject({ status: "active", resumeCostEur: 5.25 });
+    expect(state.resumedAt).not.toBeNull();
+    expect(await isAvailable({ db, settings, now: new Date() })).toBe(true);
+
+    await db.addUsage({ site: s, day: today, costEur: 5 });
+    expect(await isAvailable({ db, settings, now: new Date() })).toBe(false);
+  });
+
+  it("countRequestsForConversation counts the conversation's requests, minus the given key", async () => {
+    const conv = await newConversation();
+    const other = await newConversation();
+    const keys = [randomUUID(), randomUUID()];
+    for (const idempotencyKey of keys) await db.recordRequest({ site, idempotencyKey, source: "chat", conversationId: conv.id });
+    await db.recordRequest({ site, idempotencyKey: randomUUID(), source: "chat", conversationId: other.id });
+    expect(await db.countRequestsForConversation(conv.id)).toBe(2);
+    expect(await db.countRequestsForConversation(conv.id, keys[0])).toBe(1);
+    expect(await db.countRequestsForConversation(conv.id, "unknown-key")).toBe(2);
+    expect(await db.countRequestsForConversation(randomUUID())).toBe(0);
   });
 
   it("activePlaybooks returns only active versions", async () => {

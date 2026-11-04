@@ -1,7 +1,8 @@
 import { createUIMessageStream, createUIMessageStreamResponse } from "ai";
 import { createProposeRequest } from "./ai.js";
 import { clientIp, hashIp } from "./ipHash.js";
-import { checkLimits, isAvailable, recordUsage } from "./limits.js";
+import { assertPriced, checkLimits, isAvailable, recordUsage } from "./limits.js";
+import { toPagePath } from "./pagePath.js";
 import { buildInstructions } from "./prompt.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -49,7 +50,8 @@ export function createChatHandler(
     } catch {
       return Response.json({ error: "Invalid JSON" }, { status: 400 });
     }
-    const { id, visitorId, pageUrl = null, turnstileToken } = body ?? {};
+    const { id, visitorId, turnstileToken } = body ?? {};
+    const pageUrl = toPagePath(body?.pageUrl);
     const messages = Array.isArray(body?.messages) ? body.messages : [];
     if (typeof id !== "string" || !UUID.test(id) || typeof visitorId !== "string" || !visitorId) {
       return Response.json({ error: "Invalid request" }, { status: 400 });
@@ -61,7 +63,7 @@ export function createChatHandler(
     const ip = clientIp(request);
     try {
       if (!ipSalt) throw new Error("IP hash salt is not set");
-      if (!settings.models[model]) throw new Error(`No price for model ${model}`);
+      assertPriced(settings, model);
       const ipHash = hashIp(ip, ipSalt);
       if (!(await isAvailable({ db, settings, now: now() }))) return notice("offline", copy.offline);
 

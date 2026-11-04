@@ -1,5 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { generateText, Output, streamText, tool } from "ai";
+import { generateText, NoObjectGeneratedError, Output, streamText, tool } from "ai";
 import { z } from "zod";
 
 export const toUsage = (usage = {}) => ({
@@ -55,14 +55,20 @@ export function createAi({ apiKey, model, cacheKey, reasoningEffort, provider = 
     },
 
     async generateInsights({ system, transcript, schema }) {
-      const result = await generateText({
-        model: provider(model),
-        instructions: system,
-        prompt: transcript,
-        output: Output.object({ schema }),
-        providerOptions: { openai },
-      });
-      return { object: result.output, usage: toUsage(result.usage) };
+      try {
+        const result = await generateText({
+          model: provider(model),
+          instructions: system,
+          prompt: transcript,
+          output: Output.object({ schema }),
+          providerOptions: { openai },
+        });
+        return { object: result.output ?? null, usage: toUsage(result.usage) };
+      } catch (error) {
+        // The call was billed even though the output failed the schema.
+        if (NoObjectGeneratedError.isInstance(error)) return { object: null, usage: toUsage(error.usage) };
+        throw error;
+      }
     },
   };
 }

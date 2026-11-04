@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { costEur } from "./cost.js";
-import { chicagoDay, isAvailable, checkLimits, recordUsage } from "./limits.js";
+import { assertPriced, chicagoDay, isAvailable, checkLimits, recordUsage } from "./limits.js";
 
 const settings = {
   site: "st-ange",
@@ -104,6 +104,45 @@ describe("isAvailable", () => {
   });
 });
 
+describe("manual resume", () => {
+  const resumedToday = { status: "active", resumedAt: new Date("2026-11-05T01:00:00Z"), resumeCostEur: 5.02 };
+  const resumedYesterday = { status: "active", resumedAt: new Date("2026-11-04T01:00:00Z"), resumeCostEur: 5.02 };
+
+  it("paused at the cap, resumed today: available again until another full cap is spent", async () => {
+    const at = (spent) => fakeDb({ getChatState: vi.fn(async () => resumedToday), getUsage: vi.fn(async () => ({ costEur: spent })) });
+    expect(await isAvailable({ db: at(5.02), settings, now })).toBe(true);
+    expect(await isAvailable({ db: at(10.01), settings, now })).toBe(true);
+    expect(await isAvailable({ db: at(10.02), settings, now })).toBe(false);
+  });
+
+  it("resumed today: recordUsage pauses only after another full cap", async () => {
+    const run = async (total) => {
+      const db = fakeDb({ getChatState: vi.fn(async () => resumedToday), addUsage: vi.fn(async () => ({ costEur: total })) });
+      await recordUsage({ db, email: { send: vi.fn(async () => {}) }, settings, model: "m", usage, now });
+      return db.pauseChat.mock.calls.length;
+    };
+    expect(await run(9)).toBe(0);
+    expect(await run(10.03)).toBe(1);
+  });
+
+  it("resumed on an earlier day: the normal daily cap applies", async () => {
+    const db = fakeDb({ getChatState: vi.fn(async () => resumedYesterday), getUsage: vi.fn(async () => ({ costEur: 5 })) });
+    expect(await isAvailable({ db, settings, now })).toBe(false);
+    const db2 = fakeDb({ getChatState: vi.fn(async () => resumedYesterday), addUsage: vi.fn(async () => ({ costEur: 5.01 })) });
+    await recordUsage({ db: db2, email: { send: vi.fn(async () => {}) }, settings, model: "m", usage, now });
+    expect(db2.pauseChat).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("assertPriced", () => {
+  it("returns the price for a priced model and throws otherwise", () => {
+    expect(assertPriced(settings, "m")).toBe(settings.models.m);
+    expect(() => assertPriced(settings, undefined)).toThrow("No price for model undefined");
+    expect(() => assertPriced(settings, "x")).toThrow("No price for model x");
+    expect(() => assertPriced({ ...settings, eurPerUsd: 0 }, "m")).toThrow("eurPerUsd");
+  });
+});
+
 describe("checkLimits", () => {
   const run = (over = {}, db = fakeDb()) =>
     checkLimits({ db, settings, conversation: { messageCount: 1 }, ipHash: "h", text: "hi", ...over });
@@ -148,7 +187,9 @@ describe("recordUsage", () => {
     expect(text).toContain("Messages today: 7");
     expect(text).toContain("Visitors today: 3");
     expect(text).toMatch(/Nov 4, 2026, 10:30\sPM/);
-    expect(text).toContain("UPDATE chat_state SET status='active', resumed_at=now() WHERE site='st-ange'");
+    expect(text).toContain(
+      "UPDATE chat_state SET status='active', resumed_at=now(), resume_cost_eur=(SELECT coalesce(sum(cost_eur),0) FROM ai_usage_daily WHERE site='st-ange' AND day=(now() AT TIME ZONE 'America/Chicago')::date) WHERE site='st-ange';",
+    );
   });
 
   it("parallel crossings send exactly one alert", async () => {

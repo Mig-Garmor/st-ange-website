@@ -32,7 +32,7 @@ usePageSeo({
             <li>Your vehicle details</li>
             <li>The page you were on when you contacted us</li>
             <li>
-              A scrambled form of your IP address, used only to stop abuse. We do not keep the
+              A scrambled form of your IP address, used only to stop abuse. We do not store the
               address itself.
             </li>
           </ul>

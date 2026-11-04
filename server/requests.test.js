@@ -46,10 +46,10 @@ describe("request service", () => {
 
   const dup = (emailStatus) => ({ recordRequest: async () => ({ id: 11, duplicate: true, emailStatus }) });
 
-  it("duplicate of a failed request re-sends and records sent", async () => {
+  it("duplicate of a failed request re-sends, records sent and reports resent", async () => {
     const { service, calls } = setup({ dbOverrides: dup("failed") });
     const r = await service.submit(input);
-    expect(r).toEqual({ emailStatus: "sent", duplicate: true, leadId: 7 });
+    expect(r).toEqual({ emailStatus: "sent", duplicate: true, resent: true, leadId: 7 });
     expect(calls.sent).toHaveLength(1);
     expect(calls.status).toEqual([{ id: 11, status: "sent", error: null }]);
   });

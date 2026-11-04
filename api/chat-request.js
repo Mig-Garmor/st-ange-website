@@ -4,6 +4,7 @@ import { getSql } from "../server/db/client.js";
 import { createDb } from "../server/db/index.js";
 import { createEmail } from "../server/email.js";
 import { createRequestService } from "../server/requests.js";
+import { validateLead } from "../server/validate.js";
 
 const unavailable = () => {
   throw new Error("DATABASE_URL is not set");
@@ -20,5 +21,5 @@ export async function POST(request) {
     }),
     site: chatServerSettings.site,
   });
-  return createRequestHandler(chatServerSettings, { db, requests })(request);
+  return createRequestHandler(chatServerSettings, { db, requests, validateLead })(request);
 }

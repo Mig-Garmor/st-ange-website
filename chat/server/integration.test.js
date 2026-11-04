@@ -6,6 +6,7 @@ import { createDb } from "../../server/db/index.js";
 import { createRequestService } from "../../server/requests.js";
 import { handleSendEmail } from "../../server/sendEmailHandler.js";
 import { createChatHandler } from "./createChatHandler.js";
+import { validateLead } from "../../server/validate.js";
 import { createRequestHandler } from "./createRequestHandler.js";
 import { createInsightsJob } from "./createInsightsJob.js";
 import { isAvailable, recordUsage } from "./limits.js";
@@ -69,7 +70,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("chat end to end against a real 
     const turnstile = { verify: vi.fn(async () => true) };
     const requests = createRequestService({ db, email, site });
     const handleChat = createChatHandler(settings, { db, ai, email, turnstile, ipSalt: "salt", model: MODEL, now: () => NOW });
-    const handleRequest = createRequestHandler(settings, { db, requests });
+    const handleRequest = createRequestHandler(settings, { db, requests, validateLead });
 
     const conversationId = randomUUID();
     const res = await handleChat(

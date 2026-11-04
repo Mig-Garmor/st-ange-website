@@ -130,6 +130,33 @@ describe("createAi", () => {
     });
     expect(model.doGenerateCalls[0].providerOptions.openai.promptCacheKey).toBe("site");
   });
+
+  it("generateInsights returns a null object with the billed usage when the output fails the schema", async () => {
+    const model = new MockLanguageModelV4({
+      doGenerate: {
+        content: [{ type: "text", text: '{"summary":42}' }],
+        finishReason: { unified: "stop", raw: undefined },
+        usage,
+        warnings: [],
+      },
+    });
+    const result = await setup(model).generateInsights({
+      system: "Summarise",
+      transcript: "user: brakes?",
+      schema: z.object({ summary: z.string() }),
+    });
+    expect(result).toEqual({
+      object: null,
+      usage: { inputTokens: 1500, cachedInputTokens: 1000, cacheWriteTokens: 300, outputTokens: 12 },
+    });
+  });
+
+  it("generateInsights rethrows other errors", async () => {
+    const model = new MockLanguageModelV4({ doGenerate: async () => { throw new Error("provider down"); } });
+    await expect(
+      setup(model).generateInsights({ system: "S", transcript: "t", schema: z.object({ summary: z.string() }) }),
+    ).rejects.toThrow("provider down");
+  });
 });
 
 describe("createProposeRequest", () => {

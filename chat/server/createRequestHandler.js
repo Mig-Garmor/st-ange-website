@@ -1,12 +1,21 @@
-import { validateLead } from "../../server/validate.js";
+import { toPagePath } from "./pagePath.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SENT_NOTE = "[Request sent to the shop]";
+const MAX_REQUESTS = 3;
+const MAX_LENGTH = { name: 100, vehicle: 100, email: 200, notes: 1000 };
 
 const label = (role) => (role === "user" ? "Customer" : "Assistant");
 const str = (v) => (typeof v === "string" ? v.trim() : "");
 
-export function createRequestHandler(settings, { db, requests }) {
+const tooLong = (body) =>
+  Object.fromEntries(
+    Object.entries(MAX_LENGTH)
+      .filter(([field, max]) => typeof body[field] === "string" && body[field].trim().length > max)
+      .map(([field, max]) => [field, `Use ${max} characters or fewer`]),
+  );
+
+export function createRequestHandler(settings, { db, requests, validateLead }) {
   const { site, services } = settings;
 
   return async function handleRequest(request) {
@@ -25,18 +34,25 @@ export function createRequestHandler(settings, { db, requests }) {
     try {
       const conversation = await db.getConversation(conversationId);
       if (!conversation?.verifiedAt) return Response.json({ error: "Verification failed" }, { status: 403 });
+      if ((await db.countRequestsForConversation(conversationId, idempotencyKey)) >= MAX_REQUESTS) {
+        return Response.json({ status: "limit" }, { status: 429 });
+      }
     } catch (error) {
       console.error("Chat request gate failed", error);
       return Response.json({ error: "Verification failed" }, { status: 403 });
     }
 
+    const lengthErrors = tooLong(body);
     const { ok, errors, lead } = validateLead(body, { requireVehicle: true });
-    if (!ok) return Response.json({ status: "invalid", errors }, { status: 400 });
+    if (!ok || Object.keys(lengthErrors).length) {
+      return Response.json({ status: "invalid", errors: { ...errors, ...lengthErrors } }, { status: 400 });
+    }
 
-    const slug = str(body.service) || null;
-    const serviceName = services.find((s) => s.slug === slug)?.name ?? "Service";
+    const service = services.find((s) => s.slug === str(body.service));
+    const slug = service?.slug ?? null;
+    const serviceName = service?.name ?? "Service";
     const notes = str(body.notes);
-    const pageUrl = str(body.pageUrl) || null;
+    const pageUrl = toPagePath(body.pageUrl);
 
     let transcript = [];
     try {
@@ -60,7 +76,7 @@ export function createRequestHandler(settings, { db, requests }) {
       .filter((line) => line !== null && line !== false && line !== undefined)
       .join("\n");
 
-    const { emailStatus, leadId } = await requests.submit({
+    const { emailStatus, leadId, duplicate, resent } = await requests.submit({
       source: "chat",
       service: slug,
       idempotencyKey,
@@ -74,6 +90,7 @@ export function createRequestHandler(settings, { db, requests }) {
     });
 
     if (emailStatus !== "sent") return Response.json({ status: "failed" });
+    if (duplicate && !resent) return Response.json({ status: "sent" });
 
     try {
       if (leadId) await db.linkLead(conversationId, leadId);

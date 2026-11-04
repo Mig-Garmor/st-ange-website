@@ -32,7 +32,7 @@ export function createRequestService({ db, email, site, logger = console }) {
       }
 
       if (request?.id) await safe("setRequestEmailStatus", () => db.setRequestEmailStatus(request.id, { status: emailStatus, error }));
-      return { emailStatus, duplicate, leadId: saved?.id ?? null };
+      return { emailStatus, duplicate, ...(duplicate && { resent: true }), leadId: saved?.id ?? null };
     },
   };
 }
