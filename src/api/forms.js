@@ -1,4 +1,4 @@
-export const submitForm = async (apiRoute, data) => {
+export const submitForm = async (apiRoute, data, { onFieldErrors } = {}) => {
   try {
     const response = await fetch(`/api/${apiRoute}`, {
       method: "POST",
@@ -13,6 +13,7 @@ export const submitForm = async (apiRoute, data) => {
     } else {
       const err = await response.json();
       console.error(err.error);
+      if (response.status === 400 && err.errors && typeof err.errors === "object") onFieldErrors?.(err.errors);
       return "error";
     }
   } catch (error) {

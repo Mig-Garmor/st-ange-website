@@ -7,6 +7,7 @@ defineProps({
   error: { type: String, default: "" },
   disabled: { type: Boolean, default: false },
   autocomplete: { type: String, default: null },
+  maxlength: { type: Number, default: null },
 });
 
 const model = defineModel({ type: String, default: "" });
@@ -23,6 +24,7 @@ const id = useId();
       v-model="model"
       class="input-base"
       rows="5"
+      :maxlength="maxlength"
       :disabled="disabled"
       :aria-invalid="!!error"
     ></textarea>
@@ -32,6 +34,7 @@ const id = useId();
       v-model="model"
       class="input-base"
       :type="type"
+      :maxlength="maxlength"
       :disabled="disabled"
       :autocomplete="autocomplete"
       :aria-invalid="!!error"

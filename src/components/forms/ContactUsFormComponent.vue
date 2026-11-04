@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onMounted, watch } from "vue";
+import { computed, reactive, ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import InputFieldComponent from "@components/forms/InputFieldComponent.vue";
@@ -26,6 +26,7 @@ const subject = ref("");
 const form = reactive(emptyForm());
 const errors = reactive(emptyForm());
 const status = ref(""); // "" | "sending" | "success" | "error"
+const hasErrors = computed(() => Object.values(errors).some(Boolean));
 
 // The query only exists in the browser; reading it at render time breaks hydration of the pre-rendered page.
 onMounted(() => {
@@ -48,6 +49,10 @@ function validateForm() {
   return Object.values(errors).every((error) => !error);
 }
 
+function showServerErrors(serverErrors) {
+  for (const field of ["name", "email", "phone", "message"]) if (serverErrors[field]) errors[field] = serverErrors[field];
+}
+
 async function handleSubmit() {
   if (!validateForm()) return;
 
@@ -60,7 +65,7 @@ async function handleSubmit() {
     service: services.find((s) => s.name === subject.value)?.slug ?? null,
     pageUrl: location.href,
     idempotencyKey,
-  });
+  }, { onFieldErrors: showServerErrors });
 
   if (status.value === "success") {
     Object.assign(form, emptyForm());
@@ -81,6 +86,7 @@ async function handleSubmit() {
       v-model="form.name"
       label="Name"
       autocomplete="name"
+      :maxlength="100"
       :error="errors.name"
     />
     <InputFieldComponent
@@ -88,6 +94,7 @@ async function handleSubmit() {
       label="Your Email"
       type="email"
       autocomplete="email"
+      :maxlength="200"
       :error="errors.email"
     />
     <InputFieldComponent
@@ -95,6 +102,7 @@ async function handleSubmit() {
       label="Confirm Your Email"
       type="email"
       autocomplete="email"
+      :maxlength="200"
       :error="errors.confirmEmail"
     />
     <InputFieldComponent
@@ -108,6 +116,7 @@ async function handleSubmit() {
       v-model="form.message"
       label="Message"
       type="textarea"
+      :maxlength="2000"
       :error="errors.message"
     />
 
@@ -120,7 +129,7 @@ async function handleSubmit() {
       We will be in touch with you shortly.
     </div>
     <div v-if="status === 'error'" class="banner-error" role="alert">
-      Something went wrong. Try again or call us.
+      {{ hasErrors ? "Please check the fields above." : "Something went wrong. Try again or call us." }}
     </div>
   </form>
 </template>
