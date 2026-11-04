@@ -47,8 +47,12 @@ Customers mention these in reviews. They can only become shop statements on the 
 ## Tooling
 
 - **Automated review check.** Design and limits are in `AGENTS.md` under "Planned: automated review check".
+- **Chat go-live.** Follow the "Before going live" checklist in the README's "Chat and lead tracking" section: run `npm run db:migrate`, add the chat variables to the fork's Vercel project, then do the manual checks.
+- **Monthly: turn unanswered chat questions into FAQs.** The daily insight job records, for each chat, the questions the site couldn't answer (`conversations.unanswered`). Once a month, list the most common ones (through the Neon MCP server), and add the good ones as FAQs on the matching service page. The chat's knowledge is built from those pages, so the site, the bot and search all improve together.
+- **Chat dashboard and playbook generation.** A separate dashboard repository reads the chat tables. It is where playbooks get generated from successful conversations, once there are a few weeks of chats.
 
 ## Not pursuing
 
 - **Review stars in the regular search results.** Google doesn't show stars for a business's reviews of itself on its own site. Stars come from the Business Profile (map results and brand panel) and from directory listings.
 - **FAQ and how-to rich results.** Google limits FAQ results to government and health sites and has dropped how-to results.
+- **A database of saved chat replies.** At about €0.001 per message with prompt caching, the saving would be under €1 a month. Matching questions to saved answers needs embeddings or misfires, canned replies sound robotic, and they go stale when content changes. Instead, the fixed "Hours & location" answer covers the obvious case, and the monthly FAQ step improves the content the bot already reads.
