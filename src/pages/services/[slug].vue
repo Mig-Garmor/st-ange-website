@@ -121,7 +121,7 @@ useHead({
           <p>Prefer to talk? Call us and we'll give you a price over the phone.</p>
           <Badge :text="`Call ${business.phone.display}`" icon="mdi:phone" :href="business.phone.href" class="quote-call" />
         </div>
-        <QuoteForm :subject="service.quote.subject" />
+        <QuoteForm :subject="service.quote.subject" :service="service.slug" />
       </section>
 
       <section class="service-section">

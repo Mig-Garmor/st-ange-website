@@ -3,6 +3,8 @@ import PageHeaderComponent from "./PageHeaderComponent.vue";
 import PageFooterComponent from "./PageFooterComponent.vue";
 import MobileCallBar from "./MobileCallBar.vue";
 import RelocationNotice from "./RelocationNotice.vue";
+import ChatBubble from "../../../chat/widget/ChatBubble.vue";
+import { chatClientSettings } from "@/chatSettings.client.js";
 
 defineProps({
   callBarHiddenOver: { type: String, default: "" },
@@ -15,4 +17,5 @@ defineProps({
   <slot />
   <PageFooterComponent />
   <MobileCallBar :hidden-over="callBarHiddenOver" />
+  <ChatBubble :settings="chatClientSettings" />
 </template>

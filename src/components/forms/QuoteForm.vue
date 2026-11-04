@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, watch } from "vue";
 
 import InputFieldComponent from "@components/forms/InputFieldComponent.vue";
 import { validateName, validatePhone } from "@modules/validate.js";
@@ -7,6 +7,7 @@ import { submitForm } from "@api/forms";
 
 const props = defineProps({
   subject: { type: String, required: true },
+  service: { type: String, default: null },
 });
 
 const emptyForm = () => ({ name: "", phone: "", vehicle: "", notes: "" });
@@ -14,6 +15,11 @@ const emptyForm = () => ({ name: "", phone: "", vehicle: "", notes: "" });
 const form = reactive(emptyForm());
 const errors = reactive(emptyForm());
 const status = ref(""); // "" | "sending" | "success" | "error"
+
+let idempotencyKey = null;
+watch(form, () => {
+  idempotencyKey ??= crypto.randomUUID();
+});
 
 function validateForm() {
   errors.name = validateName(form.name);
@@ -29,12 +35,20 @@ async function handleSubmit() {
   status.value = await submitForm("send-email", {
     subject: `${props.subject} from ${form.name}`,
     name: form.name,
-    email: "not given (call back by phone)",
+    email: "",
     phone: form.phone,
+    vehicle: form.vehicle,
     message: `Vehicle: ${form.vehicle}\nNotes: ${form.notes || "none"}`,
+    source: "quote_form",
+    service: props.service,
+    pageUrl: location.href,
+    idempotencyKey,
   });
 
-  if (status.value === "success") Object.assign(form, emptyForm());
+  if (status.value === "success") {
+    Object.assign(form, emptyForm());
+    idempotencyKey = null;
+  }
 }
 </script>
 

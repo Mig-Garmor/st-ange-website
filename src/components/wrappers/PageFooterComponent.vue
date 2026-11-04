@@ -53,6 +53,8 @@ const year = new Date().getFullYear();
 
     <p class="footer-copyright">
       © {{ year }} {{ business.name }}. All rights reserved.
+      <span aria-hidden="true">·</span>
+      <RouterLink to="/privacy">Privacy</RouterLink>
     </p>
   </footer>
 </template>

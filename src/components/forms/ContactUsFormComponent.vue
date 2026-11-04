@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onMounted } from "vue";
+import { reactive, ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import InputFieldComponent from "@components/forms/InputFieldComponent.vue";
@@ -10,6 +10,7 @@ import {
   validateMessage,
 } from "@modules/validate.js";
 import { submitForm } from "@api/forms";
+import { services } from "@/config/business";
 
 const route = useRoute();
 
@@ -31,6 +32,11 @@ onMounted(() => {
   subject.value = route.query.subject || "";
 });
 
+let idempotencyKey = null;
+watch(form, () => {
+  idempotencyKey ??= crypto.randomUUID();
+});
+
 function validateForm() {
   errors.name = validateName(form.name);
   errors.email = validateEmail(form.email);
@@ -50,9 +56,16 @@ async function handleSubmit() {
   status.value = await submitForm("send-email", {
     subject: subject.value,
     ...fields,
+    source: "contact_form",
+    service: services.find((s) => s.name === subject.value)?.slug ?? null,
+    pageUrl: location.href,
+    idempotencyKey,
   });
 
-  if (status.value === "success") Object.assign(form, emptyForm());
+  if (status.value === "success") {
+    Object.assign(form, emptyForm());
+    idempotencyKey = null;
+  }
 }
 </script>
 
