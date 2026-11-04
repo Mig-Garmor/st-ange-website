@@ -240,7 +240,7 @@ If the playbooks grow large, the chat switches to loading only the playbook matc
 | Variable | Notes |
 |---|---|
 | `DATABASE_URL` | From the Neon integration on Vercel. Development and preview use their own Neon branches. |
-| `OPENROUTER_API_KEY`, `CHAT_MODEL` | `CHAT_MODEL` is an OpenRouter model id, default `openai/gpt-6-luna` |
+| `OPENROUTER_API_KEY`, `CHAT_MODEL` | `CHAT_MODEL` is a required OpenRouter model id; recommended `openai/gpt-6-luna` |
 | `LEAD_EMAIL_TO` | `stange-test@mailinator.com` in development and preview; `st.angeautos@gmail.com` in production |
 | `BREVO_API_KEY` | Existing |
 | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | |
@@ -282,5 +282,5 @@ Page speed: Lighthouse before and after on the homepage and a service page. The 
 
 ## Open items
 
-- `CHAT_MODEL` defaults to `openai/gpt-6-luna` on OpenRouter; the owner can switch to any OpenRouter model that supports tool calls.
+- `CHAT_MODEL` has no default; `openai/gpt-6-luna` on OpenRouter is recommended, and an unset value makes the chat unavailable; the owner can switch to any OpenRouter model that supports tool calls.
 - Privacy page wording, reviewed by the owner.

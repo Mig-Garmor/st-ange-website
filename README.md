@@ -18,7 +18,7 @@ Server (Vercel project settings and `.env.local`; see `.env.example`):
 | `DATABASE_URL_UNPOOLED` | Direct Neon URL used by `npm run db:migrate` |
 | `TEST_DATABASE_URL` | A separate Neon branch for the DB tests; the tests refuse to run if it matches `DATABASE_URL` |
 | `OPENROUTER_API_KEY` | OpenRouter key for chat and insights |
-| `CHAT_MODEL` | OpenRouter model id, default `openai/gpt-6-luna` (see Choosing a model) |
+| `CHAT_MODEL` | OpenRouter model id, required; recommended `openai/gpt-6-luna` (see Choosing a model) |
 | `LEAD_EMAIL_TO` | Where request and alert emails go |
 | `BREVO_API_KEY` | Email sending |
 | `TURNSTILE_SECRET_KEY` | Verifies the visitor's first message |
@@ -30,9 +30,10 @@ Server (Vercel project settings and `.env.local`; see `.env.example`):
 
 The chat and the insight job both go through [OpenRouter](https://openrouter.ai), so any model there works: set `CHAT_MODEL` to its id from [openrouter.ai/models](https://openrouter.ai/models) and redeploy. No code change is needed.
 
-- `openai/gpt-6-luna` is the default: small, cheap ($0.10 in / $0.50 out per million tokens) and supports tool calls.
+- `openai/gpt-6-luna` is the recommended model: small, cheap ($0.10 in / $0.50 out per million tokens) and supports tool calls.
 - `anthropic/claude-haiku-5.5` costs the same and is the Anthropic alternative.
-- Free models end in `:free`, for example `google/gemma-4-31b-it:free`. They are rate-limited and suited to testing, not the live site.
+- Free models end in `:free`, for example `nvidia/nemotron-3-ultra-550b-a55b:free` (worked in local testing on 2026-11-04; `google/gemma-4-31b-it:free` was rate-limited upstream). They are rate-limited and suited to testing, not the live site.
+- When switching models on Vercel, replace an old `CHAT_MODEL` value such as `gpt-6-luna` with the full OpenRouter id (`openai/gpt-6-luna`): an unknown id makes the chat unavailable without an alert.
 
 Pick a model that supports tools (the request card needs them). For `openai/` and `anthropic/` models the code asks for no hidden reasoning, so the 150-token reply budget goes to the answer; other models get no reasoning option. To change that for one model, add `reasoningEffort` (or `null` to send none) to its entry in `models` in `server/chatSettings.js`.
 
