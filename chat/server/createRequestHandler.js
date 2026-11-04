@@ -71,7 +71,9 @@ export function createRequestHandler(settings, { db, requests, validateLead }) {
       pageUrl && `Page: ${pageUrl}`,
       "",
       "Conversation:",
-      ...transcript.map(({ role, content }) => `${label(role)}: ${content}`),
+      ...transcript
+        .filter(({ role, content }) => !(role === "assistant" && /^\[.*\]$/.test(content.trim())))
+        .map(({ role, content }) => `${label(role)}: ${content}`),
     ]
       .filter((line) => line !== null && line !== false && line !== undefined)
       .join("\n");

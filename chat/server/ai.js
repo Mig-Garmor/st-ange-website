@@ -57,7 +57,9 @@ export function createProposeRequest(serviceSlugs, { validateLead } = {}) {
       phone: loose(),
       email: loose(),
       vehicle: loose(),
-      notes: loose(),
+      notes: loose().describe(
+        "One or two short lines for the mechanic: the problem or request in the customer's words (e.g. pulls to the right since hitting a pothole), plus anything they said about timing.",
+      ),
     }),
     ...(validateLead && { execute: async (input) => checkProposal(input, { slugs: serviceSlugs, validateLead }) }),
   });

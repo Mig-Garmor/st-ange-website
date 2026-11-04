@@ -116,6 +116,19 @@ describe("createRequestHandler", () => {
     expect(text).toMatch(/Conversation:\nCustomer: My car pulls left\nAssistant: An alignment may help\./);
   });
 
+  it("leaves internal notes out of the email but keeps a visitor's bracketed text", async () => {
+    const requests = fakeRequests();
+    const getMessages = async () => [
+      { role: "user", content: "[2019 Civic] pulls left" },
+      { role: "assistant", content: "Here is the card." },
+      { role: "assistant", content: "[Request card shown: car-alignment]" },
+    ];
+    await createRequestHandler(settings, { db: fakeDb({ getMessages }), requests })(post(body()));
+    const { text } = requests.submit.mock.calls[0][0];
+    expect(text).toContain("Customer: [2019 Civic] pulls left");
+    expect(text).not.toContain("[Request card shown");
+  });
+
   it("links the lead and saves the closing message on success", async () => {
     const db = fakeDb();
     const res = await createRequestHandler(settings, { db, requests: fakeRequests() })(post(body()));
