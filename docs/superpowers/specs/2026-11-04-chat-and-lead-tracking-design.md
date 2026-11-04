@@ -63,7 +63,7 @@ Rules:
 - Only `server/db/*` contains SQL. Everything else calls named functions such as `recordRequest()` or `saveMessage()`.
 - `src/chat-settings.js` builds the bot's knowledge from `src/config/business.js` and `src/content/*.js`, the same files the pages use, so there is one source of truth for content. It includes services, intros, FAQs, hours, address, the rating and review count, but not full review texts.
 
-Libraries added: `ai`, `@ai-sdk/openai`, `@ai-sdk/vue`, `@neondatabase/serverless`, and `vitest` (dev). No ORM.
+Libraries added: `ai`, `@openrouter/ai-sdk-provider`, `@ai-sdk/vue`, `@neondatabase/serverless`, and `vitest` (dev). No ORM.
 
 ## Data model
 
@@ -154,7 +154,7 @@ If the database fails, the reply still streams and the error is logged. If the A
 4. The parts that change: today's date, whether the shop is open now, the current page.
 5. The conversation, sent in full and at most 20 messages.
 
-`prompt_cache_key` is set to the site. Rules:
+OpenAI models cache this prefix automatically; for `anthropic/` models the stable part carries a cache breakpoint. Rules:
 
 - Reply in 1–3 short sentences of plain text, like a person at the front desk.
 - Ask one question at a time to understand the need, instead of listing information.
@@ -182,13 +182,13 @@ If the database fails, the reply still streams and the error is logged. If the A
 
 ## Cost control
 
-- The price per million tokens for each model (input, cached input, output) lives in the settings. Each call's usage is converted to euros and added to `ai_usage_daily`.
+- Calls go through OpenRouter with usage accounting on, so each response reports its real cost in USD (0 for `:free` models). That cost is converted to euros and added to `ai_usage_daily` with the token counts. The per-model price table in the settings is only a fallback for a call that reports no cost; a call with neither a reported cost nor a price pauses the chat and sends an alert.
 - The daily cap is €5 and is checked before every AI call.
 - Pausing is sticky: it does not reset at midnight. Resume is manual: `UPDATE chat_state SET status='active', resumed_at=now(), resume_cost_eur=(SELECT coalesce(sum(cost_eur),0) FROM ai_usage_daily WHERE site='st-ange' AND day=(now() AT TIME ZONE 'America/Chicago')::date) WHERE site='st-ange';`, run by hand or through MCP for now, and a dashboard button later.
 - A resume stores the day's spend so far in `resume_cost_eur` (migration `002_resume_allowance.sql`). For the rest of that Chicago day, the cap checks measure spend as today's cost minus `resume_cost_eur`, so a resumed chat gets another full cap; from the next day the normal daily cap applies.
 - The alert email reports the time, the day's cost, the number of messages and the number of distinct visitors.
 - Possible overshoot is limited to replies already in flight when the cap is hit (a few cents).
-- Outside the code: prepaid OpenAI credit with auto-recharge off, as a hard backstop.
+- Outside the code: prepaid OpenRouter credit with auto top-up off, as a hard backstop.
 - Expected cost is roughly €0.001 per message with a small model and caching, so €5 is reached only through abuse.
 
 ## Concurrency
@@ -240,7 +240,7 @@ If the playbooks grow large, the chat switches to loading only the playbook matc
 | Variable | Notes |
 |---|---|
 | `DATABASE_URL` | From the Neon integration on Vercel. Development and preview use their own Neon branches. |
-| `OPENAI_API_KEY`, `CHAT_MODEL` | |
+| `OPENROUTER_API_KEY`, `CHAT_MODEL` | `CHAT_MODEL` is an OpenRouter model id, default `openai/gpt-6-luna` |
 | `LEAD_EMAIL_TO` | `stange-test@mailinator.com` in development and preview; `st.angeautos@gmail.com` in production |
 | `BREVO_API_KEY` | Existing |
 | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | |
@@ -282,5 +282,5 @@ Page speed: Lighthouse before and after on the homepage and a service page. The 
 
 ## Open items
 
-- Which model `CHAT_MODEL` names, chosen at implementation time as OpenAI's cheapest current small model that supports tool calls. Its prices go in the settings.
+- `CHAT_MODEL` defaults to `openai/gpt-6-luna` on OpenRouter; the owner can switch to any OpenRouter model that supports tool calls.
 - Privacy page wording, reviewed by the owner.
