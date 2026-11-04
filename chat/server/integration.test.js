@@ -169,4 +169,23 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("chat end to end against a real 
     expect(email.send.mock.calls[0][0].subject).toBe("Chat paused: daily cap reached");
     expect(await isAvailable({ db, settings, now: NOW })).toBe(false);
   }, 30_000);
+
+  it("records a reported cost for an unpriced model, and pauses on one without a cost", async () => {
+    const site = `test-${randomUUID()}`;
+    const settings = makeSettings(site, { providerReportsCost: true });
+    const email = fakeEmail();
+    await recordUsage({ db, email, settings, model: "openai/unpriced", usage: { ...usage, costUsd: 0.01 }, now: NOW });
+    const day = (await db.getUsage(site, "2026-11-04")).costEur;
+    expect(day).toBeCloseTo(0.009, 6);
+    expect(await isAvailable({ db, settings, now: NOW })).toBe(true);
+
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    await recordUsage({ db, email, settings, model: "openai/unpriced", usage, now: NOW });
+    log.mockRestore();
+    const state = await db.getChatState(site);
+    expect(state.status).toBe("paused");
+    expect(state.pauseReason).toBe("unpriced call without a reported cost");
+    expect(email.send).toHaveBeenCalledTimes(1);
+    expect(await isAvailable({ db, settings, now: NOW })).toBe(false);
+  }, 30_000);
 });

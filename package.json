@@ -12,12 +12,12 @@
     "test:db": "node --env-file-if-exists=.env.local node_modules/vitest/vitest.mjs run server/db chat/server/integration.test.js"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^4.0.108",
     "@ai-sdk/vue": "^4.0.162",
     "@iconify/vue": "^5.0.0",
     "@neon/config": "^1.10.1",
     "@neon/env": "^1.6.9",
     "@neondatabase/serverless": "^1.2.0",
+    "@openrouter/ai-sdk-provider": "^3.1.0",
     "@sendinblue/client": "^3.3.1",
     "@unhead/vue": "^2.1.17",
     "@vercel/functions": "^3.10.6",

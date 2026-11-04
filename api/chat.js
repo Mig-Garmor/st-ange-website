@@ -1,5 +1,5 @@
 import { waitUntil } from "@vercel/functions";
-import { createAi } from "../chat/server/ai.js";
+import { createAi, reasoningEffortFor } from "../chat/server/ai.js";
 import { createChatHandler } from "../chat/server/createChatHandler.js";
 import { createTurnstile } from "../chat/server/turnstile.js";
 import { chatServerSettings } from "../server/chatSettings.js";
@@ -17,10 +17,9 @@ export async function POST(request) {
   const handler = createChatHandler(chatServerSettings, {
     db: process.env.DATABASE_URL ? createDb(getSql()) : noDb,
     ai: createAi({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.OPENROUTER_API_KEY,
       model,
-      cacheKey: chatServerSettings.site,
-      reasoningEffort: chatServerSettings.models[model]?.reasoningEffort,
+      reasoningEffort: reasoningEffortFor(chatServerSettings, model),
     }),
     email: createEmail({
       apiKey: process.env.BREVO_API_KEY,

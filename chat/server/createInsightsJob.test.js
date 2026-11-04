@@ -127,4 +127,34 @@ describe("createInsightsJob", () => {
     expect(db.saveInsights).toHaveBeenCalledWith("a", { outcome: "abandoned" });
     expect(db.saveInsights).toHaveBeenCalledWith("b", { outcome: "abandoned" });
   });
+
+  it("with a provider that reports cost, an unpriced model runs and records the reported cost", async () => {
+    const db = fakeDb({ claimForInsights: vi.fn(async () => [{ id: "a", transcript: "user: hi" }]) });
+    const ai = { generateInsights: vi.fn(async () => ({ object: insight, usage: { ...usage, costUsd: 0.002 } })) };
+    const reporting = { ...settings, providerReportsCost: true };
+    const res = await createInsightsJob(reporting, {
+      db, ai, email: { send: vi.fn() }, model: "openai/new-model", cronSecret: "s3cret", now: () => new Date("2026-11-04T12:00:00Z"),
+    })(req("Bearer s3cret"));
+    expect(await res.json()).toEqual({ processed: 1, failed: 0 });
+    expect(db.addUsage.mock.calls[0][0].costEur).toBeCloseTo(0.002 * 0.9, 12);
+  });
+
+  it("an unpriced call without a reported cost pauses the chat and stops the batch", async () => {
+    let paused = false;
+    const db = fakeDb({
+      getChatState: vi.fn(async () => ({ status: paused ? "paused" : "active" })),
+      pauseChat: vi.fn(async () => ((paused = true), true)),
+      dayStats: vi.fn(async () => ({ messages: 1, visitors: 1 })),
+    });
+    const ai = { generateInsights: vi.fn(async () => ({ object: insight, usage })) };
+    const email = { send: vi.fn(async () => {}) };
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const res = await createInsightsJob({ ...settings, providerReportsCost: true }, {
+      db, ai, email, model: "openai/new-model", cronSecret: "s3cret", now: () => new Date("2026-11-04T12:00:00Z"),
+    })(req("Bearer s3cret"));
+    expect(await res.json()).toEqual({ processed: 1, failed: 0 });
+    expect(ai.generateInsights).toHaveBeenCalledTimes(1);
+    expect(db.pauseChat).toHaveBeenCalledWith("test-site", "unpriced call without a reported cost");
+    expect(email.send).toHaveBeenCalledTimes(1);
+  });
 });

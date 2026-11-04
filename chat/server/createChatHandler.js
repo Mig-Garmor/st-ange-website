@@ -133,7 +133,7 @@ export function createChatHandler(
 
     try {
       return await ai.streamReply({
-        system: `${stable}\n\n${variable}`,
+        system: [stable, variable],
         messages: history,
         maxOutputTokens: settings.maxOutputTokens,
         tools,

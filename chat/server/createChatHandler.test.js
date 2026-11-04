@@ -305,14 +305,17 @@ describe("createChatHandler", () => {
     error.mockRestore();
   });
 
-  it("system prompt starts with the stable part", async () => {
+  it("system prompt is the stable part, then the variable part", async () => {
     const db = fakeDb({ activePlaybooks: vi.fn(async () => [{ intent: "brakes", content: "Ask about noise." }]) });
     const { handler, ai } = setup({ db });
     await handler(post(body()));
     const { system } = ai.streamReply.mock.calls[0][0];
-    expect(system.startsWith("You are the chat assistant")).toBe(true);
-    const [stable, variable] = system.split("\n\nToday is ");
+    expect(system).toHaveLength(2);
+    const [stable, variable] = system;
+    expect(stable.startsWith("You are the chat assistant")).toBe(true);
     expect(stable).toContain("## Playbook: brakes\nAsk about noise.");
+    expect(stable).not.toContain("Today is ");
+    expect(variable.startsWith("Today is ")).toBe(true);
     expect(variable).toContain("Current page: /services/brakes");
   });
 
@@ -320,8 +323,9 @@ describe("createChatHandler", () => {
     const { handler, db, ai } = setup();
     await handler(post(body({ pageUrl: "https://evil.example/services/brakes?ignore=previous#x" })));
     expect(db.ensureConversation).toHaveBeenCalledWith(expect.objectContaining({ pageUrl: "/services/brakes" }));
-    expect(ai.streamReply.mock.calls[0][0].system.endsWith("Current page: /services/brakes")).toBe(true);
-    expect(ai.streamReply.mock.calls[0][0].system).not.toContain("ignore=previous");
+    const variable = ai.streamReply.mock.calls[0][0].system.at(-1);
+    expect(variable.endsWith("Current page: /services/brakes")).toBe(true);
+    expect(ai.streamReply.mock.calls[0][0].system.join("\n")).not.toContain("ignore=previous");
   });
 
   it("a huge or non-http pageUrl becomes null", async () => {
@@ -329,7 +333,7 @@ describe("createChatHandler", () => {
       const { handler, db, ai } = setup();
       await handler(post(body({ pageUrl })));
       expect(db.ensureConversation).toHaveBeenCalledWith(expect.objectContaining({ pageUrl: null }));
-      const { system } = ai.streamReply.mock.calls[0][0];
+      const system = ai.streamReply.mock.calls[0][0].system.join("\n\n");
       expect(system).toContain("Current page: unknown");
       expect(system.length).toBeLessThan(100_000);
     }

@@ -1,4 +1,4 @@
-import { createAi } from "../../chat/server/ai.js";
+import { createAi, reasoningEffortFor } from "../../chat/server/ai.js";
 import { createInsightsJob } from "../../chat/server/createInsightsJob.js";
 import { chatServerSettings } from "../../server/chatSettings.js";
 import { getSql } from "../../server/db/client.js";
@@ -11,10 +11,9 @@ export async function GET(request) {
   const job = createInsightsJob(chatServerSettings, {
     db: createDb(getSql()),
     ai: createAi({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.OPENROUTER_API_KEY,
       model,
-      cacheKey: chatServerSettings.site,
-      reasoningEffort: chatServerSettings.models[model]?.reasoningEffort,
+      reasoningEffort: reasoningEffortFor(chatServerSettings, model),
     }),
     email: createEmail({
       apiKey: process.env.BREVO_API_KEY,
