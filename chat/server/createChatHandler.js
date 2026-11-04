@@ -88,7 +88,7 @@ export function createChatHandler(
       console.error("Chat history failed, using client text", error);
     }
     const latest = stored?.at(-1);
-    // A reload mid-reply re-sends a first message that was stored but never answered.
+    // A reload mid-reply re-sends a message that was stored but never answered.
     const unanswered = latest?.role === "user" && latest.content === text;
     if (!unanswered) {
       try {

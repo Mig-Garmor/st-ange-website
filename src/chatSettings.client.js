@@ -9,7 +9,6 @@ export const chatClientSettings = {
   notice: "We save this chat to help with your request.",
   privacyPath: "/privacy",
   quickReplies: ["Wheel alignment", "Brake repair", "Get a quote", "Hours & location"],
-  hoursAndLocation,
   localAnswers: { "Hours & location": hoursAndLocation },
   phoneDisplay: business.phone.display,
   phoneHref: business.phone.href,

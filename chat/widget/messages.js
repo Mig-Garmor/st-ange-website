@@ -8,7 +8,7 @@ export const textOf = (message) =>
 
 export const isLocal = (message) => message.metadata?.local === true;
 
-// Answered in the browser from settings; the server never sees or stores this pair.
+// Answered in the browser from settings; the server never stores this pair.
 export const localExchange = (question, answer, newId = () => crypto.randomUUID()) =>
   [
     ["user", question],
