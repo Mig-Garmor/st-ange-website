@@ -36,7 +36,7 @@ const body = (over = {}) => ({
   service: "car-alignment",
   name: "Jane",
   phone: "832-572-7121",
-  email: "",
+  email: "jane@example.com",
   vehicle: "2015 Civic",
   notes: "Pulls left",
   pageUrl: "http://localhost/",
@@ -184,6 +184,14 @@ describe("createRequestHandler", () => {
     const db = fakeDb({ countRequestsForConversation: vi.fn(async () => 2) });
     const res = await createRequestHandler(settings, { db, requests })(post(body()));
     expect(await res.json()).toEqual({ status: "sent" });
+  });
+
+  it("400 when the email is missing, since the chat requires one", async () => {
+    const requests = fakeRequests();
+    const res = await createRequestHandler(settings, { db: fakeDb(), requests })(post(body({ email: "" })));
+    expect(res.status).toBe(400);
+    expect((await res.json()).errors).toEqual({ email: "Invalid email address" });
+    expect(requests.submit).not.toHaveBeenCalled();
   });
 
   it("400 with field errors when free text is over its cap", async () => {

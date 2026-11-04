@@ -43,7 +43,7 @@ export function createRequestHandler(settings, { db, requests, validateLead }) {
     }
 
     const lengthErrors = tooLong(body);
-    const { ok, errors, lead } = validateLead(body, { requireVehicle: true });
+    const { ok, errors, lead } = validateLead(body, { requireVehicle: true, requireEmail: true });
     if (!ok || Object.keys(lengthErrors).length) {
       return Response.json({ status: "invalid", errors: { ...errors, ...lengthErrors } }, { status: 400 });
     }

@@ -6,6 +6,7 @@ import { chatServerSettings } from "../server/chatSettings.js";
 import { getSql } from "../server/db/client.js";
 import { createDb } from "../server/db/index.js";
 import { createEmail } from "../server/email.js";
+import { validateLead } from "../server/validate.js";
 
 const unavailable = () => {
   throw new Error("DATABASE_URL is not set");
@@ -28,6 +29,7 @@ export async function POST(request) {
     turnstile: createTurnstile({ secret: process.env.TURNSTILE_SECRET_KEY }),
     ipSalt: process.env.IP_HASH_SALT,
     model,
+    validateLead,
     waitUntil,
   });
   return handler(request);

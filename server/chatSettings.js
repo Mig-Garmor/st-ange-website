@@ -43,10 +43,13 @@ ${qa(faqs)}`;
 
 const featured = `The shop has a new alignment machine and offers brake services. Mention them when the person talks about new tires, suspension work, the car pulling to one side, a crooked steering wheel, a squealing or grinding noise when braking, or a soft brake pedal. Do not mention them otherwise.`;
 
+export const localAreaCodes = ["281", "832", "346", "713"];
+
 export const chatServerSettings = {
   site: "st-ange",
   timeZone: "America/Chicago",
   phoneDisplay: business.phone.display,
+  localAreaCodes,
   knowledge,
   featured,
   services: services.map(({ slug, name }) => ({ slug, name })),

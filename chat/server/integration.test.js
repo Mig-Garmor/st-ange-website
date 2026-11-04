@@ -94,7 +94,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("chat end to end against a real 
     expect(today.costEur).toBeGreaterThan(0);
 
     const idempotencyKey = randomUUID();
-    const card = { conversationId, idempotencyKey, name: "Jane Driver", phone: "+1 (832) 555-0142", vehicle: "2015 Honda Civic", service: "brakes", notes: "Squealing when braking" };
+    const card = { conversationId, idempotencyKey, name: "Jane Driver", phone: "+1 (832) 555-0142", email: "jane@example.com", vehicle: "2015 Honda Civic", service: "brakes", notes: "Squealing when braking" };
     expect(await (await handleRequest(jsonRequest(card))).json()).toEqual({ status: "sent" });
     expect(await (await handleRequest(jsonRequest(card))).json()).toEqual({ status: "sent" });
 

@@ -1,7 +1,8 @@
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { generateText, NoObjectGeneratedError, Output, streamText, tool } from "ai";
+import { generateText, isStepCount, NoObjectGeneratedError, Output, streamText, tool } from "ai";
 import { z } from "zod";
 import { humanize, humanizeTransform } from "./humanText.js";
+import { checkProposal } from "./proposal.js";
 
 export const toUsage = (usage = {}, costUsd) => ({
   inputTokens: usage.inputTokens,
@@ -27,18 +28,22 @@ export const reasoningEffortFor = (settings, model) => {
   return REASONING_DEFAULT.test(model ?? "") ? settings.defaultReasoningEffort : undefined;
 };
 
-export function createProposeRequest(serviceSlugs) {
+const loose = () => z.union([z.string(), z.number()]).nullish().transform((v) => (v == null ? v : String(v)));
+
+export function createProposeRequest(serviceSlugs, { validateLead } = {}) {
   return tool({
     description:
-      "Show the visitor a request card to confirm and send. Use once you have their name, phone and vehicle.",
+      "Check the visitor's details and, if they are valid, show a request card to confirm and send. Use once you have their name, phone, email and vehicle. If it returns errors, ask the visitor to fix those fields.",
+    // Lenient on purpose: an input that fails the schema skips execute, so the model's reply can claim a card that never renders.
     inputSchema: z.object({
-      service: z.enum(serviceSlugs).nullable(),
-      name: z.string(),
-      phone: z.string(),
-      email: z.string().nullable(),
-      vehicle: z.string(),
-      notes: z.string(),
+      service: loose().describe(`One of: ${serviceSlugs.join(", ")}`),
+      name: loose(),
+      phone: loose(),
+      email: loose(),
+      vehicle: loose(),
+      notes: loose(),
     }),
+    ...(validateLead && { execute: async (input) => checkProposal(input, { slugs: serviceSlugs, validateLead }) }),
   });
 }
 
@@ -78,6 +83,9 @@ export function createAi({ apiKey, model, reasoningEffort, provider = openRouter
         messages,
         maxOutputTokens,
         tools,
+        // Step two lets the model react to the tool's verdict; it may not propose again in the same turn.
+        stopWhen: isStepCount(2),
+        prepareStep: ({ stepNumber }) => (stepNumber > 0 ? { toolChoice: "none" } : {}),
         providerOptions,
         experimental_transform: humanizeTransform(),
         onError: ({ error }) => {
@@ -85,10 +93,13 @@ export function createAi({ apiKey, model, reasoningEffort, provider = openRouter
           onError?.(error);
         },
         onEnd: async (event) => {
-          const call = event.toolCalls?.find((c) => c.toolName === "proposeRequest");
+          const steps = event.steps ?? [];
+          const call = steps.flatMap((s) => s.toolCalls ?? []).find((c) => c.toolName === "proposeRequest");
+          const result = call && steps.flatMap((s) => s.toolResults ?? []).find((r) => r.toolCallId === call.toolCallId);
+          const text = steps.length ? steps.map((s) => s.text ?? "").filter(Boolean).join(" ") : (event.text ?? "");
           await onFinish?.({
-            text: humanize(event.text ?? ""),
-            toolCall: call ? { toolName: call.toolName, input: call.input } : null,
+            text: humanize(text),
+            toolCall: call ? { toolName: call.toolName, input: call.input, output: result?.output ?? null } : null,
             usage: toUsage(event.totalUsage ?? event.usage, reportedCostUsd(event.steps)),
           });
         },

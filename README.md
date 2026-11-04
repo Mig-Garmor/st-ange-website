@@ -37,6 +37,10 @@ The chat and the insight job both go through [OpenRouter](https://openrouter.ai)
 
 Pick a model that supports tools (the request card needs them). For `openai/`, `anthropic/` and `nvidia/` models the code asks for no hidden reasoning, so the 150-token reply budget goes to the answer; other models get no reasoning option, because some reject it ("Reasoning is mandatory"). A model that reasons by default and gets no option can use up the whole budget and reply with nothing. To change that for one model, add `reasoningEffort` (or `null` to send none) to its entry in `models` in `server/chatSettings.js`.
 
+### Request card
+
+The chat asks for name, phone, email and vehicle (email is required in the chat; the website quote form keeps it optional). The `proposeRequest` tool checks the details with the same `validateLead` rules as `/api/chat-request` before any card is shown: placeholder emails such as "none" count as missing, an unknown service becomes "Not sure yet", and the phone is shown as `832-572-7121`. If something is invalid the tool returns field errors and the model asks the visitor to fix them in a second step; the card renders only for an `ok` result. The local area codes the bot suggests for a 7-digit number are `localAreaCodes` in `server/chatSettings.js`.
+
 ### Switching the bubble on
 
 Set `VITE_CHAT_ENABLED=true` and `VITE_TURNSTILE_SITE_KEY` (the public Turnstile key) at build time; the bubble shows only when both are set. Otherwise it stays hidden and forms keep emailing as before.

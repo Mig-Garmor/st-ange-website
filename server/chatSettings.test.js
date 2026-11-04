@@ -20,6 +20,7 @@ describe("chatServerSettings", () => {
   it("exposes the fixed limits", () => {
     expect(chatServerSettings.limits).toEqual({ maxChars: 500, maxUserMessages: 20, perHour: 40 });
     expect(chatServerSettings.services.map((s) => s.slug)).toEqual(services.map((s) => s.slug));
+    expect(chatServerSettings.localAreaCodes).toEqual(["281", "832", "346", "713"]);
   });
 
   it("uses the fixed chat copy", () => {
