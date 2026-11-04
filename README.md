@@ -40,7 +40,7 @@ Pick a model that supports tools (the request card needs them). For `openai/`, `
 
 ### Request card
 
-The chat asks for name, phone, email and vehicle (email is required in the chat; the website quote form keeps it optional). The `proposeRequest` tool checks the details with the same `validateLead` rules as `/api/chat-request` before any card is shown: placeholder emails such as "none" count as missing, an unknown service becomes "Not sure yet", and the phone is shown as `832-572-7121`. If something is invalid the tool returns field errors and the model asks the visitor to fix them in a second step; the card renders only for an `ok` result. The local area codes the bot suggests for a 7-digit number are `localAreaCodes` in `server/chatSettings.js`.
+The chat asks for name, phone, email and vehicle (email is required in the chat; the website quote form keeps it optional). The `proposeRequest` tool checks the details with the same `validateLead` rules as `/api/chat-request` before any card is shown: placeholder emails such as "none" count as missing, an unknown service becomes "Not sure yet", and the phone is shown as `832-572-7121`. If something is invalid the tool returns field errors and the model asks the visitor to fix them in a second step; the card renders only for an `ok` result. The local area codes the bot suggests for a 7-digit number are `localAreaCodes` in `src/config/business.js`, shared by the chat, the request card and the website forms.
 
 ### Switching the bubble on
 

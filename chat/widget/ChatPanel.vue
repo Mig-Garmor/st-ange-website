@@ -93,8 +93,8 @@ watch(
   },
 );
 
-watch([noReply, failed], ([missing, broken]) => {
-  if (missing || broken) scrollToBottom("smooth");
+watch([noReply, failed, verifyFailed], (states) => {
+  if (states.some(Boolean)) scrollToBottom("smooth");
 });
 
 function send(text) {
