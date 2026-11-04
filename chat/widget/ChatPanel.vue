@@ -5,6 +5,7 @@ import { DefaultChatTransport } from "ai";
 import RequestCard from "./RequestCard.vue";
 import { createTurnstile } from "./turnstile.js";
 import { loadSession, saveSession, visitorId } from "./storage.js";
+import { chatState, hasUnsentFirstMessage, isVerified, textOf } from "./messages.js";
 
 const props = defineProps({
   settings: { type: Object, required: true },
@@ -24,17 +25,6 @@ let turnstile = null;
 
 const saved = loadSession();
 const conversation = shallowRef({ id: saved?.id ?? crypto.randomUUID(), messages: saved?.messages ?? [] });
-
-const chatState = (message) => message.parts?.find((part) => part.type === "data-chat-state")?.data?.state;
-const textOf = (message) =>
-  (message.parts ?? [])
-    .filter((part) => part.type === "text")
-    .map((part) => part.text)
-    .join("");
-
-// Any AI reply, or the limit notice, means the server has a verified conversation for this id.
-const isVerified = (list) =>
-  list.some((m) => m.role === "assistant" && !["offline", "error"].includes(chatState(m)) && m.parts?.length);
 
 const transport = new DefaultChatTransport({
   api: "/api/chat",
@@ -87,7 +77,7 @@ watch(
 function send(text) {
   const value = text.trim().slice(0, MAX_CHARS);
   if (!value || busy.value) return;
-  verifyFailed.value = false;
+  if (verifyFailed.value) return retry();
   if (status.value === "error") clearError();
   sendMessage({ text: value });
 }
@@ -116,6 +106,7 @@ watch(
 onMounted(() => {
   turnstile = createTurnstile(challenge.value, props.settings.turnstileSiteKey);
   if (!isVerified(messages.value)) turnstile.warm();
+  if (hasUnsentFirstMessage(messages.value)) verifyFailed.value = true;
   emit("ready");
   if (props.open) focusInput();
 });
@@ -207,7 +198,7 @@ onBeforeUnmount(() => turnstile?.remove());
 
     <div ref="challenge" class="challenge"></div>
 
-    <form class="composer" @submit.prevent="submit">
+    <form v-if="!verifyFailed" class="composer" @submit.prevent="submit">
       <input
         ref="field"
         aria-label="Your message"
