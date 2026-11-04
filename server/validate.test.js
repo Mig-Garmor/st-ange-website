@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { validatePhone } from "../src/modules/validate.js";
 import { validateLead } from "./validate.js";
 
 const lead = { name: "Ann", phone: "832-555-0100", email: "", vehicle: "Civic" };
@@ -17,5 +18,11 @@ describe("validateLead phone errors", () => {
   it("accepts a 10-digit or +1 number, and email stays optional unless required", () => {
     expect(validateLead({ ...lead, phone: "+1 (832) 555-0100" })).toMatchObject({ ok: true, lead: { phone: "8325550100" } });
     expect(validateLead(lead, { requireEmail: true }).errors).toEqual({ email: "Invalid email address" });
+  });
+
+  it("the website forms' browser check names the missing area code too", () => {
+    expect(validatePhone("555-0100")).toBe("Add the area code (281, 832, 346 or 713)");
+    expect(validatePhone("832-555-0100")).toBe("");
+    expect(validatePhone("12345")).toBe("Invalid phone number");
   });
 });

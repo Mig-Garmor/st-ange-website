@@ -7,6 +7,7 @@ export const business = {
     href: "tel:+18325727121",
     schema: "+1-832-572-7121",
   },
+  localAreaCodes: ["281", "832", "346", "713"],
   address: {
     street: "108 Schilling Ave",
     area: "Schilling Avenue",

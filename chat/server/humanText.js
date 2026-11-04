@@ -3,16 +3,17 @@ export function humanize(text) {
   return text
     .replace(/(\d)\s*[–—]\s*(\d)/g, "$1-$2")
     .replace(/\s*[—–]\s*/g, ", ")
-    .replace(/,\s*([.,!?;:])/g, "$1");
+    .replace(/,\s*([.,!?;:])/g, "$1")
+    .replace(/,\s{2,}/g, ", ");
 }
 
-// Trailing whitespace is held back so a dash split across chunks still loses the space before it.
+// The raw tail a later chunk could still change (digits, spaces, commas, dashes) is held back unconverted.
 export function humanizeTransform() {
   return () => {
     let pending = "";
     let pendingId;
     const flush = (controller) => {
-      if (pending) controller.enqueue({ type: "text-delta", id: pendingId, text: pending });
+      if (pending) controller.enqueue({ type: "text-delta", id: pendingId, text: humanize(pending) });
       pending = "";
     };
     return new TransformStream({
@@ -22,9 +23,10 @@ export function humanizeTransform() {
           controller.enqueue(chunk);
           return;
         }
-        const joined = humanize(pending + chunk.text);
-        const body = joined.trimEnd();
-        pending = joined.slice(body.length);
+        const raw = pending + chunk.text;
+        const tail = raw.match(/[\d\s,–—]*$/)[0];
+        const body = humanize(raw.slice(0, raw.length - tail.length));
+        pending = tail;
         pendingId = chunk.id;
         if (body) controller.enqueue({ ...chunk, text: body });
       },

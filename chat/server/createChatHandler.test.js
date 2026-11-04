@@ -336,12 +336,13 @@ describe("createChatHandler", () => {
       { role: "assistant", content: "Here are your details." },
       { role: "assistant", content: "[Request card shown: car-alignment]" },
       { role: "assistant", content: "[Request sent to the shop]" },
+      { role: "user", content: "[sic] my brakes" },
     ];
     const db = fakeDb({ getMessages: vi.fn(async () => withNotes) });
     const { handler, ai } = setup({ db });
     await handler(post(body()));
     const { messages: sent, system } = ai.streamReply.mock.calls[0][0];
-    expect(sent.map((m) => m.content)).toEqual(["Book alignment", "Here are your details.", "Brakes squeal"]);
+    expect(sent.map((m) => m.content)).toEqual(["Book alignment", "Here are your details.", "[sic] my brakes", "Brakes squeal"]);
     expect(system[1]).toContain("A request card was shown earlier in this chat.");
     expect(system[1]).toContain("The visitor already sent a request to the shop in this chat.");
   });
@@ -357,6 +358,8 @@ describe("createChatHandler", () => {
     await onFinish({ text: "Tap Send request below.", toolCall: failed, usage: {} });
     expect(db.saveMessage).not.toHaveBeenCalled();
     expect(db.addUsage).toHaveBeenCalled();
+    await onFinish({ text: "Once that's fixed you can send requests any time.", toolCall: null, usage: {} });
+    expect(db.saveMessage).toHaveBeenCalledOnce();
     warn.mockRestore();
   });
 

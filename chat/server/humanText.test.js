@@ -18,6 +18,10 @@ describe("humanize", () => {
     expect(humanize("Open late —.")).toBe("Open late.");
   });
 
+  it("never leaves a double space after the comma", () => {
+    expect(humanize("We can help,  just")).toBe("We can help, just");
+  });
+
   it("leaves text without dashes unchanged", () => {
     expect(humanize("Call us at 832-572-7121.")).toBe("Call us at 832-572-7121.");
   });
@@ -54,5 +58,21 @@ describe("humanizeTransform", () => {
     ]);
     expect(out.map((c) => c.type)).toEqual(["text-delta", "text-delta", "tool-call"]);
     expect(out.slice(0, 2).map((c) => c.text).join("")).toBe("Hello ");
+  });
+
+  const textOf = (out) => out.filter((c) => c.type === "text-delta").map((c) => c.text).join("");
+  const deltas = (parts) => [...parts.map((text) => ({ type: "text-delta", id: "t", text })), { type: "text-end", id: "t" }];
+
+  it("a dash streamed as its own token with a leading space gives one space", async () => {
+    expect(textOf(await run(deltas(["We can help", " —", " just"])))).toBe("We can help, just");
+  });
+
+  it("a range split across chunks stays a hyphen", async () => {
+    expect(textOf(await run(deltas(["It takes 1", "–2 hours"])))).toBe("It takes 1-2 hours");
+    expect(textOf(await run(deltas(["8 AM ", "1", " – ", "2"])))).toBe("8 AM 1-2");
+  });
+
+  it("a dash before punctuation in the next chunk leaves no comma", async () => {
+    expect(textOf(await run(deltas(["Open late", " —", "."])))).toBe("Open late.");
   });
 });

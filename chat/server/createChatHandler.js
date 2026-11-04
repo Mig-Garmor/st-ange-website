@@ -10,7 +10,7 @@ const HISTORY = 20;
 const NOTE = /^\[[^\]]*\]$/;
 const CARD_NOTE = /^\[Request card shown/;
 const SENT_NOTE = /^\[Request sent/;
-const CLAIMS_CARD = /send request/i;
+const CLAIMS_CARD = /tap (the )?send request|send request (button|below)/i;
 
 const textOf = (message) =>
   (message?.parts ?? [])
@@ -104,11 +104,11 @@ export function createChatHandler(
       }
     }
     // Bracketed notes are for transcripts; the model copied them verbatim, so it gets them as context instead.
-    const history = stored ? stored.filter((m) => !NOTE.test(m.content)).slice(-HISTORY) : clientHistory(messages);
-    const cardShown = Boolean(stored?.some((m) => CARD_NOTE.test(m.content)));
+    const history = stored ? stored.filter((m) => m.role !== "assistant" || !NOTE.test(m.content)).slice(-HISTORY) : clientHistory(messages);
+    const cardShown = Boolean(stored?.some((m) => m.role === "assistant" && CARD_NOTE.test(m.content)));
     const earlier = [
       cardShown && "A request card was shown earlier in this chat.",
-      stored?.some((m) => SENT_NOTE.test(m.content)) && "The visitor already sent a request to the shop in this chat.",
+      stored?.some((m) => m.role === "assistant" && SENT_NOTE.test(m.content)) && "The visitor already sent a request to the shop in this chat.",
     ].filter(Boolean);
 
     let playbooks = [];

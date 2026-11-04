@@ -43,13 +43,11 @@ ${qa(faqs)}`;
 
 const featured = `The shop has a new alignment machine and offers brake services. Mention them when the person talks about new tires, suspension work, the car pulling to one side, a crooked steering wheel, a squealing or grinding noise when braking, or a soft brake pedal. Do not mention them otherwise.`;
 
-export const localAreaCodes = ["281", "832", "346", "713"];
-
 export const chatServerSettings = {
   site: "st-ange",
   timeZone: "America/Chicago",
   phoneDisplay: business.phone.display,
-  localAreaCodes,
+  localAreaCodes: business.localAreaCodes,
   knowledge,
   featured,
   services: services.map(({ slug, name }) => ({ slug, name })),
@@ -64,6 +62,14 @@ export const chatServerSettings = {
   models: {
     "openai/gpt-6-luna": { inputUsd: 0.1, cachedInputUsd: 0.01, cacheWriteUsd: 0.125, outputUsd: 0.5 },
     "anthropic/claude-haiku-5.5": { inputUsd: 0.1, cachedInputUsd: 0.01, cacheWriteUsd: 0.125, outputUsd: 0.5 },
+    // Reasons by default; off so the 150-token budget goes to the reply. Prices for prompts under 32k tokens.
+    "qwen/qwen3.7-flash": {
+      inputUsd: 0.03,
+      cachedInputUsd: 0.006,
+      cacheWriteUsd: 0.038,
+      outputUsd: 0.13,
+      reasoningEffort: "none",
+    },
   },
   // ECB reference rate for 2026-11-04: 1 EUR = 1.1267 USD.
   eurPerUsd: 0.8875,

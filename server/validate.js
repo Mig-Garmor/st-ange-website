@@ -1,15 +1,9 @@
-import { validateName, validateEmail } from "../src/modules/validate.js";
-import { localAreaCodes } from "./chatSettings.js";
+import { isSevenDigits, missingAreaCode, validateName, validateEmail } from "../src/modules/validate.js";
 import { normalizePhone } from "./phone.js";
 
 const MAX_LENGTH = { name: 100, vehicle: 100, email: 200 };
 
-const orList = (items) => (items.length > 1 ? `${items.slice(0, -1).join(", ")} or ${items.at(-1)}` : items.join(""));
-
-const phoneError = (phone) =>
-  String(phone ?? "").replace(/\D/g, "").length === 7
-    ? `Add the area code (${orList(localAreaCodes)})`
-    : "Enter a 10-digit US phone number";
+const phoneError = (phone) => (isSevenDigits(phone) ? missingAreaCode() : "Enter a 10-digit US phone number");
 
 export function validateLead({ name, phone, email, vehicle }, { requireVehicle = false, requireEmail = false } = {}) {
   const errors = {};

@@ -32,6 +32,7 @@ The chat and the insight job both go through [OpenRouter](https://openrouter.ai)
 
 - `openai/gpt-6-luna` is the recommended model: small, cheap ($0.10 in / $0.50 out per million tokens) and supports tool calls.
 - `anthropic/claude-haiku-5.5` costs the same and is the Anthropic alternative.
+- `qwen/qwen3.7-flash` is a very cheap paid option for testing ($0.03 in / $0.13 out per million tokens); its entry in `models` turns reasoning off.
 - Free models end in `:free`, for example `nvidia/nemotron-3-ultra-550b-a55b:free` (worked in local testing on 2026-11-04; `google/gemma-4-31b-it:free` was rate-limited upstream). They are rate-limited and suited to testing, not the live site.
 - When switching models on Vercel, replace an old `CHAT_MODEL` value such as `gpt-6-luna` with the full OpenRouter id (`openai/gpt-6-luna`): an unknown id makes the chat unavailable without an alert.
 

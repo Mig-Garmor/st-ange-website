@@ -12,6 +12,22 @@ export const toUsage = (usage = {}, costUsd) => ({
   ...(costUsd !== undefined && { costUsd }),
 });
 
+const add = (a, b) => (a === undefined && b === undefined ? undefined : (a ?? 0) + (b ?? 0));
+
+// Summed from the steps because totalUsage comes back empty when a later step fails.
+export function sumUsage(steps = []) {
+  const usages = steps.map((step) => step?.usage).filter(Boolean);
+  if (!usages.length) return undefined;
+  return usages.reduce((sum, u) => ({
+    inputTokens: add(sum.inputTokens, u.inputTokens),
+    outputTokens: add(sum.outputTokens, u.outputTokens),
+    inputTokenDetails: {
+      cacheReadTokens: add(sum.inputTokenDetails?.cacheReadTokens, u.inputTokenDetails?.cacheReadTokens),
+      cacheWriteTokens: add(sum.inputTokenDetails?.cacheWriteTokens, u.inputTokenDetails?.cacheWriteTokens),
+    },
+  }));
+}
+
 // A call billed over several steps only has a known cost if every step reported one.
 export function reportedCostUsd(steps = []) {
   const costs = steps.map((step) => step?.providerMetadata?.openrouter?.usage?.cost);
@@ -94,13 +110,17 @@ export function createAi({ apiKey, model, reasoningEffort, provider = openRouter
         },
         onEnd: async (event) => {
           const steps = event.steps ?? [];
-          const call = steps.flatMap((s) => s.toolCalls ?? []).find((c) => c.toolName === "proposeRequest");
-          const result = call && steps.flatMap((s) => s.toolResults ?? []).find((r) => r.toolCallId === call.toolCallId);
+          const results = steps.flatMap((s) => s.toolResults ?? []);
+          const calls = steps
+            .flatMap((s) => s.toolCalls ?? [])
+            .filter((c) => c.toolName === "proposeRequest")
+            .map((c) => ({ ...c, output: results.find((r) => r.toolCallId === c.toolCallId)?.output ?? null }));
+          const call = calls.findLast((c) => c.output?.ok) ?? calls.at(-1);
           const text = steps.length ? steps.map((s) => s.text ?? "").filter(Boolean).join(" ") : (event.text ?? "");
           await onFinish?.({
             text: humanize(text),
-            toolCall: call ? { toolName: call.toolName, input: call.input, output: result?.output ?? null } : null,
-            usage: toUsage(event.totalUsage ?? event.usage, reportedCostUsd(event.steps)),
+            toolCall: call ? { toolName: call.toolName, input: call.input, output: call.output } : null,
+            usage: toUsage(sumUsage(steps) ?? event.totalUsage ?? event.usage, reportedCostUsd(event.steps)),
           });
         },
       });

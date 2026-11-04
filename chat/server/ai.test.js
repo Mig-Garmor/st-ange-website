@@ -3,6 +3,7 @@ import { asSchema, readUIMessageStream, simulateReadableStream } from "ai";
 import { MockLanguageModelV4 } from "ai/test";
 import { z } from "zod";
 import { validateLead } from "../../server/validate.js";
+import { chatServerSettings } from "../../server/chatSettings.js";
 import { okCard } from "../widget/card.js";
 import { createAi, createProposeRequest, openRouter, reasoningEffortFor, reportedCostUsd } from "./ai.js";
 
@@ -151,6 +152,62 @@ describe("createAi", () => {
       note: expect.any(String),
       errors: { email: "Email is required", vehicle: "Vehicle is required" },
     });
+  });
+
+  it("a dash streamed as its own token comes out with one space, streamed and saved", async () => {
+    const model = streamModel([
+      { type: "text-start", id: "t" },
+      ...["We can help", " —", " just bring it in."].map((delta) => ({ type: "text-delta", id: "t", delta })),
+      { type: "text-end", id: "t" },
+    ]);
+    const onFinish = vi.fn();
+    const res = setup(model).streamReply({ system: "Rules", messages: [{ role: "user", content: "Hi" }], maxOutputTokens: 150, tools: {}, onFinish });
+    const message = await clientMessage(await res.text());
+    expect(message.parts.filter((p) => p.type === "text").map((p) => p.text).join("")).toBe("We can help, just bring it in.");
+    expect(onFinish.mock.calls[0][0].text).toBe("We can help, just bring it in.");
+  });
+
+  it("token counts survive a second step that fails", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    let call = 0;
+    const valid = { service: "brakes", name: "Ann", phone: "8325550100", email: "ann@example.com", vehicle: "Civic" };
+    const model = new MockLanguageModelV4({
+      doStream: async () => {
+        if (call++ > 0) throw new Error("provider down");
+        return {
+          stream: simulateReadableStream({
+            chunks: [
+              { type: "tool-call", toolCallId: "c1", toolName: "proposeRequest", input: JSON.stringify(valid) },
+              { type: "finish", finishReason: { unified: "tool-calls", raw: undefined }, usage },
+            ],
+          }),
+        };
+      },
+    });
+    const onFinish = vi.fn();
+    const res = setup(model).streamReply({
+      system: "Rules",
+      messages: [{ role: "user", content: "Book me" }],
+      maxOutputTokens: 150,
+      tools: { proposeRequest: createProposeRequest(["brakes"], { validateLead }) },
+      onFinish,
+      errorText: "Unavailable.",
+    });
+    await res.text().catch(() => {});
+    await vi.waitFor(() => expect(onFinish).toHaveBeenCalledOnce(), { timeout: 2000 });
+    expect(onFinish.mock.calls[0][0].usage).toEqual({ inputTokens: 1500, cachedInputTokens: 1000, cacheWriteTokens: 300, outputTokens: 12 });
+    error.mockRestore();
+  });
+
+  it("the noted card is the last ok proposeRequest call, not the first call", async () => {
+    const good = { service: "brakes", name: "Ann", phone: "8325550100", email: "ann@example.com", vehicle: "Civic" };
+    const model = streamModel([
+      { type: "tool-call", toolCallId: "c1", toolName: "proposeRequest", input: JSON.stringify({ ...good, phone: "1" }) },
+      { type: "tool-call", toolCallId: "c2", toolName: "proposeRequest", input: JSON.stringify(good) },
+      { type: "tool-call", toolCallId: "c3", toolName: "proposeRequest", input: JSON.stringify({ ...good, email: "none" }) },
+    ]);
+    const { finish } = await propose(model);
+    expect(finish.toolCall.output).toMatchObject({ ok: true, card: { phone: "832-555-0100" } });
   });
 
   it("usage and reported cost cover both steps", async () => {
@@ -399,6 +456,11 @@ describe("OpenRouter cost, caching and reasoning", () => {
     expect(reasoningEffortFor(settings, undefined)).toBeUndefined();
     expect(reasoningEffortFor(settings, "x/b")).toBe("low");
     expect(reasoningEffortFor(settings, "openai/c")).toBeNull();
+  });
+
+  it("reasoningEffortFor turns reasoning off for qwen/qwen3.7-flash from its own entry", () => {
+    expect(chatServerSettings.models["qwen/qwen3.7-flash"]).toMatchObject({ inputUsd: 0.03, outputUsd: 0.13, reasoningEffort: "none" });
+    expect(reasoningEffortFor({ ...chatServerSettings, defaultReasoningEffort: "low" }, "qwen/qwen3.7-flash")).toBe("none");
   });
 
   it("reportedCostUsd sums every step and needs a cost on each", () => {
