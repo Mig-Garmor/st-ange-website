@@ -31,7 +31,19 @@ describe("cost", () => {
   });
 });
 
+describe("cost defaults", () => {
+  it("costEur with no cachedInputTokens charges all input at the input price", () => {
+    const price = { inputUsd: 1, cachedInputUsd: 0.1, outputUsd: 2 };
+    expect(costEur({ inputTokens: 1_000_000, outputTokens: 0 }, price, 1)).toBeCloseTo(1, 10);
+  });
+});
+
 describe("chicagoDay", () => {
+  it("handles the DST boundaries", () => {
+    expect(chicagoDay(new Date("2026-11-01T06:30:00Z"), "America/Chicago")).toBe("2026-11-01");
+    expect(chicagoDay(new Date("2026-03-08T05:30:00Z"), "America/Chicago")).toBe("2026-03-07");
+  });
+
   it("chicagoDay of 2026-11-05T04:30Z is 2026-11-04", () => {
     expect(chicagoDay(now, "America/Chicago")).toBe("2026-11-04");
   });
@@ -94,8 +106,9 @@ describe("recordUsage", () => {
     const { subject, text } = email.send.mock.calls[0][0];
     expect(subject).toBe("Chat paused: daily cap reached");
     expect(text).toContain("5.01");
-    expect(text).toContain("7");
-    expect(text).toContain("3");
+    expect(text).toContain("Messages today: 7");
+    expect(text).toContain("Visitors today: 3");
+    expect(text).toMatch(/Nov 4, 2026, 10:30\sPM/);
     expect(text).toContain("UPDATE chat_state SET status='active', resumed_at=now() WHERE site='st-ange'");
   });
 
@@ -118,6 +131,42 @@ describe("recordUsage", () => {
     log.mockRestore();
   });
 
+  it("a usage object missing cachedInputTokens records a finite cost", async () => {
+    const db = fakeDb();
+    await recordUsage({
+      db, email: { send: vi.fn() }, settings, model: "m",
+      usage: { inputTokens: 1000, outputTokens: 100 }, now,
+    });
+    const arg = db.addUsage.mock.calls[0][0];
+    expect(arg.cachedInputTokens).toBe(0);
+    expect(Number.isFinite(arg.costEur)).toBe(true);
+    expect(arg.costEur).toBeGreaterThan(0);
+  });
+
+  it("a price with a non-finite entry throws before recording", async () => {
+    const db = fakeDb();
+    const bad = { ...settings, models: { m: { inputUsd: 1, outputUsd: 2 } } };
+    await expect(recordUsage({ db, email: { send: vi.fn() }, settings: bad, model: "m", usage, now })).rejects.toThrow(
+      "No price for model m",
+    );
+    expect(db.addUsage).not.toHaveBeenCalled();
+  });
+
+  it("still alerts when dayStats fails after the pause", async () => {
+    const db = fakeDb({
+      addUsage: vi.fn(async () => ({ costEur: 6 })),
+      dayStats: vi.fn(async () => { throw new Error("db down"); }),
+    });
+    const email = { send: vi.fn(async () => {}) };
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    await recordUsage({ db, email, settings, model: "m", usage, now });
+    log.mockRestore();
+    const { text } = email.send.mock.calls[0][0];
+    expect(text).toContain("Messages today: unavailable");
+    expect(text).toContain("6.00");
+    expect(text).toContain("UPDATE chat_state");
+  });
+
   it("unknown model throws before recording", async () => {
     const db = fakeDb();
     await expect(recordUsage({ db, email: { send: vi.fn() }, settings, model: "x", usage, now })).rejects.toThrow(
@@ -130,7 +179,7 @@ describe("recordUsage", () => {
     const db = fakeDb();
     await expect(
       recordUsage({ db, email: { send: vi.fn() }, settings: { ...settings, eurPerUsd: null }, model: "m", usage, now }),
-    ).rejects.toThrow();
+    ).rejects.toThrow("eurPerUsd must be a positive number");
     expect(db.addUsage).not.toHaveBeenCalled();
   });
 });

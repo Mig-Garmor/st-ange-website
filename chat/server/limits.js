@@ -1,4 +1,4 @@
-import { costEur } from "./cost.js";
+import { costEur, normaliseUsage } from "./cost.js";
 
 export function chicagoDay(now, timeZone) {
   return new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
@@ -22,11 +22,15 @@ export async function checkLimits({ db, settings, conversation, ipHash, text }) 
 const chicagoTime = (now, timeZone) =>
   new Intl.DateTimeFormat("en-US", { timeZone, dateStyle: "medium", timeStyle: "short" }).format(now);
 
-export async function recordUsage({ db, email, settings, model, usage, now }) {
+const validPrice = (p) =>
+  p && [p.inputUsd, p.cachedInputUsd, p.outputUsd].every((n) => typeof n === "number" && Number.isFinite(n));
+
+export async function recordUsage({ db, email, settings, model, usage: rawUsage, now }) {
   const price = settings.models[model];
-  if (!price) throw new Error(`No price for model ${model}`);
+  if (!validPrice(price)) throw new Error(`No price for model ${model}`);
   if (!(settings.eurPerUsd > 0)) throw new Error("eurPerUsd must be a positive number");
 
+  const usage = normaliseUsage(rawUsage);
   const { site, timeZone } = settings;
   const day = chicagoDay(now, timeZone);
   const { costEur: total } = await db.addUsage({
@@ -40,8 +44,14 @@ export async function recordUsage({ db, email, settings, model, usage, now }) {
   if (total < settings.dailyCapEur) return;
   if (!(await db.pauseChat(site, "daily cap reached"))) return;
 
+  let messages = "unavailable";
+  let visitors = "unavailable";
   try {
-    const { messages, visitors } = await db.dayStats(site, day);
+    ({ messages, visitors } = await db.dayStats(site, day));
+  } catch (error) {
+    console.error("Cap alert stats failed", error);
+  }
+  try {
     await email.send({
       subject: "Chat paused: daily cap reached",
       text: [
