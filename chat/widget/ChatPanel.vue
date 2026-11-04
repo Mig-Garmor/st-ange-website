@@ -84,10 +84,18 @@ async function scrollToBottom(behavior = "auto") {
   awayFromBottom.value = false;
 }
 
+// Follows a streaming reply only while the visitor is near the bottom; their own new message always scrolls.
 watch(
   () => [messages.value.length, messages.value.at(-1)],
-  () => scrollToBottom(),
+  ([length], [previous] = []) => {
+    const sentByVisitor = length !== previous && messages.value.at(-1)?.role === "user";
+    if (sentByVisitor || !awayFromBottom.value) scrollToBottom();
+  },
 );
+
+watch([noReply, failed], ([missing, broken]) => {
+  if (missing || broken) scrollToBottom("smooth");
+});
 
 function send(text) {
   const value = text.trim().slice(0, MAX_CHARS);
@@ -201,6 +209,7 @@ onBeforeUnmount(() => turnstile?.remove());
               :phone-display="settings.phoneDisplay"
               :phone-href="settings.phoneHref"
               :superseded="part.toolCallId !== latestCardId"
+              :local-area-codes="settings.localAreaCodes"
             />
           </template>
         </template>

@@ -59,6 +59,10 @@ describe("widget messages", () => {
     expect(lastReplyMissing([...verified, user("832-572-7121"), { role: "assistant", parts: [claim] }])).toBe(true);
     expect(lastReplyMissing([...verified, user("832-572-7121"), { role: "assistant", parts: [cardPart({ ok: false, errors: {} }), claim] }])).toBe(true);
     expect(lastReplyMissing([...verified, user("832-572-7121"), { role: "assistant", parts: [cardPart({ ok: true, card }), claim] }])).toBe(false);
+    const plain = { type: "text", text: "Once that's fixed you can send requests any time." };
+    expect(lastReplyMissing([...verified, user("ok"), { role: "assistant", parts: [plain] }])).toBe(false);
+    const below = { type: "text", text: "Check the details and use the Send request button." };
+    expect(lastReplyMissing([...verified, user("ok"), { role: "assistant", parts: [below] }])).toBe(true);
     const earlier = { role: "assistant", parts: [cardPart({ ok: true, card })] };
     expect(lastReplyMissing([...verified, user("book"), earlier, user("ok?"), { role: "assistant", parts: [claim] }])).toBe(false);
     expect(lastReplyMissing([user("hi")])).toBe(false);

@@ -51,4 +51,9 @@ describe("latestCardId", () => {
   it("is null when no valid card was shown", () => {
     expect(latestCardId([{ role: "assistant", parts: [card("a", false)] }])).toBeNull();
   });
+
+  it("a 7-digit phone asks for the area code when the local codes are known", () => {
+    expect(fieldError("phone", "572-7121", { localAreaCodes: ["281", "832"] })).toBe("Add the area code (281 or 832)");
+    expect(fieldError("phone", "572-7121")).toBe("Enter a 10-digit US phone number");
+  });
 });

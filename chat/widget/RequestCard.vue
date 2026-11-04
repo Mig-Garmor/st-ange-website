@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, useId } from "vue";
+import { computed, reactive, ref, useId, watch } from "vue";
 import { fieldError, initialForm, okCard } from "./card.js";
 
 const props = defineProps({
@@ -9,17 +9,24 @@ const props = defineProps({
   phoneDisplay: { type: String, required: true },
   phoneHref: { type: String, required: true },
   superseded: { type: Boolean, default: false },
+  localAreaCodes: { type: Array, default: () => [] },
 });
 
 const form = reactive(initialForm(okCard(props.proposal)));
 const errors = reactive({});
 
 function check(field) {
-  const message = fieldError(field, form[field]);
+  const message = fieldError(field, form[field], { localAreaCodes: props.localAreaCodes });
   if (message) errors[field] = message;
   else delete errors[field];
 }
 const editing = ref(false);
+watch(
+  () => props.superseded,
+  (superseded) => {
+    if (superseded) editing.value = false;
+  },
+);
 const status = ref("");
 const uid = useId();
 // Derived from the tool call, so a reload re-sends with the same key and the shop is not emailed twice.
@@ -32,7 +39,7 @@ const locked = computed(() => status.value === "sending" || status.value === "se
 const invalid = computed(() => Object.keys(errors).length > 0);
 
 async function send() {
-  if (locked.value) return;
+  if (locked.value || props.superseded) return;
   for (const field of ["name", "phone", "email", "vehicle"]) check(field);
   if (invalid.value) {
     editing.value = true;
