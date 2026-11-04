@@ -1,32 +1,29 @@
-import SibApiV3Sdk from "@sendinblue/client";
+import { getSql } from "../server/db/client.js";
+import { createDb } from "../server/db/index.js";
+import { createEmail } from "../server/email.js";
+import { createRequestService } from "../server/requests.js";
+import { handleSendEmail } from "../server/sendEmailHandler.js";
 
-export default async function handler(req, res) {
-  if (req.method !== "POST")
-    return res.status(405).json({ error: "Method not allowed" });
+const unavailable = () => {
+  throw new Error("DATABASE_URL is not set");
+};
+const noDb = new Proxy({}, { get: () => unavailable });
 
-  const { name, email, phone, message, subject } = req.body.data;
-
-  const client = new SibApiV3Sdk.TransactionalEmailsApi();
-  client.setApiKey(
-    SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey,
-    process.env.BREVO_API_KEY
-  );
-
+export async function POST(request) {
+  let body;
   try {
-    await client.sendTransacEmail({
-      sender: { email: "st.angeautos@gmail.com" },
-      to: [{ email: "st.angeautos@gmail.com" }],
-      subject: subject ? `${subject}` : `Service Request from ${name}`,
-      textContent: `Name: ${name}\nMessage: ${message}\nFrom: ${email}\nPhone: ${phone}`,
-    });
-
-    return res.status(200).json({ message: "Email sent successfully" });
-  } catch (error) {
-    // Capture Brevo response if available
-    let errorMessage = error.response?.body || error.message || error;
-    console.error("Email sending failed:", errorMessage);
-
-    // Make sure the error is visible in the response too
-    return res.status(500).json({ error: errorMessage });
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
+
+  const db = process.env.DATABASE_URL ? createDb(getSql()) : noDb;
+  const email = createEmail({
+    apiKey: process.env.BREVO_API_KEY,
+    to: process.env.LEAD_EMAIL_TO ?? "st.angeautos@gmail.com",
+  });
+  const requests = createRequestService({ db, email, site: "st-ange" });
+
+  const { status, json } = await handleSendEmail(body, { requests });
+  return Response.json(json, { status });
 }
