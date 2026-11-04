@@ -2,6 +2,19 @@
 
 Open work for the St Ange Auto Service site, grouped by who can do it. Remove an item once it's done. The rules for keeping business data and reviews accurate are in `AGENTS.md`.
 
+## Main priority: Google Business Profile for alignment and brakes (owner)
+
+Goal: more alignment jobs (the new alignment machine) and more brake jobs. The profile drives the map results and the brand panel, where the 5.0 stars show. Audit of the public listing on 2026-11-04: St Ange was not in the top 10 map results for "wheel alignment baytown tx" or "brake repair baytown tx" (searched from outside Texas, so exact positions may differ). Competitors there have alignment or brakes in their name or categories and 98–147 reviews against our 29. Items 2, 3 and 6 take about ten minutes in the dashboard and matter most.
+
+1. **Replace the main photo.** It's a flyer showing the old address, 1300 N Main Street. Use the shop at 108 Schilling Ave instead, and add more photos (there are about four): the new alignment machine, a car on it, a brake job, the bays and the team. Keep adding photos regularly.
+2. **Categories.** Primary stays Auto repair shop. Add secondary: Wheel alignment service, Brake shop, Tire shop, Auto air conditioning service, Mechanic.
+3. **Services list.** Only "Oil change" shows today. Add every service from the site's service pages with a short description matching the page: Wheel alignment, Brake repair, Brake pad replacement, Rotor replacement, Brake fluid service, Suspension & steering, New & used tires, A/C repair.
+4. **Business description.** None shows. Use the 750 characters to mention the new alignment machine, brake repair, Baytown and the ZIP codes 77520, 77521 and 77523.
+5. **Posts.** First post: "New alignment machine" with a photo and a Call button. Then every week or two, alternating alignment and brakes, plus seasonal A/C checks and tire offers.
+6. **Links.** Website: the homepage. Appointment link: `https://www.stangeautoservice.com/services/car-alignment#quote`.
+7. **Reviews.** Ask alignment and brake customers to say what was done ("alignment", "brake job"), since reviews mentioning a service help the listing rank for it. Reply to every review and name the service in the reply. New reviews also feed the site; see the refresh checklist in `AGENTS.md`.
+8. **Fix other listings** (details under "Directory listings" below). Mismatched name, address and phone weaken the map ranking.
+
 ## Website (code)
 
 Goal: take up more of Google's results page and give the existing result more detail.
@@ -11,23 +24,15 @@ Goal: take up more of Google's results page and give the existing result more de
 - **Address, phone and hours in every meta description.** Each page's description should end with the full address, phone and short hours (for example "108 Schilling Ave, Baytown, TX 77520 · 832-572-7121 · Open Mon–Sat from 8 AM"), generated from `src/config/business.js` so it updates with the config. Google often shows this text as the snippet.
 - **Google Search Console.** Verify the domain, submit `https://www.stangeautoservice.com/sitemap.xml`, and request indexing for the homepage, `/reviews` and the service pages after each release that adds or changes them.
 
-## Google Business Profile (owner)
-
-The profile drives the map results and the brand panel, which is where the 5.0 stars show.
-
-- **Categories.** Primary: Auto repair shop. Secondary, for services the shop offers: Brake shop, Tire shop, Wheel alignment service, Auto air conditioning service.
-- **Services list.** Add every service from the site's service pages with a short description that matches the page.
-- **Links.** Website: the homepage. Appointment link: `https://www.stangeautoservice.com/contact-us`.
-- **Address check.** Confirm the profile shows 108 Schilling Ave exactly as the site does.
-- **Photos.** The shop at the new address, the team, the bays and equipment. Add new photos regularly.
-- **Posts.** Occasional updates: the move to a bigger shop, seasonal A/C checks, tire offers.
-- **Reviews.** Ask every customer for a review and suggest they mention the work done ("brake job", "A/C"). Reply to every review. New reviews also feed the site; see the refresh checklist in `AGENTS.md`.
-
 ## Directory listings (owner)
 
 Claimed listings with the same name, address and phone fill more of the results page when people search the shop's name, and some show their own stars.
 
-- Claim or update Yelp, Facebook, BBB, Bing Places (ChatGPT search relies on Bing), Apple Business Connect and the Baytown Chamber of Commerce with the new address.
+- Found on 2026-11-04:
+  - **Yelp** shows the old 1300 N Main St and a different phone, (832) 677-4680. Ask the owner whether that's an old number.
+  - **MapQuest** shows 1300 N Main St.
+  - **Facebook** About still lists 1300 N Main St alongside the new address.
+- Claim or update Yelp, Facebook, MapQuest, BBB, Bing Places (ChatGPT search relies on Bing), Apple Business Connect and the Baytown Chamber of Commerce with the new address and 832-572-7121.
 - When a listing is live, add its URL to `sameAs` in `src/seo/localBusinessSchema.js`.
 
 ## Waiting on owner confirmation
@@ -42,8 +47,12 @@ Customers mention these in reviews. They can only become shop statements on the 
 ## Tooling
 
 - **Automated review check.** Design and limits are in `AGENTS.md` under "Planned: automated review check".
+- **Chat go-live.** Follow the "Before going live" checklist in the README's "Chat and lead tracking" section: run `npm run db:migrate`, add the chat variables to the fork's Vercel project, then do the manual checks.
+- **Monthly: turn unanswered chat questions into FAQs.** The daily insight job records, for each chat, the questions the site couldn't answer (`conversations.unanswered`). Once a month, list the most common ones (through the Neon MCP server), and add the good ones as FAQs on the matching service page. The chat's knowledge is built from those pages, so the site, the bot and search all improve together.
+- **Chat dashboard and playbook generation.** A separate dashboard repository reads the chat tables. It is where playbooks get generated from successful conversations, once there are a few weeks of chats.
 
 ## Not pursuing
 
 - **Review stars in the regular search results.** Google doesn't show stars for a business's reviews of itself on its own site. Stars come from the Business Profile (map results and brand panel) and from directory listings.
 - **FAQ and how-to rich results.** Google limits FAQ results to government and health sites and has dropped how-to results.
+- **A database of saved chat replies.** At about €0.001 per message with prompt caching, the saving would be under €1 a month. Matching questions to saved answers needs embeddings or misfires, canned replies sound robotic, and they go stale when content changes. Instead, the fixed "Hours & location" answer covers the obvious case, and the monthly FAQ step improves the content the bot already reads.
