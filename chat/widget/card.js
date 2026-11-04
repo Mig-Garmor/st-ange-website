@@ -8,6 +8,13 @@ export const okCard = (part) =>
     ? part.output.card ?? null
     : null;
 
+// Only the newest valid card can be sent; an older one may hold details the visitor has since corrected.
+export const latestCardId = (messages) =>
+  messages
+    .flatMap((message) => message.parts ?? [])
+    .filter((part) => okCard(part))
+    .at(-1)?.toolCallId ?? null;
+
 export const initialForm = (card) => Object.fromEntries(FIELDS.map((f) => [f, str(card?.[f])]));
 
 // Mirrors the server rules so an edit is flagged before sending; /api/chat-request still decides.

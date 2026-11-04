@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIELDS, fieldError, initialForm, okCard } from "./card.js";
+import { FIELDS, fieldError, initialForm, okCard, latestCardId } from "./card.js";
 
 const card = { service: "brakes", name: "Ann", phone: "832-555-0100", email: "ann@example.com", vehicle: "Civic", notes: "" };
 const part = (output, state = "output-available") => ({ type: "tool-proposeRequest", toolCallId: "t1", state, input: {}, output });
@@ -28,5 +28,27 @@ describe("request card", () => {
     expect(fieldError("name", " ")).toBe("Name is required");
     expect(fieldError("vehicle", "")).toBe("Vehicle is required");
     expect(fieldError("notes", "")).toBe("");
+  });
+});
+
+describe("latestCardId", () => {
+  const card = (toolCallId, ok = true) => ({
+    type: "tool-proposeRequest",
+    state: "output-available",
+    toolCallId,
+    output: ok ? { ok: true, card: { name: "Bill" } } : { ok: false, errors: { phone: "x" } },
+  });
+
+  it("returns the newest valid card, ignoring invalid ones", () => {
+    const messages = [
+      { role: "assistant", parts: [card("a")] },
+      { role: "user", parts: [{ type: "text", text: "my phone is wrong" }] },
+      { role: "assistant", parts: [card("b"), card("c", false)] },
+    ];
+    expect(latestCardId(messages)).toBe("b");
+  });
+
+  it("is null when no valid card was shown", () => {
+    expect(latestCardId([{ role: "assistant", parts: [card("a", false)] }])).toBeNull();
   });
 });

@@ -5,7 +5,7 @@ import { DefaultChatTransport } from "ai";
 import RequestCard from "./RequestCard.vue";
 import { createTurnstile } from "./turnstile.js";
 import { loadSession, saveSession, visitorId } from "./storage.js";
-import { okCard } from "./card.js";
+import { latestCardId as findLatestCardId, okCard } from "./card.js";
 import { chatState, hasUnsentFirstMessage, isVerified, lastReplyMissing, localExchange, textOf } from "./messages.js";
 
 const props = defineProps({
@@ -45,6 +45,7 @@ const { id, messages, status, error, sendMessage, regenerate, clearError } = use
 const busy = computed(() => status.value === "submitted" || status.value === "streaming");
 const unavailable = computed(() => `Chat is unavailable right now. Call us at ${props.settings.phoneDisplay}.`);
 const failed = computed(() => status.value === "error" && !verifyFailed.value);
+const latestCardId = computed(() => findLatestCardId(messages.value));
 const noReply = computed(() => status.value === "ready" && !verifyFailed.value && lastReplyMissing(messages.value));
 
 watch([id, messages, status], () => {
@@ -199,6 +200,7 @@ onBeforeUnmount(() => turnstile?.remove());
               :services="settings.services"
               :phone-display="settings.phoneDisplay"
               :phone-href="settings.phoneHref"
+              :superseded="part.toolCallId !== latestCardId"
             />
           </template>
         </template>

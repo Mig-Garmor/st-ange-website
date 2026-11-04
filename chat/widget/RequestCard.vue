@@ -8,6 +8,7 @@ const props = defineProps({
   services: { type: Array, default: () => [] },
   phoneDisplay: { type: String, required: true },
   phoneHref: { type: String, required: true },
+  superseded: { type: Boolean, default: false },
 });
 
 const form = reactive(initialForm(okCard(props.proposal)));
@@ -100,20 +101,21 @@ async function send() {
 
     <dl v-else class="summary">
       <dt>Service</dt><dd>{{ serviceName }}</dd>
-      <dt>Name</dt><dd>{{ form.name || "—" }}</dd>
-      <dt>Phone</dt><dd>{{ form.phone || "—" }}</dd>
+      <dt>Name</dt><dd>{{ form.name || "Not given" }}</dd>
+      <dt>Phone</dt><dd>{{ form.phone || "Not given" }}</dd>
       <template v-if="form.email"><dt>Email</dt><dd>{{ form.email }}</dd></template>
-      <dt>Vehicle</dt><dd>{{ form.vehicle || "—" }}</dd>
+      <dt>Vehicle</dt><dd>{{ form.vehicle || "Not given" }}</dd>
       <template v-if="form.notes"><dt>Notes</dt><dd>{{ form.notes }}</dd></template>
     </dl>
 
-    <p v-if="status === 'sent'" class="banner-success" role="status">Sent — we'll call you back shortly.</p>
+    <p v-if="status === 'sent'" class="banner-success" role="status">Sent. We'll call you back shortly.</p>
     <p v-else-if="status === 'failed'" class="banner-error" role="alert">
       We couldn't send your request. Please call us at
       <a :href="phoneHref">{{ phoneDisplay }}</a>.
     </p>
 
-    <div v-if="status !== 'sent'" class="actions">
+    <p v-if="superseded && status !== 'sent'" class="superseded">Replaced by the updated details below.</p>
+    <div v-else-if="status !== 'sent'" class="actions">
       <button type="button" class="send" :disabled="locked" @click="send">
         {{ status === "sending" ? "Sending…" : "Send request" }}
       </button>
@@ -125,6 +127,9 @@ async function send() {
 </template>
 
 <style scoped>
+.superseded {
+  @apply mt-2 text-[13px] italic text-gray-500;
+}
 .request-card {
   @apply w-full rounded-lg border border-gray-200 bg-white p-3 shadow-sm text-sm;
 }
