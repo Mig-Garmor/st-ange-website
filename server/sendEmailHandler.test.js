@@ -40,6 +40,14 @@ describe("handleSendEmail", () => {
     expect(requests.submitted[0].source).toBe("contact_form");
   });
 
+  it("400 for an unknown source", async () => {
+    const requests = fakeRequests();
+    const r = await handleSendEmail({ data: { ...contact, source: "chat" } }, { requests });
+    expect(r.status).toBe(400);
+    expect(r.json.errors.source).toBeTruthy();
+    expect(requests.submitted).toHaveLength(0);
+  });
+
   it("500 when the email failed", async () => {
     const r = await handleSendEmail({ data: contact }, { requests: fakeRequests("failed") });
     expect(r).toEqual({ status: 500, json: { error: "Email failed" } });

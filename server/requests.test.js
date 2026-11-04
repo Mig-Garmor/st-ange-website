@@ -44,14 +44,29 @@ describe("request service", () => {
     expect(calls.status).toEqual([{ id: 11, status: "failed", error: "brevo down" }]);
   });
 
-  it("duplicate idempotency key sends no email", async () => {
-    const { service, calls } = setup({
-      dbOverrides: { recordRequest: async () => ({ id: 11, duplicate: true, emailStatus: "sent" }) },
-    });
+  const dup = (emailStatus) => ({ recordRequest: async () => ({ id: 11, duplicate: true, emailStatus }) });
+
+  it("duplicate of a failed request re-sends and records sent", async () => {
+    const { service, calls } = setup({ dbOverrides: dup("failed") });
+    const r = await service.submit(input);
+    expect(r).toEqual({ emailStatus: "sent", duplicate: true });
+    expect(calls.sent).toHaveLength(1);
+    expect(calls.status).toEqual([{ id: 11, status: "sent", error: null }]);
+  });
+
+  it("duplicate of a sent request sends nothing", async () => {
+    const { service, calls } = setup({ dbOverrides: dup("sent") });
     const r = await service.submit(input);
     expect(r).toEqual({ emailStatus: "sent", duplicate: true });
     expect(calls.sent).toHaveLength(0);
     expect(calls.status).toHaveLength(0);
+  });
+
+  it("duplicate still in flight sends nothing and reports sent", async () => {
+    const { service, calls } = setup({ dbOverrides: dup(null) });
+    const r = await service.submit(input);
+    expect(r).toEqual({ emailStatus: "sent", duplicate: true });
+    expect(calls.sent).toHaveLength(0);
   });
 
   it("email still sends when db.upsertLead throws", async () => {
