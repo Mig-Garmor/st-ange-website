@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { migrate, pendingFiles, splitStatements } from "./migrate.js";
-import { getSql } from "./client.js";
+import { getTestSql } from "./testDb.js";
 
 describe("migration helpers", () => {
   it("splits statements on semicolons at line ends", () => {
@@ -17,8 +17,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("migrate", () => {
   const tables = ["playbooks", "chat_state", "ai_usage_daily", "requests", "messages", "conversations", "leads", "schema_migrations"];
 
   async function reset() {
-    process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
-    const sql = getSql();
+    const sql = getTestSql();
     for (const table of tables) await sql.query(`drop table if exists ${table} cascade`);
     return sql;
   }
