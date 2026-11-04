@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "db:migrate": "node --env-file-if-exists=.env.local server/db/migrate.js",
-    "test:db": "node --env-file-if-exists=.env.local node_modules/vitest/vitest.mjs run server/db"
+    "test:db": "node --env-file-if-exists=.env.local node_modules/vitest/vitest.mjs run server/db chat/server/integration.test.js"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.108",
