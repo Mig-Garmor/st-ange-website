@@ -27,7 +27,6 @@ async function close() {
     <component
       :is="panel"
       v-if="panel"
-      v-show="open"
       id="chat-panel"
       :settings="settings"
       :open="open"
@@ -62,12 +61,33 @@ async function close() {
   @apply transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-yellow/60;
   bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px) + 0.75rem);
 }
+.chat-bubble {
+  transition:
+    transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 150ms ease-out,
+    visibility 0s linear 0s;
+}
 .chat-bubble.is-hidden {
-  @apply hidden;
+  @apply pointer-events-none invisible opacity-0;
+  transform: scale(0.6);
+  transition:
+    transform 150ms ease-in,
+    opacity 150ms ease-in,
+    visibility 0s linear 150ms;
 }
 @media (min-width: 768px) {
   .chat-bubble {
     @apply bottom-4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-bubble,
+  .chat-bubble.is-hidden {
+    transition: opacity 120ms linear;
+  }
+  .chat-bubble.is-hidden {
+    transform: none;
   }
 }
 </style>
