@@ -34,7 +34,7 @@ export function buildInstructions(settings, { playbooks = [], now, pageUrl }) {
     `Services: ${services}`,
     settings.knowledge,
     settings.featured,
-    ...playbooks.map((playbook) => `## Playbook: ${playbook.intent}\n${playbook.body}`),
+    ...playbooks.map((playbook) => `## Playbook: ${playbook.intent}\n${playbook.content}`),
   ].join("\n\n");
 
   const p = parts(now, settings.timeZone);

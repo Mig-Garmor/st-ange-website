@@ -12,6 +12,7 @@ const settings = {
   ],
   hours: [
     { days: ["Monday", "Tuesday"], opens: "08:00", closes: "18:00" },
+    { days: ["Saturday"], opens: "08:00", closes: "17:00" },
     { days: [], display: "Closed" },
   ],
 };
@@ -36,7 +37,7 @@ describe("buildInstructions", () => {
 
   it("stable includes active playbooks after knowledge", () => {
     const { stable } = buildInstructions(settings, {
-      playbooks: [{ intent: "alignment", body: "Ask about pulling." }],
+      playbooks: [{ intent: "alignment", content: "Ask about pulling." }],
       now: monday10,
       pageUrl: "/",
     });
@@ -63,5 +64,15 @@ describe("buildInstructions", () => {
     const earlyUtc = new Date("2026-11-02T13:00:00Z");
     const { variable } = buildInstructions(settings, { playbooks: [], now: earlyUtc, pageUrl: "/" });
     expect(variable).toContain("Closed now");
+  });
+
+  it.each([
+    ["Monday 08:00", "2026-11-02T14:00:00Z", "Open now"],
+    ["Monday 18:00", "2026-11-03T00:00:00Z", "Closed now"],
+    ["Saturday 16:59", "2026-11-07T22:59:00Z", "Open now"],
+    ["Saturday 17:00", "2026-11-07T23:00:00Z", "Closed now"],
+  ])("%s Chicago is %s", (_label, iso, expected) => {
+    const { variable } = buildInstructions(settings, { playbooks: [], now: new Date(iso), pageUrl: "/" });
+    expect(variable).toContain(expected);
   });
 });
