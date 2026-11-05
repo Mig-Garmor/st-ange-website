@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIELDS, STEPS, fieldError, firstIncompleteStep, initialForm, okCard, latestCardId, stepErrors } from "./card.js";
+import { FIELDS, STEPS, displayPhone, fieldError, mergeDraft, firstIncompleteStep, initialForm, okCard, latestCardId, stepErrors } from "./card.js";
 
 const card = { service: "brakes", name: "Ann", phone: "832-555-0100", email: "ann@example.com", vehicle: "Civic", notes: "" };
 const part = (output, state = "output-available") => ({ type: "tool-proposeRequest", toolCallId: "t1", state, input: {}, output });
@@ -74,5 +74,20 @@ describe("latestCardId", () => {
     expect(firstIncompleteStep(initialForm({ vehicle: "Civic" }))).toBe(1);
     expect(firstIncompleteStep(initialForm({ vehicle: "Civic", name: "Ann", phone: "8325550100" }))).toBe(2);
     expect(firstIncompleteStep(initialForm({ service: "brakes", vehicle: "Civic", name: "Ann", phone: "832-555-0100", email: "ann@example.com" }))).toBe(2);
+  });
+
+  it("mergeDraft keeps what the visitor typed and lets the prefill fill only the gaps", () => {
+    const prefill = initialForm({ service: "car-alignment", notes: "pulls right", vehicle: "" });
+    const draft = { vehicle: "2018 Camry", name: "Sam", notes: "  ", phone: "" };
+    expect(mergeDraft(prefill, draft)).toEqual({ service: "car-alignment", name: "Sam", phone: "", email: "", vehicle: "2018 Camry", notes: "pulls right" });
+    expect(mergeDraft(prefill, {})).toEqual(prefill);
+    expect(mergeDraft(prefill, null)).toEqual(prefill);
+  });
+
+  it("displayPhone shows a US number in the shop's style and leaves anything else as typed", () => {
+    expect(displayPhone("8234738223")).toBe("823-473-8223");
+    expect(displayPhone("+1 (823) 473 8223")).toBe("823-473-8223");
+    expect(displayPhone("555-0142")).toBe("555-0142");
+    expect(displayPhone("")).toBe("");
   });
 });

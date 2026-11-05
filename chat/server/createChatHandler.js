@@ -12,13 +12,15 @@ const HISTORY = 20;
 const NOTE = /^\[[^\]]*\]$/;
 const CARD_NOTE = /^\[Request card shown/;
 const SENT_NOTE = /^\[Request sent/;
-const CLAIMS_CARD = /tap (the )?send request|send request (button|below)|(the |in the )form below/i;
+const CLAIMS_CARD = /tap (the )?send request|send request (button|below)|(the |in the |this )form\b/i;
 
+// A burst of quick messages arrives as one message with a part per bubble; each stays on its own line.
 const textOf = (message) =>
   (message?.parts ?? [])
     .filter((part) => part?.type === "text" && typeof part.text === "string")
-    .map((part) => part.text)
-    .join("");
+    .map((part) => part.text.trim())
+    .filter(Boolean)
+    .join("\n");
 
 // Postgres text cannot hold NUL, and a failed save used to skip every counter; other C0 controls have no place in a chat.
 const CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;

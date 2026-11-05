@@ -171,11 +171,11 @@ describe("createChatHandler", () => {
     expect(db.saveMessage).not.toHaveBeenCalled();
   });
 
-  it("saves the user message from its text parts and hashes the ip", async () => {
+  it("saves the user message from its text parts, one line per part, and hashes the ip", async () => {
     const { handler, db } = setup();
     const message = { id: "u1", role: "user", parts: [{ type: "text", text: "Brakes " }, { type: "text", text: "squeal" }] };
     await handler(post(body({ messages: [message] })));
-    expect(db.saveMessage).toHaveBeenCalledWith({ site: "test-site", conversationId: ID, role: "user", content: "Brakes squeal" });
+    expect(db.saveMessage).toHaveBeenCalledWith({ site: "test-site", conversationId: ID, role: "user", content: "Brakes\nsqueal" });
     const { ipHash } = db.ensureConversation.mock.calls[0][0];
     expect(ipHash).toMatch(/^[0-9a-f]{64}$/);
     expect(ipHash).not.toContain("203.0.113.9");
@@ -233,6 +233,14 @@ describe("createChatHandler", () => {
     expect(await (await handler(post(body({ messages })))).text()).toContain("Unavailable copy.");
     expect(ai.streamReply).not.toHaveBeenCalled();
     error.mockRestore();
+  });
+
+  it("a burst of quick messages is one turn, one line per message", async () => {
+    const { handler, ai, db } = setup();
+    const burst = { id: "u1", role: "user", parts: [{ type: "text", text: "hi " }, { type: "text", text: "my brakes squeal" }, { type: "text", text: "2018 Camry" }] };
+    await handler(post(body({ messages: [burst] })));
+    expect(db.saveMessage).toHaveBeenCalledWith(expect.objectContaining({ role: "user", content: "hi\nmy brakes squeal\n2018 Camry" }));
+    expect(ai.streamReply.mock.calls[0][0].messages.at(-1)).toEqual({ role: "user", content: "hi\nmy brakes squeal\n2018 Camry" });
   });
 
   it("400 for an oversized or odd visitorId, and 403 for a cross-site post", async () => {

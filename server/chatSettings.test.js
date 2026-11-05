@@ -18,7 +18,7 @@ describe("chatServerSettings", () => {
   });
 
   it("exposes the fixed limits", () => {
-    expect(chatServerSettings.limits).toEqual({ maxChars: 500, maxUserMessages: 20, maxAttempts: 30, perHour: 40 });
+    expect(chatServerSettings.limits).toEqual({ maxChars: 1000, maxUserMessages: 20, maxAttempts: 30, perHour: 40 });
     expect(chatServerSettings.services.map((s) => s.slug)).toEqual(services.map((s) => s.slug));
     expect(chatServerSettings.localAreaCodes).toEqual(["281", "832", "346", "713"]);
   });
