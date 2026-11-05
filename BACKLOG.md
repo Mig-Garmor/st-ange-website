@@ -2,6 +2,15 @@
 
 Open work for the St Ange Auto Service site, grouped by who can do it. Remove an item once it's done. The rules for keeping business data and reviews accurate are in `AGENTS.md`.
 
+## Urgent: confirm the live site's emails reach the shop
+
+The contact and quote forms on the live site may not be sending. Local testing hit Brevo's "API Key is not enabled" with two keys before a third one worked, and the live site still uses its own key. If it's broken, every form lead since then is lost silently: the visitor sees an error, the shop gets nothing.
+
+1. **Look first, send nothing.** In Brevo, open Transactional → Logs and check for recent sends from the site. In Vercel (Marissa's `st-ange-website` project), check the `/api/send-email` function logs for "Email sending failed".
+2. **One real test.** Submit the live contact form once, with "TEST, please ignore" as the message. The form's own reply already tells most of the story: "Your message was sent" appears only after Brevo accepted the email, and an error means Brevo refused it. Then confirm it arrived in the shop's inbox, spam folder included.
+3. **If it fails:** create a new Brevo API key in the shop's account, put it in the live project's `BREVO_API_KEY`, redeploy, and repeat step 2.
+4. **Afterwards:** set `DATABASE_URL` on the live project too, so every request is also stored with its email status (`requests.email_status`), and a failed email can be seen even when nobody is watching the inbox.
+
 ## Main priority: Google Business Profile for alignment and brakes (owner)
 
 Goal: more alignment jobs (the new alignment machine) and more brake jobs. The profile drives the map results and the brand panel, where the 5.0 stars show. Audit of the public listing on 2026-11-04: St Ange was not in the top 10 map results for "wheel alignment baytown tx" or "brake repair baytown tx" (searched from outside Texas, so exact positions may differ). Competitors there have alignment or brakes in their name or categories and 98–147 reviews against our 29. Items 2, 3 and 6 take about ten minutes in the dashboard and matter most.
@@ -49,7 +58,12 @@ Customers mention these in reviews. They can only become shop statements on the 
 - **Automated review check.** Design and limits are in `AGENTS.md` under "Planned: automated review check".
 - **Chat go-live.** Follow the "Before going live" checklist in the README's "Chat and lead tracking" section: run `npm run db:migrate`, add the chat variables to the fork's Vercel project, then do the manual checks.
 - **Monthly: turn unanswered chat questions into FAQs.** The daily insight job records, for each chat, the questions the site couldn't answer (`conversations.unanswered`). Once a month, list the most common ones (through the Neon MCP server), and add the good ones as FAQs on the matching service page. The chat's knowledge is built from those pages, so the site, the bot and search all improve together.
-- **Chat dashboard and playbook generation.** A separate dashboard repository reads the chat tables. It is where playbooks get generated from successful conversations, once there are a few weeks of chats. Playbooks go into every visitor's instructions, so a person must review each one before it is set active: a generated playbook copies visitor-written text, and one crafted chat could otherwise rewrite the bot for everyone. Treat `summary` and `unanswered` the same way when an AI agent reads them.
+- **Lead and analytics dashboard (its own project, reused across sites).** A Mixpanel-style product, but built around leads: full control and visibility of what happens on each site. It needs its own design before any build.
+  - **Multitenant.** One profile per project or client. Each client logs in and sees only their own data; the owner sees every project.
+  - **Leads and requests.** Every chat and form request with its lead details, the conversation and its summary, and the email's delivery status (sent, failed, and why), so a lost email is visible.
+  - **Events.** A small script each site loads. Any button or element can be given an event name; a click sends an API call to the dashboard, with or without a payload. Page views and chat opens are tracked the same way. Counts of how many people interact with what, over time.
+  - **St Ange as the first tenant.** It reads the chat tables already in Neon (leads, requests, conversations, insights), so the chat's data model is a starting point.
+  - **Playbook generation** from successful conversations lives here too, once there are a few weeks of chats. Playbooks go into every visitor's instructions, so a person must review each one before it is set active: a generated playbook copies visitor-written text, and one crafted chat could otherwise rewrite the bot for everyone. Treat `summary` and `unanswered` the same way when an AI agent reads them.
 
 ## Not pursuing
 
