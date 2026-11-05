@@ -129,7 +129,7 @@ async function send() {
     <p v-if="superseded && status !== 'sent'" class="superseded">Replaced by the updated details below.</p>
     <label v-else-if="status !== 'sent'" class="confirm">
       <input v-model="confirmed" type="checkbox" :disabled="locked" />
-      <span>My phone and email are correct. We use them to reach you.</span>
+      <span>My phone number and email are correct, so the shop can reach me.</span>
     </label>
     <div v-if="!superseded && status !== 'sent'" class="actions">
       <button type="button" class="send" :disabled="locked || !confirmed" @click="send">
