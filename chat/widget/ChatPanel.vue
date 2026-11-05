@@ -16,7 +16,6 @@ const emit = defineEmits(["close", "ready"]);
 
 const MAX_CHARS = 500;
 const STATES = ["offline", "limit", "error"];
-const PLACEHOLDER_MS = 3000;
 const SHAKE_MS = 400;
 
 const field = ref(null);
@@ -89,21 +88,19 @@ const online = ref(typeof navigator === "undefined" || navigator.onLine !== fals
 const updateOnline = () => (online.value = navigator.onLine !== false);
 const unusable = computed(() => !online.value || ["offline", "limit"].includes(chatState(messages.value.at(-1) ?? {})));
 
-const placeholders = computed(() => (props.settings.placeholders?.length ? props.settings.placeholders : ["Type your message"]));
-const placeholderIndex = ref(0);
-const placeholder = computed(() => (unusable.value ? "Chat unavailable right now" : placeholders.value[placeholderIndex.value % placeholders.value.length]));
-let placeholderTimer = null;
+const placeholder = computed(() => (unusable.value ? "Chat unavailable right now" : "Type your message"));
 
 const shaking = ref(false);
-const emptyHint = ref("");
 let shakeTimer = null;
-function nudgeEmpty() {
-  shaking.value = false;
+const sendButton = ref(null);
+async function nudgeEmpty() {
   clearTimeout(shakeTimer);
-  requestAnimationFrame(() => (shaking.value = true));
+  shaking.value = false;
+  await nextTick();
+  // Reading layout between removing and re-adding the class restarts the animation on repeated clicks.
+  void sendButton.value?.offsetWidth;
+  shaking.value = true;
   shakeTimer = setTimeout(() => (shaking.value = false), SHAKE_MS);
-  emptyHint.value = "";
-  nextTick(() => (emptyHint.value = "Type a message first"));
   focusInput();
 }
 
@@ -195,9 +192,6 @@ watch(
 onMounted(() => {
   window.addEventListener("online", updateOnline);
   window.addEventListener("offline", updateOnline);
-  placeholderTimer = setInterval(() => {
-    if (!draft.value) placeholderIndex.value += 1;
-  }, PLACEHOLDER_MS);
   requestAnimationFrame(() => requestAnimationFrame(() => (shown.value = props.open)));
   turnstile = createTurnstile(challenge.value, props.settings.turnstileSiteKey);
   if (!isVerified(messages.value)) turnstile.warm();
@@ -213,7 +207,6 @@ onBeforeUnmount(() => {
   turnstile?.remove();
   window.removeEventListener("online", updateOnline);
   window.removeEventListener("offline", updateOnline);
-  clearInterval(placeholderTimer);
   clearTimeout(shakeTimer);
 });
 </script>
@@ -340,8 +333,7 @@ onBeforeUnmount(() => {
         :placeholder="placeholder"
         :disabled="unusable"
       />
-      <button type="submit" class="send" :class="{ shake: shaking }" :disabled="unusable">Send</button>
-      <span class="sr-only" aria-live="polite">{{ emptyHint }}</span>
+      <button ref="sendButton" type="submit" class="send" :class="{ shake: shaking }" :disabled="unusable">Send</button>
     </form>
   </section>
 </template>
