@@ -82,6 +82,9 @@ describe("buildInstructions", () => {
     expect(stable).toContain('Never use "I", "me" or "my"');
     expect(stable).not.toContain("person at the front desk");
     expect(stable).toContain("Never open the request form on your own");
+    expect(stable).toContain("Only the person chatting gives their own details");
+    expect(stable).toContain("Before every reply, check it against this list");
+    expect(stable).toContain("4. Am I only asking for or using the visitor's own details, never someone else's?");
     expect(stable).toContain("ask whether they would like to send a request");
     expect(stable).toContain("If they keep asking questions instead, keep answering and do not call the tool");
     expect(stable).toContain("never add dates, the page, times or your own words");
