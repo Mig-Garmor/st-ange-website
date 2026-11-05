@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { SESSION_TTL_MS, isExpired, loadSession, saveSession, visitorId } from "./storage.js";
+import { CARRY_TTL_MS, SESSION_TTL_MS, forgetChat, isExpired, loadSession, recentChatId, rememberChat, saveSession, visitorId } from "./storage.js";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -13,8 +13,8 @@ describe("chat storage", () => {
     expect(loadSession()).toBeNull();
     const session = { id: "abc", messages: [{ id: "m1", role: "user", parts: [{ type: "text", text: "Hi" }] }] };
     saveSession(session, 1_000);
-    expect(JSON.parse(sessionStorage.getItem("chat:session"))).toEqual({ ...session, savedAt: 1_000 });
-    expect(loadSession(1_000)).toEqual({ ...session, savedAt: 1_000 });
+    expect(JSON.parse(sessionStorage.getItem("chat:session"))).toEqual({ ...session, previousId: null, savedAt: 1_000 });
+    expect(loadSession(1_000)).toEqual({ ...session, previousId: null, savedAt: 1_000 });
   });
 
   it("a session idle for 60 minutes is gone, one idle for just under is kept", () => {
@@ -45,9 +45,27 @@ describe("chat storage", () => {
     vi.spyOn(Storage.prototype, "setItem").mockImplementation(fail);
     const session = { id: "xyz", messages: [] };
     expect(() => saveSession(session, 5)).not.toThrow();
-    expect(loadSession(5)).toEqual({ ...session, savedAt: 5 });
+    expect(loadSession(5)).toEqual({ ...session, previousId: null, savedAt: 5 });
     const id = visitorId();
     expect(id).toBeTruthy();
     expect(visitorId()).toBe(id);
+  });
+
+  it("remembers the last chat for 24 hours in localStorage, so a new tab can continue it", () => {
+    rememberChat("chat-1", 0);
+    expect(localStorage.getItem("chat:last")).toBe(JSON.stringify({ id: "chat-1", at: 0 }));
+    expect(recentChatId(CARRY_TTL_MS - 1)).toBe("chat-1");
+    expect(recentChatId(CARRY_TTL_MS)).toBeNull();
+    expect(localStorage.getItem("chat:last")).toBeNull();
+    rememberChat("chat-2", 0);
+    forgetChat();
+    expect(recentChatId(0)).toBeNull();
+    localStorage.clear();
+    expect(recentChatId(0)).toBeNull();
+  });
+
+  it("keeps the earlier chat's id with the session", () => {
+    saveSession({ id: "new", messages: [], previousId: "old" }, 10);
+    expect(loadSession(10).previousId).toBe("old");
   });
 });

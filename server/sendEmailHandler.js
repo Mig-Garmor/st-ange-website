@@ -2,10 +2,12 @@ import { toPagePath } from "../chat/server/pagePath.js";
 import { formatPhone } from "../chat/server/proposal.js";
 import { services } from "../src/config/business.js";
 import { CUSTOMER_HEADER, oneLine, quoted } from "../chat/server/emailText.js";
+import { localOverride } from "./localOverride.js";
 import { validateLead } from "./validate.js";
 
 const MAX_MESSAGE = 2000;
-const PER_HOUR = 5;
+// FORM_LIMIT_PER_HOUR (0 = off) only overrides the per-IP form limit in local development.
+const PER_HOUR = localOverride("FORM_LIMIT_PER_HOUR", 5);
 const KEY = /^[\w:.-]{1,200}$/;
 
 const SOURCES = ["contact_form", "quote_form"];
@@ -27,7 +29,7 @@ export async function handleSendEmail(body, { requests, turnstile = null, ip = n
   }
 
   if (turnstile && !(await turnstile.verify(data.turnstileToken, ip))) return { status: 403, json: { error: "Verification failed" } };
-  if (ipHash && countRecent) {
+  if (PER_HOUR > 0 && ipHash && countRecent) {
     try {
       if ((await countRecent(ipHash)) >= PER_HOUR) return { status: 429, json: { error: "Too many requests" } };
     } catch (error) {

@@ -8,6 +8,10 @@
   .privacy-hero-inner {
     @apply flex flex-col gap-4 max-w-5xl mx-auto;
 
+    .privacy-updated {
+      @apply text-sm opacity-80;
+    }
+
     h1 {
       @apply text-[32px] md:text-[44px] font-bold leading-tight;
     }

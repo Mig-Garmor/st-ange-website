@@ -9,12 +9,12 @@ export function createRequestService({ db, email, site, logger = console }) {
   }
 
   return {
-    async submit({ source, service = null, idempotencyKey, lead = {}, subject, text, message = null, vehicle = null, pageUrl = null, conversationId = null, ipHash = null, requireRecord = false }) {
+    async submit({ source, service = null, idempotencyKey, lead = {}, subject, text, message = null, vehicle = null, pageUrl = null, conversationId = null, ipHash = null, requireRecord = false, consentText = null }) {
       const saved = await safe("upsertLead", () => db.upsertLead({ site, ...lead }));
       const request = await safe("recordRequest", () =>
         db.recordRequest({
           site, idempotencyKey, source, service, leadId: saved?.id ?? null,
-          conversationId, subject, message, vehicle, pageUrl, ipHash,
+          conversationId, subject, message, vehicle, pageUrl, ipHash, consentText,
         }),
       );
       // Without a row the per-conversation cap cannot see this request, so an unrecorded chat request is never emailed.

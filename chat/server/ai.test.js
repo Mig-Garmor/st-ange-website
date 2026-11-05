@@ -5,7 +5,7 @@ import { z } from "zod";
 import { validateLead } from "../../server/validate.js";
 import { chatServerSettings } from "../../server/chatSettings.js";
 import { okCard } from "../widget/card.js";
-import { createAi, createProposeRequest, openRouter, reasoningEffortFor, reportedCostUsd } from "./ai.js";
+import { ZDR_ROUTING, providerOrderFor, createAi, createProposeRequest, openRouter, reasoningEffortFor, reportedCostUsd } from "./ai.js";
 
 const usage = {
   inputTokens: { total: 1500, noCache: 200, cacheRead: 1000, cacheWrite: 300 },
@@ -52,6 +52,7 @@ describe("createAi", () => {
     expect(call.providerOptions.openrouter).toEqual({
       usage: { include: true },
       reasoning: { effort: "none", exclude: true },
+      provider: { zdr: true, data_collection: "deny", require_parameters: true },
     });
     expect(call.prompt[0]).toEqual({ role: "system", content: "Rules" });
     expect(call.prompt[0].providerOptions).toBeUndefined();
@@ -430,7 +431,24 @@ describe("OpenRouter cost, caching and reasoning", () => {
   it("sends no reasoning option when the model has no reasoning effort", async () => {
     const model = costStream();
     await reply(setup(model, { reasoningEffort: undefined }));
-    expect(model.doStreamCalls[0].providerOptions.openrouter).toEqual({ usage: { include: true } });
+    expect(model.doStreamCalls[0].providerOptions.openrouter).toEqual({ usage: { include: true }, provider: ZDR_ROUTING });
+  });
+
+  it("prefers a model's provider for cache reads, keeping fallbacks and zero retention", async () => {
+    const model = costStream();
+    await reply(setup(model, { providerOrder: ["amazon-bedrock"] }));
+    expect(model.doStreamCalls[0].providerOptions.openrouter.provider).toEqual({ ...ZDR_ROUTING, order: ["amazon-bedrock"], allow_fallbacks: true });
+    expect(providerOrderFor({ models: { m: { providerOrder: ["x"] } } }, "m")).toEqual(["x"]);
+    expect(providerOrderFor({ models: {} }, "m")).toBeUndefined();
+  });
+
+  it("requires zero data retention by default, and only drops it when zdr is false", async () => {
+    const on = costStream();
+    await reply(setup(on));
+    expect(on.doStreamCalls[0].providerOptions.openrouter.provider).toEqual({ zdr: true, data_collection: "deny", require_parameters: true });
+    const off = costStream();
+    await reply(setup(off, { zdr: false }));
+    expect(off.doStreamCalls[0].providerOptions.openrouter).not.toHaveProperty("provider");
   });
 
   it("generateInsights surfaces the reported cost, with and without a schema failure", async () => {

@@ -8,6 +8,11 @@ export const business = {
     schema: "+1-832-572-7121",
   },
   localAreaCodes: ["281", "832", "346", "713"],
+  // How long we keep data; the privacy page states these and the nightly job enforces them.
+  retention: { ipHashDays: 7, chatMonths: 18, leadYears: 3 },
+  // Shown on the chat request form's tick box and stored word for word with each request as proof of consent.
+  callbackConsent:
+    "My phone number and email are correct, and St Ange Auto Service may call or text me about this request. Reply STOP to stop texts.",
   address: {
     street: "108 Schilling Ave",
     area: "Schilling Avenue",

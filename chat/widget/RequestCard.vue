@@ -10,6 +10,7 @@ const props = defineProps({
   phoneHref: { type: String, required: true },
   superseded: { type: Boolean, default: false },
   localAreaCodes: { type: Array, default: () => [] },
+  consentText: { type: String, required: true },
 });
 const emit = defineEmits(["sent"]);
 
@@ -80,6 +81,7 @@ async function send() {
         ...form,
         service: form.service || null,
         pageUrl: location.href,
+        consent: props.consentText,
       }),
     });
     const result = await response.json().catch(() => ({}));
@@ -173,7 +175,7 @@ async function send() {
 
         <label class="confirm">
           <input v-model="confirmed" type="checkbox" />
-          <span>My phone number and email are correct, so the shop can reach me.</span>
+          <span>{{ consentText }}</span>
         </label>
       </template>
 

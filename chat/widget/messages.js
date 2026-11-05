@@ -1,6 +1,8 @@
 import { okCard } from "./card.js";
 
-export const chatState = (message) => message.parts?.find((part) => part.type === "data-chat-state")?.data?.state;
+const stateData = (message) => message.parts?.find((part) => part.type === "data-chat-state")?.data;
+export const chatState = (message) => stateData(message)?.state;
+export const chatReason = (message) => stateData(message)?.reason;
 
 export const textOf = (message) =>
   (message.parts ?? [])
@@ -43,10 +45,30 @@ export function nextBurst(queue, max = MAX_TURN_CHARS) {
 export const SENT_FOLLOW_UP = "Thanks, we got your request and we'll be in touch shortly. Can I help with anything else?";
 
 // Keyed by the card, so sending twice or reloading never adds a second note.
-export const sentNote = (toolCallId, list) =>
+export const SENT_CLOSED = "Thanks, we got your request and we'll be in touch shortly.";
+
+export const sentNote = (toolCallId, list, text = SENT_FOLLOW_UP) =>
   list.some((m) => m.id === `sent-${toolCallId}`)
     ? list
-    : [...list, { id: `sent-${toolCallId}`, role: "assistant", metadata: { local: true }, parts: [{ type: "text", text: SENT_FOLLOW_UP }] }];
+    : [...list, { id: `sent-${toolCallId}`, role: "assistant", metadata: { local: true }, parts: [{ type: "text", text }] }];
+
+// Opens the request form without the model, for when the chat itself can no longer reply.
+export const localForm = (id = crypto.randomUUID()) => ({
+  id: `form-${id}`,
+  role: "assistant",
+  metadata: { local: true },
+  parts: [{ type: "tool-proposeRequest", toolCallId: `local-${id}`, state: "output-available", input: {}, output: { ok: true, card: {} } }],
+});
+
+// Local messages (a form opened here, the sent note) don't lift a limit the server set.
+export const serverState = (list) => chatState(list.findLast((m) => !isLocal(m)) ?? {});
+
+// A message that is only too long can be shortened and resent; every other limit stops the chat.
+export const blocksChat = (list) => {
+  const last = list.findLast((m) => !isLocal(m)) ?? {};
+  const state = chatState(last);
+  return state === "offline" || (state === "limit" && chatReason(last) !== "too_long");
+};
 
 // Any AI reply, or the limit notice, means the server has a verified conversation for this id.
 export const isVerified = (list) =>

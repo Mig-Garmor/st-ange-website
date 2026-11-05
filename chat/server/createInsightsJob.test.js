@@ -3,6 +3,7 @@ import { createInsightsJob, insightsSchema } from "./createInsightsJob.js";
 
 const settings = {
   site: "test-site",
+  retention: { ipHashDays: 7, chatMonths: 18, leadYears: 3 },
   timeZone: "America/Chicago",
   dailyCapEur: 5,
   eurPerUsd: 0.9,
@@ -24,6 +25,7 @@ const fakeDb = (over = {}) => ({
   ]),
   saveInsights: vi.fn(async () => {}),
   forgetIpHashes: vi.fn(async () => {}),
+  purgeExpired: vi.fn(async () => ({ chats: 0, leads: 0 })),
   ...over,
 });
 
@@ -104,6 +106,16 @@ describe("createInsightsJob", () => {
     expect(saved).toHaveLength(10);
     expect(saved.every((q) => q.length === 200)).toBe(true);
     expect(db.forgetIpHashes).toHaveBeenCalledWith(7);
+    expect(db.purgeExpired).toHaveBeenCalledWith({ site: "test-site", chatMonths: 18, leadYears: 3 });
+  });
+
+  it("a failed purge is logged and the insights still run", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const db = fakeDb({ purgeExpired: vi.fn(async () => { throw new Error("db"); }) });
+    const res = await job(db, { generateInsights: vi.fn(async () => ({ object: insight, usage })) })(req("Bearer s3cret"));
+    expect((await res.json()).processed).toBe(2);
+    expect(error).toHaveBeenCalledWith("Retention purge failed", expect.any(Error));
+    error.mockRestore();
   });
 
   it("an unreadable insight still records a sent request", async () => {

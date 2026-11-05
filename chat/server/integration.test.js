@@ -31,6 +31,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("chat end to end against a real 
     featured: "Featured.",
     services: [{ slug: "brakes", name: "Brakes" }],
     limits: { maxChars: 500, maxUserMessages: 20, maxAttempts: 30, perHour: 40 },
+    retention: { ipHashDays: 7, chatMonths: 18, leadYears: 3 },
     maxOutputTokens: 150,
     dailyCapEur: 5,
     models: { [MODEL]: { inputUsd: 1, cachedInputUsd: 0.1, outputUsd: 2 } },

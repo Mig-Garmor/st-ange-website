@@ -25,8 +25,11 @@ describe("chatServerSettings", () => {
 
   it("uses the fixed chat copy", () => {
     expect(chatServerSettings.copy).toEqual({
-      offline: "Our chat is offline right now. Call us at 832-572-7121 or send a quote request.",
+      offline: "Our chat is taking a break right now. Call us at 832-572-7121, or send a request and we'll call you back.",
       limit: "Let's pick this up by phone: call us at 832-572-7121.",
+      limitConversation: "This chat has gotten long. Start a new chat to keep going, or call us at 832-572-7121.",
+      limitHourly: "You've sent a lot of messages in a short time. Please try again in a little while, call us at 832-572-7121, or send a request and we'll call you back.",
+      tooLong: "That message is a bit long for the chat. Could you shorten it?",
       unavailable: "Chat is unavailable right now. Call us at 832-572-7121.",
     });
   });

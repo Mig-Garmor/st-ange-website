@@ -144,4 +144,15 @@ describe("handleSendEmail", () => {
     expect(r.json.errors.phone).toBe("Use 30 characters or fewer");
     expect(requests.submitted).toHaveLength(0);
   });
+
+  it("FORM_LIMIT_PER_HOUR=0 switches the per-IP form limit off", async () => {
+    vi.stubEnv("FORM_LIMIT_PER_HOUR", "0");
+    vi.resetModules();
+    const { handleSendEmail: fresh } = await import("./sendEmailHandler.js");
+    const requests = fakeRequests();
+    const countRecent = vi.fn(async () => 99);
+    expect((await fresh({ data: contact }, { requests, ipHash: "h", countRecent })).status).toBe(200);
+    expect(countRecent).not.toHaveBeenCalled();
+    vi.unstubAllEnvs();
+  });
 });

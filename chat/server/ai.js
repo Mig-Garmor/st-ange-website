@@ -44,9 +44,12 @@ export const reasoningEffortFor = (settings, model) => {
   return REASONING_DEFAULT.test(model ?? "") ? settings.defaultReasoningEffort : undefined;
 };
 
+// A prompt cache lives at one provider; preferring one keeps cache reads, and fallbacks keep the chat up if it is down.
+export const providerOrderFor = (settings, model) => settings.models?.[model]?.providerOrder;
+
 const loose = () => z.union([z.string(), z.number()]).nullish().transform((v) => (v == null ? v : String(v)));
 
-export function createProposeRequest(serviceSlugs, { validateLead } = {}) {
+export function createProposeRequest(serviceSlugs, { validateLead, known = null } = {}) {
   return tool({
     description:
       "Open the request form in the chat. Call it only after the visitor agreed to send a request, or asked outright for a quote, booking or callback. Pass the service, the car problem in the visitor's words as notes, and any name, phone, email or vehicle they already gave; leave the rest empty. The form asks for what is missing in three short steps.",
@@ -61,7 +64,7 @@ export function createProposeRequest(serviceSlugs, { validateLead } = {}) {
         "Only the car's problem or the work wanted, in a few words from the customer (e.g. pulls to the right since hitting a pothole), plus any timing they asked for. Never their questions, that they agreed to a request, today's date or anything about this chat.",
       ),
     }),
-    ...(validateLead && { execute: async (input) => checkProposal(input, { slugs: serviceSlugs, validateLead }) }),
+    ...(validateLead && { execute: async (input) => checkProposal(input, { slugs: serviceSlugs, validateLead, known }) }),
   });
 }
 
@@ -75,11 +78,18 @@ export const openRouter = ({ apiKey, fetch }) =>
     appUrl: "https://www.stangeautoservice.com",
   });
 
-export function createAi({ apiKey, model, reasoningEffort, provider = openRouter({ apiKey }) }) {
+// zdr routes only to providers that keep no prompts and never train on them; a model with no such provider fails instead.
+// require_parameters skips providers that would silently drop the request form's tool (CoreWeave and SiliconFlow for Qwen3.6, 2026-11-05).
+export const ZDR_ROUTING = { zdr: true, data_collection: "deny", require_parameters: true };
+
+export function createAi({ apiKey, model, reasoningEffort, zdr = true, providerOrder, provider = openRouter({ apiKey }) }) {
   const providerOptions = {
     openrouter: {
       usage: { include: true },
       ...(reasoningEffort && { reasoning: { effort: reasoningEffort, exclude: true } }),
+      ...((zdr || providerOrder) && {
+        provider: { ...(zdr && ZDR_ROUTING), ...(providerOrder && { order: providerOrder, allow_fallbacks: true }) },
+      }),
     },
   };
   const cacheBreakpoint = model?.startsWith("anthropic/")

@@ -1,17 +1,37 @@
 export function conversationsDb(sql) {
   return {
-    async ensureConversation({ site, id, visitorId, pageUrl = null, ipHash = null, verified = false }) {
+    async ensureConversation({ site, id, visitorId, pageUrl = null, ipHash = null, verified = false, previousId = null, carryOver = null, carryDetails = null }) {
       await sql`
-        insert into conversations (id, site, visitor_id, page_url, ip_hash, verified_at)
-        values (${id}, ${site}, ${visitorId}, ${pageUrl}, ${ipHash}, case when ${Boolean(verified)}::boolean then now() end)
+        insert into conversations (id, site, visitor_id, page_url, ip_hash, verified_at, previous_id, carry_over, carry_details)
+        values (${id}, ${site}, ${visitorId}, ${pageUrl}, ${ipHash}, case when ${Boolean(verified)}::boolean then now() end, ${previousId}, ${carryOver}, ${carryDetails})
         on conflict (id) do nothing`;
-      const [row] = await sql`select id, verified_at, message_count from conversations where id = ${id}`;
-      return { id: row.id, verifiedAt: row.verified_at, messageCount: row.message_count };
+      return this.getConversation(id);
     },
 
     async getConversation(id) {
-      const [row] = await sql`select id, verified_at, message_count from conversations where id = ${id}`;
-      return row ? { id: row.id, verifiedAt: row.verified_at, messageCount: row.message_count } : null;
+      const [row] = await sql`select id, verified_at, message_count, carry_over, carry_details from conversations where id = ${id}`;
+      return row
+        ? { id: row.id, verifiedAt: row.verified_at, messageCount: row.message_count, carryOver: row.carry_over, carryDetails: row.carry_details }
+        : null;
+    },
+
+    // Only the same visitor's chat, active in the last 24 hours, can hand its context to a new one.
+    async carryOverSource({ site, previousId, visitorId }) {
+      const [row] = await sql`
+        select c.summary, l.name, l.phone, l.email, l.vehicle,
+          (select coalesce(array_agg(content order by created_at), '{}') from (
+            select content, created_at from messages where conversation_id = c.id and role = 'user'
+            order by created_at desc limit 12) recent) as user_messages
+        from conversations c left join leads l on l.id = c.lead_id
+        where c.id = ${previousId} and c.site = ${site} and c.visitor_id = ${visitorId}
+          and c.last_message_at > now() - interval '24 hours'`;
+      return row
+        ? {
+            summary: row.summary,
+            lead: { name: row.name, phone: row.phone, email: row.email, vehicle: row.vehicle },
+            userMessages: row.user_messages,
+          }
+        : null;
     },
 
     async saveMessage({ site, conversationId, role, content }) {

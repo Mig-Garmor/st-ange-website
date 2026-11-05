@@ -50,8 +50,10 @@ export function createRequestHandler(settings, { db, requests, validateLead }) {
     }
 
     const lengthErrors = tooLong(body);
-    const { ok, errors, lead } = validateLead(body, { requireVehicle: true, requireEmail: true });
-    if (!ok || Object.keys(lengthErrors).length) {
+    const { errors, lead } = validateLead(body, { requireVehicle: true, requireEmail: true });
+    // The visitor must have ticked the exact wording this site shows; it is stored as their consent to calls and texts.
+    if (body.consent !== settings.callbackConsent) errors.consent = "Please tick the box so we can call or text you about this request.";
+    if (Object.keys(errors).length || Object.keys(lengthErrors).length) {
       return Response.json({ status: "invalid", errors: { ...errors, ...lengthErrors } }, { status: 400 });
     }
 
@@ -101,6 +103,7 @@ export function createRequestHandler(settings, { db, requests, validateLead }) {
       pageUrl,
       conversationId,
       requireRecord: true,
+      consentText: settings.callbackConsent,
     });
 
     if (emailStatus !== "sent") return Response.json({ status: "failed" });
