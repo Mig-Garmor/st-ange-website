@@ -216,6 +216,21 @@ describe("createChatHandler", () => {
     expect(result.card).toMatchObject({ name: "Old Name", phone: "832-555-0123", vehicle: "2016 Honda Civic" });
   });
 
+  it("after a request is sent, a yes is not consent to a new form", async () => {
+    const db = fakeDb({
+      getConversation: existing(new Date()),
+      getMessages: vi.fn(async () => [
+        { role: "assistant", content: "Would you like to send a request so we can call you back?" },
+        { role: "user", content: "yes" },
+        { role: "assistant", content: "[Request card shown: car-alignment]" },
+        { role: "assistant", content: "[Request sent to the shop]" },
+      ]),
+    });
+    const { handler, ai } = setup({ db });
+    await handler(post(body({ messages: [userMessage("yes")] })));
+    expect(ai.streamReply.mock.calls[0][0].forceTool).toBeUndefined();
+  });
+
   it("an existing chat uses its stored context and never looks the earlier chat up again", async () => {
     const db = fakeDb({
       getConversation: vi.fn(async () => ({ id: ID, verifiedAt: new Date(), messageCount: 2, carryOver: "brakes on a Civic" })),
