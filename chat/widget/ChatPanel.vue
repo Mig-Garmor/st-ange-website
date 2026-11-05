@@ -16,6 +16,8 @@ const emit = defineEmits(["close", "ready"]);
 
 const MAX_CHARS = 500;
 const STATES = ["offline", "limit", "error"];
+const PLACEHOLDER_MS = 3000;
+const SHAKE_MS = 400;
 
 const field = ref(null);
 const log = ref(null);
@@ -82,6 +84,29 @@ watch(error, async (err) => {
   if (text) send(text);
 });
 
+// Send is greyed only when a message cannot go anywhere; an empty box or a reply in progress is not that.
+const online = ref(typeof navigator === "undefined" || navigator.onLine !== false);
+const updateOnline = () => (online.value = navigator.onLine !== false);
+const unusable = computed(() => !online.value || ["offline", "limit"].includes(chatState(messages.value.at(-1) ?? {})));
+
+const placeholders = computed(() => (props.settings.placeholders?.length ? props.settings.placeholders : ["Type your message"]));
+const placeholderIndex = ref(0);
+const placeholder = computed(() => (unusable.value ? "Chat unavailable right now" : placeholders.value[placeholderIndex.value % placeholders.value.length]));
+let placeholderTimer = null;
+
+const shaking = ref(false);
+const emptyHint = ref("");
+let shakeTimer = null;
+function nudgeEmpty() {
+  shaking.value = false;
+  clearTimeout(shakeTimer);
+  requestAnimationFrame(() => (shaking.value = true));
+  shakeTimer = setTimeout(() => (shaking.value = false), SHAKE_MS);
+  emptyHint.value = "";
+  nextTick(() => (emptyHint.value = "Type a message first"));
+  focusInput();
+}
+
 const awayFromBottom = ref(false);
 
 function onLogScroll() {
@@ -131,7 +156,9 @@ function onSent(toolCallId) {
 }
 
 function submit() {
-  if (busy.value || !draft.value.trim()) return;
+  if (unusable.value) return;
+  if (!draft.value.trim()) return nudgeEmpty();
+  if (busy.value) return;
   send(draft.value);
   draft.value = "";
 }
@@ -166,6 +193,11 @@ watch(
 );
 
 onMounted(() => {
+  window.addEventListener("online", updateOnline);
+  window.addEventListener("offline", updateOnline);
+  placeholderTimer = setInterval(() => {
+    if (!draft.value) placeholderIndex.value += 1;
+  }, PLACEHOLDER_MS);
   requestAnimationFrame(() => requestAnimationFrame(() => (shown.value = props.open)));
   turnstile = createTurnstile(challenge.value, props.settings.turnstileSiteKey);
   if (!isVerified(messages.value)) turnstile.warm();
@@ -177,7 +209,13 @@ onMounted(() => {
   }
 });
 
-onBeforeUnmount(() => turnstile?.remove());
+onBeforeUnmount(() => {
+  turnstile?.remove();
+  window.removeEventListener("online", updateOnline);
+  window.removeEventListener("offline", updateOnline);
+  clearInterval(placeholderTimer);
+  clearTimeout(shakeTimer);
+});
 </script>
 
 <template>
@@ -299,9 +337,11 @@ onBeforeUnmount(() => turnstile?.remove());
         type="text"
         :maxlength="MAX_CHARS"
         autocomplete="off"
-        placeholder="Type your message"
+        :placeholder="placeholder"
+        :disabled="unusable"
       />
-      <button type="submit" class="send" :disabled="busy || !draft.trim()">Send</button>
+      <button type="submit" class="send" :class="{ shake: shaking }" :disabled="unusable">Send</button>
+      <span class="sr-only" aria-live="polite">{{ emptyHint }}</span>
     </form>
   </section>
 </template>
@@ -425,6 +465,25 @@ onBeforeUnmount(() => turnstile?.remove());
   @apply min-w-0 flex-1 rounded-lg border border-gray-300 p-2 text-[16px] focus:outline-none focus:ring-2 focus:ring-blue-400;
 }
 .send {
-  @apply rounded-lg bg-brand-navy px-4 font-bold text-white transition hover:opacity-90 disabled:opacity-60;
+  @apply rounded-lg bg-brand-navy px-4 font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60;
+}
+.composer input:disabled {
+  @apply cursor-not-allowed bg-gray-100;
+}
+.send.shake {
+  animation: send-shake 400ms ease-in-out;
+}
+@keyframes send-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .send.shake {
+    animation: send-flash 400ms linear;
+  }
+  @keyframes send-flash {
+    50% { @apply bg-brand-yellow text-brand-navy; }
+  }
 }
 </style>
