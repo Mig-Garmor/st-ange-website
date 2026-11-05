@@ -78,6 +78,9 @@ describe("buildInstructions", () => {
 
   it("opens the form instead of asking for details in chat, names the local area codes, and treats the page as context", () => {
     const { stable } = buildInstructions({ ...settings, localAreaCodes: ["281", "832", "346", "713"] }, { now: monday10, pageUrl: "/" });
+    expect(stable).toContain("you reply as the shop itself, not as a person");
+    expect(stable).toContain('Never use "I", "me" or "my"');
+    expect(stable).not.toContain("person at the front desk");
     expect(stable).toContain("Never open the request form on your own");
     expect(stable).toContain("ask whether they would like to send a request");
     expect(stable).toContain("If they keep asking questions instead, keep answering and do not call the tool");

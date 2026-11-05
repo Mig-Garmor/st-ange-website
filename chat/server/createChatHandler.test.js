@@ -413,7 +413,7 @@ describe("createChatHandler", () => {
     const { system } = ai.streamReply.mock.calls[0][0];
     expect(system).toHaveLength(2);
     const [stable, variable] = system;
-    expect(stable.startsWith("You are the chat assistant")).toBe(true);
+    expect(stable.startsWith("You are the chat on a local auto repair shop")).toBe(true);
     expect(stable).toContain("## Playbook: brakes\nAsk about noise.");
     expect(stable).not.toContain("Today is ");
     expect(variable.startsWith("Today is ")).toBe(true);
