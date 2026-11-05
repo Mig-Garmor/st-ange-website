@@ -22,33 +22,35 @@ describe("proposal", () => {
     expect(formatPhone("8325727121")).toBe("832-572-7121");
   });
 
-  it("an ok proposal returns the normalised card", () => {
+  it("complete details open the form ready to send, normalised", () => {
     expect(checkProposal({ ...valid, service: "oil" }, { slugs, validateLead })).toEqual({
       ok: true,
       card: { service: null, name: "Ann", phone: "832-555-0100", email: "ann@example.com", vehicle: "2019 Civic", notes: "Squeal" },
+      note: "The visitor now sees the form with everything filled in, ready to check and send.",
     });
   });
 
-  it("a placeholder email is missing, never shown on a card", () => {
-    expect(checkProposal({ ...valid, email: "None" }, { slugs, validateLead })).toEqual({
-      ok: false,
-      note: expect.any(String),
-      errors: { email: "Email is required" },
-    });
+  it("no details still opens the form, and the note tells the model not to ask for them in chat", () => {
+    const result = checkProposal({ service: "brakes", notes: "Squeal" }, { slugs, validateLead });
+    expect(result.ok).toBe(true);
+    expect(result.card).toEqual({ service: "brakes", name: "", phone: "", email: "", vehicle: "", notes: "Squeal" });
+    expect(result.note).toBe("The visitor now sees a 3-step form that asks for name, phone, email, vehicle. Do not ask for them in the chat.");
   });
 
-  it("a non-US or short phone fails with the endpoint's message", () => {
-    expect(checkProposal({ ...valid, phone: "+34643847584" }, { slugs, validateLead }).errors).toEqual({
-      phone: "Enter a 10-digit US phone number",
-    });
-    expect(checkProposal({ ...valid, phone: "555-0100" }, { slugs, validateLead }).errors).toEqual({
-      phone: "Add the area code (281, 832, 346 or 713)",
-    });
+  it("a placeholder email is left empty for the form to ask, never shown as given", () => {
+    const result = checkProposal({ ...valid, email: "None" }, { slugs, validateLead });
+    expect(result.card.email).toBe("");
+    expect(result.note).toContain("asks for email");
   });
 
-  it("long notes are rejected like the request endpoint does", () => {
-    expect(checkProposal({ ...valid, notes: "x".repeat(1001) }, { slugs, validateLead }).errors).toEqual({
-      notes: "Use 1000 characters or fewer",
-    });
+  it("an invalid phone is kept as typed so the form's phone step can flag it", () => {
+    expect(checkProposal({ ...valid, phone: "555-0100" }, { slugs, validateLead }).card.phone).toBe("555-0100");
+    expect(checkProposal({ ...valid, phone: "+34643847584" }, { slugs, validateLead }).note).toContain("asks for phone");
+  });
+
+  it("over-long values are cut to the endpoint's limits instead of failing", () => {
+    const { card } = checkProposal({ ...valid, notes: "x".repeat(1500), name: "n".repeat(150) }, { slugs, validateLead });
+    expect(card.notes).toHaveLength(1000);
+    expect(card.name).toHaveLength(100);
   });
 });

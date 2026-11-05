@@ -31,7 +31,7 @@ export const isVerified = (list) =>
     (m) => m.role === "assistant" && !isLocal(m) && !["offline", "error"].includes(chatState(m)) && m.parts?.length,
   );
 
-const CLAIMS_CARD = /tap (the )?send request|send request (button|below)/i;
+const CLAIMS_CARD = /tap (the )?send request|send request (button|below)|(the |in the )form below/i;
 const hasCard = (message) => (message.parts ?? []).some((part) => okCard(part));
 
 const hasVisibleReply = (message, earlierCard) => {

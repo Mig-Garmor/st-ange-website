@@ -49,7 +49,7 @@ const loose = () => z.union([z.string(), z.number()]).nullish().transform((v) =>
 export function createProposeRequest(serviceSlugs, { validateLead } = {}) {
   return tool({
     description:
-      "Check the visitor's details and, if they are valid, show a request card to confirm and send. Use once you have their name, phone, email and vehicle. If it returns errors, ask the visitor to fix those fields.",
+      "Open the request form in the chat. Call it as soon as the visitor wants a service, a quote or a booking. Pass the service, the problem in notes, and any name, phone, email or vehicle they already gave; leave the rest empty. The form asks for what is missing in three short steps.",
     // Lenient on purpose: an input that fails the schema skips execute, so the model's reply can claim a card that never renders.
     inputSchema: z.object({
       service: loose().describe(`One of: ${serviceSlugs.join(", ")}`),
@@ -94,7 +94,7 @@ export function createAi({ apiKey, model, reasoningEffort, provider = openRouter
     }));
 
   return {
-    streamReply({ system, messages, maxOutputTokens, tools, onFinish, onError, onSettled, errorText }) {
+    streamReply({ system, messages, maxOutputTokens, tools, forceTool, onFinish, onError, onSettled, errorText }) {
       const result = streamText({
         model: provider(model),
         instructions: instructions(system),
@@ -103,7 +103,8 @@ export function createAi({ apiKey, model, reasoningEffort, provider = openRouter
         tools,
         // Step two lets the model react to the tool's verdict; it may not propose again in the same turn.
         stopWhen: isStepCount(2),
-        prepareStep: ({ stepNumber }) => (stepNumber > 0 ? { toolChoice: "none" } : {}),
+        prepareStep: ({ stepNumber }) =>
+          stepNumber > 0 ? { toolChoice: "none" } : forceTool ? { toolChoice: { type: "tool", toolName: forceTool } } : {},
         providerOptions,
         experimental_transform: humanizeTransform(),
         onError: ({ error }) => {

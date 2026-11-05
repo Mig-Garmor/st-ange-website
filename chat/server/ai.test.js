@@ -90,25 +90,25 @@ describe("createAi", () => {
     return { body, finish: onFinish.mock.calls[0][0], model };
   };
 
-  it("streamReply validates the proposal, lets the model add a line, and reports the ok card", async () => {
+  it("streamReply opens the prefilled form, lets the model add a line, and reports the ok card", async () => {
     const input = { service: "Brakes", name: "Ann", phone: "(832) 555-0100", email: "ann@example.com", vehicle: "2019 Civic", notes: null };
-    const { finish } = await propose(twoStepModel(input, "Tap Send request to confirm."));
-    expect(finish.text).toBe("Tap Send request to confirm.");
-    expect(finish.toolCall.output).toEqual({
+    const { finish } = await propose(twoStepModel(input, "You can finish it in the form below."));
+    expect(finish.text).toBe("You can finish it in the form below.");
+    expect(finish.toolCall.output).toMatchObject({
       ok: true,
       card: { service: "brakes", name: "Ann", phone: "832-555-0100", email: "ann@example.com", vehicle: "2019 Civic", notes: "" },
     });
   });
 
-  it("an invalid proposal returns field errors and the model asks for a fix in the second step", async () => {
+  it("partial details still open the form, and the model only adds a line in the second step", async () => {
     const input = { service: null, name: "Ann", phone: "+34643847584", email: "None", vehicle: "Civic" };
-    const { body, finish, model } = await propose(twoStepModel(input, "Could you share a US number and an email?"));
-    expect(finish.toolCall.output).toEqual({
-      ok: false,
-      note: expect.any(String),
-      errors: { phone: "Enter a 10-digit US phone number", email: "Email is required" },
+    const { body, finish, model } = await propose(twoStepModel(input, "Finish your request in the form below, it takes three quick steps."));
+    expect(finish.toolCall.output).toMatchObject({
+      ok: true,
+      card: { name: "Ann", phone: "+34643847584", email: "", vehicle: "Civic" },
+      note: expect.stringContaining("asks for phone, email"),
     });
-    expect(finish.text).toBe("Could you share a US number and an email?");
+    expect(finish.text).toBe("Finish your request in the form below, it takes three quick steps.");
     expect(body).toContain("tool-output-available");
     expect(model.doStreamCalls).toHaveLength(2);
     expect(model.doStreamCalls[0].maxOutputTokens).toBe(150);
@@ -144,14 +144,25 @@ describe("createAi", () => {
     expect(message.parts.filter((p) => p.type === "text").map((p) => p.text)).toEqual(["Here are your details, tap Send request to confirm."]);
   });
 
-  it("a proposal with missing or odd-typed fields still runs the check instead of failing the schema", async () => {
-    const { body, finish } = await propose(twoStepModel({ name: "Bill", phone: 8325727121 }, "What's your email and vehicle?"));
-    expect(body).not.toContain("tool-input-error");
-    expect(finish.toolCall.output).toEqual({
-      ok: false,
-      note: expect.any(String),
-      errors: { email: "Email is required", vehicle: "Vehicle is required" },
+  it("forceTool requires that tool on the first step only", async () => {
+    const model = twoStepModel({ service: "brakes" }, "Finish it in the form below.");
+    const res = setup(model).streamReply({
+      system: "Rules",
+      messages: [{ role: "user", content: "Get a quote" }],
+      maxOutputTokens: 150,
+      tools: { proposeRequest: createProposeRequest(["brakes"], { validateLead }) },
+      forceTool: "proposeRequest",
+      onFinish: vi.fn(),
     });
+    await res.text();
+    expect(model.doStreamCalls[0].toolChoice).toEqual({ type: "tool", toolName: "proposeRequest" });
+    expect(model.doStreamCalls[1].toolChoice).toEqual({ type: "none" });
+  });
+
+  it("a proposal with missing or odd-typed fields still opens the form instead of failing the schema", async () => {
+    const { body, finish } = await propose(twoStepModel({ name: "Bill", phone: 8325727121 }, "Finish it in the form below."));
+    expect(body).not.toContain("tool-input-error");
+    expect(finish.toolCall.output).toMatchObject({ ok: true, card: { name: "Bill", phone: "832-572-7121", email: "", vehicle: "" } });
   });
 
   it("a dash streamed as its own token comes out with one space, streamed and saved", async () => {
@@ -559,16 +570,15 @@ describe("createProposeRequest", () => {
     expect(Object.keys(json.properties)).toEqual(["service", "name", "phone", "email", "vehicle", "notes"]);
   });
 
-  it("execute returns an ok card or field errors", async () => {
+  it("execute always returns an ok card, prefilled with whatever is known", async () => {
     const tool = createProposeRequest(["brakes"], { validateLead });
-    const ok = await tool.execute({ service: "brakes", name: " Ann ", phone: "1 832 555 0100", email: "ann@example.com", vehicle: "Civic", notes: "Squeal" });
-    expect(ok).toEqual({
+    const full = await tool.execute({ service: "brakes", name: " Ann ", phone: "1 832 555 0100", email: "ann@example.com", vehicle: "Civic", notes: "Squeal" });
+    expect(full).toMatchObject({
       ok: true,
       card: { service: "brakes", name: "Ann", phone: "832-555-0100", email: "ann@example.com", vehicle: "Civic", notes: "Squeal" },
     });
-    const bad = await tool.execute({ service: "oil", name: "", phone: "5550100", email: "n/a", vehicle: "" });
-    expect(bad.ok).toBe(false);
-    expect(Object.keys(bad.errors).sort()).toEqual(["email", "name", "phone", "vehicle"]);
-    expect(bad.errors.phone).toBe("Add the area code (281, 832, 346 or 713)");
+    const sparse = await tool.execute({ service: "oil", name: "", phone: "5550100", email: "n/a", vehicle: "" });
+    expect(sparse).toMatchObject({ ok: true, card: { service: null, name: "", phone: "5550100", email: "", vehicle: "" } });
+    expect(sparse.note).toContain("name, phone, email, vehicle");
   });
 });

@@ -52,6 +52,8 @@ export const chatServerSettings = {
   featured,
   services: services.map(({ slug, name }) => ({ slug, name })),
   limits: { maxChars: 500, maxUserMessages: 20, maxAttempts: 30, perHour: 40 },
+  // Must match the quick reply text in src/chatSettings.client.js.
+  formTriggers: ["Get a quote"],
   maxOutputTokens: 150,
   dailyCapEur: Number(process.env.CHAT_DAILY_CAP_EUR ?? 5),
   // OpenRouter reports each call's real cost, so this table is only a fallback for calls that report none.
