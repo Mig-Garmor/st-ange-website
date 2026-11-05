@@ -4,7 +4,7 @@ import { useChat } from "@ai-sdk/vue";
 import { DefaultChatTransport } from "ai";
 import RequestCard from "./RequestCard.vue";
 import { createTurnstile } from "./turnstile.js";
-import { loadSession, saveSession, visitorId } from "./storage.js";
+import { isExpired, loadSession, saveSession, visitorId } from "./storage.js";
 import { latestCardId as findLatestCardId, okCard } from "./card.js";
 import { chatState, hasUnsentFirstMessage, isVerified, lastReplyMissing, localExchange, sentNote, textOf } from "./messages.js";
 
@@ -26,6 +26,7 @@ let turnstile = null;
 
 const saved = loadSession();
 const conversation = shallowRef({ id: saved?.id ?? crypto.randomUUID(), messages: saved?.messages ?? [] });
+let lastActive = saved?.savedAt ?? Date.now();
 
 const transport = new DefaultChatTransport({
   api: "/api/chat",
@@ -49,8 +50,20 @@ const latestCardId = computed(() => findLatestCardId(messages.value));
 const noReply = computed(() => status.value === "ready" && !verifyFailed.value && lastReplyMissing(messages.value));
 
 watch([id, messages, status], () => {
-  if (status.value !== "streaming") saveSession({ id: id.value, messages: messages.value });
+  if (status.value === "streaming") return;
+  lastActive = Date.now();
+  saveSession({ id: id.value, messages: messages.value }, lastActive);
 });
+
+// The old conversation stays in the database; the visitor id still links it to this one.
+function startNewChat() {
+  if (busy.value) return;
+  conversation.value = { id: crypto.randomUUID(), messages: [] };
+  draft.value = "";
+  verifyFailed.value = false;
+  turnstile?.warm();
+  focusInput();
+}
 
 watch(error, async (err) => {
   const challengeFailed = err && !err.statusCode && err.message?.startsWith("Turnstile");
@@ -146,7 +159,10 @@ watch(
 const shown = ref(false);
 watch(
   () => props.open,
-  (open) => (shown.value = open),
+  (open) => {
+    shown.value = open;
+    if (open && messages.value.length && isExpired(lastActive)) startNewChat();
+  },
 );
 
 onMounted(() => {
@@ -176,6 +192,9 @@ onBeforeUnmount(() => turnstile?.remove());
   >
     <header class="head">
       <h2 id="chat-panel-title" class="head-title">Chat with us</h2>
+      <button v-if="messages.length" type="button" class="new-chat" :disabled="busy" @click="startNewChat">
+        New chat
+      </button>
       <button type="button" class="close" aria-label="Close chat" @click="emit('close')">
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
           <path
@@ -334,6 +353,9 @@ onBeforeUnmount(() => turnstile?.remove());
 }
 .head-title {
   @apply text-[16px] font-bold;
+}
+.new-chat {
+  @apply ml-auto mr-2 rounded-full border border-white/60 px-3 py-1 text-sm font-semibold text-white hover:border-brand-yellow hover:text-brand-yellow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow disabled:opacity-50;
 }
 .close {
   @apply rounded-full p-1 text-white hover:text-brand-yellow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow;

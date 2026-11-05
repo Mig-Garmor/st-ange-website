@@ -1,6 +1,11 @@
 const SESSION_KEY = "chat:session";
 const VISITOR_KEY = "chat:visitor";
 
+// Matches the insight job's one hour of quiet, so a chat that may already be summarised is never continued.
+export const SESSION_TTL_MS = 60 * 60 * 1000;
+
+export const isExpired = (savedAt, now = Date.now()) => !(now - savedAt < SESSION_TTL_MS);
+
 const memory = { session: null, visitor: null };
 
 const newId = () => {
@@ -11,20 +16,19 @@ const newId = () => {
   }
 };
 
-export function loadSession() {
+export function loadSession(now = Date.now()) {
+  let session = memory.session;
   try {
     const raw = sessionStorage.getItem(SESSION_KEY);
-    if (raw) {
-      const session = JSON.parse(raw);
-      if (typeof session?.id === "string" && Array.isArray(session.messages)) return session;
-    }
+    if (raw) session = JSON.parse(raw);
   } catch {
   }
-  return memory.session;
+  const valid = typeof session?.id === "string" && Array.isArray(session.messages) && !isExpired(session.savedAt, now);
+  return valid ? session : null;
 }
 
-export function saveSession({ id, messages }) {
-  memory.session = { id, messages };
+export function saveSession({ id, messages }, now = Date.now()) {
+  memory.session = { id, messages, savedAt: now };
   try {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(memory.session));
   } catch {
