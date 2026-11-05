@@ -1,6 +1,7 @@
 import { CUSTOMER_HEADER, oneLine, quoted } from "./emailText.js";
 import { toPagePath } from "./pagePath.js";
 import { formatPhone } from "./proposal.js";
+import { rejectCrossSite } from "./sameSite.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 // Postgres rejects unique-index entries over about 2.7 KB, which made oversized keys skip the request row.
@@ -23,6 +24,8 @@ export function createRequestHandler(settings, { db, requests, validateLead }) {
   const { site, services } = settings;
 
   return async function handleRequest(request) {
+    const crossSite = rejectCrossSite(request);
+    if (crossSite) return crossSite;
     let body;
     try {
       body = await request.json();

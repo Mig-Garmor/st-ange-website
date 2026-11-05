@@ -23,6 +23,7 @@ const fakeDb = (over = {}) => ({
     { id: "b", transcript: "user: hello" },
   ]),
   saveInsights: vi.fn(async () => {}),
+  forgetIpHashes: vi.fn(async () => {}),
   ...over,
 });
 
@@ -93,6 +94,16 @@ describe("createInsightsJob", () => {
     expect(db.saveInsights).toHaveBeenCalledWith("sent", { ...insight, outcome: "request_sent" });
     expect(db.saveInsights).toHaveBeenCalledWith("card-only", insight);
     expect(insightsSchema(["car-alignment"]).safeParse({ ...insight, outcome: "request_sent" }).success).toBe(false);
+  });
+
+  it("bounds the unanswered list a visitor could steer, and forgets old IP hashes first", async () => {
+    const db = fakeDb();
+    const long = { ...insight, unanswered: Array.from({ length: 15 }, () => "q".repeat(500)) };
+    await job(db, { generateInsights: vi.fn(async () => ({ object: long, usage })) })(req("Bearer s3cret"));
+    const saved = db.saveInsights.mock.calls[0][1].unanswered;
+    expect(saved).toHaveLength(10);
+    expect(saved.every((q) => q.length === 200)).toBe(true);
+    expect(db.forgetIpHashes).toHaveBeenCalledWith(7);
   });
 
   it("an unreadable insight still records a sent request", async () => {

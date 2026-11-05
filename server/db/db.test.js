@@ -157,6 +157,14 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("data access", () => {
     expect(await db.countAttempt(conv.id, 5)).toBe(false);
   });
 
+  it("forgetIpHashes clears hashes older than the given days and keeps recent ones", async () => {
+    const [old, recent] = [await newConversation({ ipHash: "h-old" }), await newConversation({ ipHash: "h-new" })];
+    await sql`update conversations set created_at = now() - interval '8 days' where id = ${old.id}`;
+    await db.forgetIpHashes(7);
+    const rows = await sql`select id, ip_hash from conversations where id in (${old.id}, ${recent.id})`;
+    expect(Object.fromEntries(rows.map((r) => [r.id, r.ip_hash]))).toEqual({ [old.id]: null, [recent.id]: "h-new" });
+  });
+
   it("formRequestsLastHour counts one IP's recent form requests, not chat ones", async () => {
     const ipHash = randomUUID();
     for (const source of ["contact_form", "quote_form", "chat"]) {

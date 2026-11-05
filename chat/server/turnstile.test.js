@@ -17,6 +17,13 @@ describe("turnstile", () => {
     expect(body.get("remoteip")).toBe("1.2.3.4");
   });
 
+  it("with a hostname allowlist, a token solved on another hostname fails", async () => {
+    const hostnames = ["stangeautoservice.com"];
+    expect(await createTurnstile({ secret: "s", hostnames, fetch: reply({ success: true, hostname: "stangeautoservice.com" }) }).verify("t")).toBe(true);
+    expect(await createTurnstile({ secret: "s", hostnames, fetch: reply({ success: true, hostname: "evil.example" }) }).verify("t")).toBe(false);
+    expect(await createTurnstile({ secret: "s", fetch: reply({ success: true, hostname: "example.com" }) }).verify("t")).toBe(true);
+  });
+
   it("false on success:false", async () => {
     const t = createTurnstile({ secret: "s", fetch: reply({ success: false }) });
     expect(await t.verify("tok", "1.2.3.4")).toBe(false);

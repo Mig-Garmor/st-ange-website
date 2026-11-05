@@ -26,7 +26,10 @@ export async function POST(request) {
       apiKey: process.env.BREVO_API_KEY,
       to: process.env.LEAD_EMAIL_TO ?? "st.angeautos@gmail.com",
     }),
-    turnstile: createTurnstile({ secret: process.env.TURNSTILE_SECRET_KEY }),
+    turnstile: createTurnstile({
+      secret: process.env.TURNSTILE_SECRET_KEY,
+      hostnames: (process.env.TURNSTILE_HOSTNAMES ?? "").split(",").map((h) => h.trim()).filter(Boolean),
+    }),
     ipSalt: process.env.IP_HASH_SALT,
     model,
     validateLead,

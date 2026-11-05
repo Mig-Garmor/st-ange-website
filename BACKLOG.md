@@ -49,7 +49,7 @@ Customers mention these in reviews. They can only become shop statements on the 
 - **Automated review check.** Design and limits are in `AGENTS.md` under "Planned: automated review check".
 - **Chat go-live.** Follow the "Before going live" checklist in the README's "Chat and lead tracking" section: run `npm run db:migrate`, add the chat variables to the fork's Vercel project, then do the manual checks.
 - **Monthly: turn unanswered chat questions into FAQs.** The daily insight job records, for each chat, the questions the site couldn't answer (`conversations.unanswered`). Once a month, list the most common ones (through the Neon MCP server), and add the good ones as FAQs on the matching service page. The chat's knowledge is built from those pages, so the site, the bot and search all improve together.
-- **Chat dashboard and playbook generation.** A separate dashboard repository reads the chat tables. It is where playbooks get generated from successful conversations, once there are a few weeks of chats.
+- **Chat dashboard and playbook generation.** A separate dashboard repository reads the chat tables. It is where playbooks get generated from successful conversations, once there are a few weeks of chats. Playbooks go into every visitor's instructions, so a person must review each one before it is set active: a generated playbook copies visitor-written text, and one crafted chat could otherwise rewrite the bot for everyone. Treat `summary` and `unanswered` the same way when an AI agent reads them.
 
 ## Not pursuing
 

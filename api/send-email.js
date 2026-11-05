@@ -1,4 +1,5 @@
 import { clientIp, hashIp } from "../chat/server/ipHash.js";
+import { rejectCrossSite } from "../chat/server/sameSite.js";
 import { createTurnstile } from "../chat/server/turnstile.js";
 import { getSql } from "../server/db/client.js";
 import { createDb } from "../server/db/index.js";
@@ -11,7 +12,11 @@ const unavailable = () => {
 };
 const noDb = new Proxy({}, { get: () => unavailable });
 
+const turnstileHostnames = () => (process.env.TURNSTILE_HOSTNAMES ?? "").split(",").map((h) => h.trim()).filter(Boolean);
+
 export async function POST(request) {
+  const crossSite = rejectCrossSite(request);
+  if (crossSite) return crossSite;
   let body;
   try {
     body = await request.json();
@@ -34,7 +39,7 @@ export async function POST(request) {
     ip,
     ipHash: salt ? hashIp(ip, salt) : null,
     countRecent: process.env.DATABASE_URL ? (ipHash) => db.formRequestsLastHour(ipHash) : null,
-    turnstile: secret ? createTurnstile({ secret }) : null,
+    turnstile: secret ? createTurnstile({ secret, hostnames: turnstileHostnames() }) : null,
   });
   return Response.json(json, { status });
 }
