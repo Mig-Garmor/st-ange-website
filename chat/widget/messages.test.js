@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasUnsentFirstMessage, isLocal, isVerified, lastReplyMissing, localExchange, textOf } from "./messages.js";
+import { SENT_FOLLOW_UP, hasUnsentFirstMessage, isLocal, isVerified, lastReplyMissing, localExchange, sentNote, textOf } from "./messages.js";
 
 const user = (text) => ({ role: "user", parts: [{ type: "text", text }] });
 const reply = (text) => ({ role: "assistant", parts: [{ type: "text", text }] });
@@ -22,6 +22,16 @@ describe("widget messages", () => {
     expect(hasUnsentFirstMessage([])).toBe(false);
     expect(hasUnsentFirstMessage([user("hi"), reply("hello"), user("again")])).toBe(false);
     expect(hasUnsentFirstMessage([user("hi"), notice("offline")])).toBe(false);
+  });
+
+  it("sentNote adds one local follow-up per card and keeps the chat open", () => {
+    const list = [user("brakes"), reply("Check the card.")];
+    const once = sentNote("call-1", list);
+    expect(once).toHaveLength(3);
+    expect(once.at(-1)).toMatchObject({ role: "assistant", metadata: { local: true } });
+    expect(textOf(once.at(-1))).toBe(SENT_FOLLOW_UP);
+    expect(sentNote("call-1", once)).toBe(once);
+    expect(lastReplyMissing(once)).toBe(false);
   });
 
   it("localExchange builds a local question and answer pair", () => {

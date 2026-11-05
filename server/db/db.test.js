@@ -100,6 +100,19 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("data access", () => {
     expect(row.services).toEqual(["brakes"]);
   });
 
+  it("claimForInsights flags a conversation whose request email was sent", async () => {
+    const s = `${site}-claim-sent`;
+    const [sent, pending] = [await newConversation({ site: s }), await newConversation({ site: s })];
+    for (const conv of [sent, pending]) {
+      await db.saveMessage({ site: s, conversationId: conv.id, role: "user", content: "brakes" });
+      await db.recordRequest({ site: s, idempotencyKey: `${conv.id}:k`, source: "chat", conversationId: conv.id });
+    }
+    await db.setRequestEmailStatus((await sql`select id from requests where conversation_id = ${sent.id}`)[0].id, { status: "sent" });
+    await sql`update conversations set last_message_at = now() - interval '2 hours' where site = ${s}`;
+    const claimed = Object.fromEntries((await db.claimForInsights(s, 10)).map((c) => [c.id, c.requestSent]));
+    expect(claimed).toEqual({ [sent.id]: true, [pending.id]: false });
+  });
+
   it("getChatState creates an active row", async () => {
     expect(await db.getChatState(`${site}-fresh`)).toMatchObject({ status: "active", pausedAt: null });
   });

@@ -6,7 +6,7 @@ import RequestCard from "./RequestCard.vue";
 import { createTurnstile } from "./turnstile.js";
 import { loadSession, saveSession, visitorId } from "./storage.js";
 import { latestCardId as findLatestCardId, okCard } from "./card.js";
-import { chatState, hasUnsentFirstMessage, isVerified, lastReplyMissing, localExchange, textOf } from "./messages.js";
+import { chatState, hasUnsentFirstMessage, isVerified, lastReplyMissing, localExchange, sentNote, textOf } from "./messages.js";
 
 const props = defineProps({
   settings: { type: Object, required: true },
@@ -110,6 +110,11 @@ function ask(reply) {
   if (!answer) return send(reply);
   if (busy.value) return;
   messages.value = [...messages.value, ...localExchange(reply, answer)];
+}
+
+function onSent(toolCallId) {
+  messages.value = sentNote(toolCallId, messages.value);
+  focusInput();
 }
 
 function submit() {
@@ -220,6 +225,7 @@ onBeforeUnmount(() => turnstile?.remove());
               :phone-href="settings.phoneHref"
               :superseded="part.toolCallId !== latestCardId"
               :local-area-codes="settings.localAreaCodes"
+              @sent="onSent(part.toolCallId)"
             />
           </template>
         </template>

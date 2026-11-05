@@ -17,6 +17,14 @@ export const localExchange = (question, answer, newId = () => crypto.randomUUID(
     ["assistant", answer],
   ].map(([role, text]) => ({ id: newId(), role, metadata: { local: true }, parts: [{ type: "text", text }] }));
 
+export const SENT_FOLLOW_UP = "Thanks, we got your request and we'll be in touch shortly. Can I help with anything else?";
+
+// Keyed by the card, so sending twice or reloading never adds a second note.
+export const sentNote = (toolCallId, list) =>
+  list.some((m) => m.id === `sent-${toolCallId}`)
+    ? list
+    : [...list, { id: `sent-${toolCallId}`, role: "assistant", metadata: { local: true }, parts: [{ type: "text", text: SENT_FOLLOW_UP }] }];
+
 // Any AI reply, or the limit notice, means the server has a verified conversation for this id.
 export const isVerified = (list) =>
   list.some(

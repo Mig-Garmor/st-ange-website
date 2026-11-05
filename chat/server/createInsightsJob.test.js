@@ -81,6 +81,34 @@ describe("createInsightsJob", () => {
     expect(ai.generateInsights).not.toHaveBeenCalled();
   });
 
+  it("outcome is request_sent only when the database has a sent request, whatever the model says", async () => {
+    const db = fakeDb({
+      claimForInsights: vi.fn(async () => [
+        { id: "sent", transcript: "user: brakes", requestSent: true },
+        { id: "card-only", transcript: "user: brakes", requestSent: false },
+      ]),
+    });
+    const ai = { generateInsights: vi.fn(async () => ({ object: insight, usage })) };
+    await job(db, ai)(req("Bearer s3cret"));
+    expect(db.saveInsights).toHaveBeenCalledWith("sent", { ...insight, outcome: "request_sent" });
+    expect(db.saveInsights).toHaveBeenCalledWith("card-only", insight);
+    expect(insightsSchema(["car-alignment"]).safeParse({ ...insight, outcome: "request_sent" }).success).toBe(false);
+  });
+
+  it("an unreadable insight still records a sent request", async () => {
+    const db = fakeDb({ claimForInsights: vi.fn(async () => [{ id: "sent", transcript: "user: x", requestSent: true }]) });
+    await job(db, { generateInsights: vi.fn(async () => ({ object: null, usage })) })(req("Bearer s3cret"));
+    expect(db.saveInsights).toHaveBeenCalledWith("sent", { outcome: "request_sent" });
+  });
+
+  it("the instructions list service names and forbid gendered pronouns", async () => {
+    const ai = { generateInsights: vi.fn(async () => ({ object: insight, usage })) };
+    await job(fakeDb(), ai)(req("Bearer s3cret"));
+    const { system } = ai.generateInsights.mock.calls[0][0];
+    expect(system).toContain("car-alignment (Car Alignment)");
+    expect(system).toContain("Never use he, him, his, she or her");
+  });
+
   it("the schema rejects an unknown service slug", () => {
     const schema = insightsSchema(["car-alignment"]);
     expect(schema.safeParse({ ...insight, services: ["oil-change"] }).success).toBe(false);
