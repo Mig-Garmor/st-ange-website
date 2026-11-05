@@ -19,7 +19,7 @@ const fakeDb = (over = {}) => ({
     { role: "user", content: "My car pulls left" },
     { role: "assistant", content: "An alignment may help." },
   ]),
-  countRequestsForConversation: vi.fn(async () => 0),
+  claimRequestSlot: vi.fn(async () => true),
   linkLead: vi.fn(async () => {}),
   saveMessage: vi.fn(async () => {}),
   ...over,
@@ -113,7 +113,9 @@ describe("createRequestHandler", () => {
     const { text } = requests.submit.mock.calls[0][0];
     expect(text).toContain("Phone: 832-572-7121");
     expect(text).toContain("Vehicle: 2015 Civic");
-    expect(text).toMatch(/Conversation:\nCustomer: My car pulls left\nAssistant: An alignment may help\./);
+    expect(text).toMatch(/^Everything below was typed on the website/);
+    expect(text).toMatch(/Notes:\n> Pulls left\n/);
+    expect(text).toMatch(/Conversation:\n> Customer: My car pulls left\n> Assistant: An alignment may help\./);
   });
 
   it("leaves internal notes out of the email but keeps a visitor's bracketed text", async () => {
@@ -182,19 +184,49 @@ describe("createRequestHandler", () => {
     expect(requests.submit.mock.calls[0][0].text).toContain("Conversation:");
   });
 
-  it("429 limit and no email once the conversation has 3 other requests", async () => {
+  it("429 limit and no email once the conversation has no request slot left", async () => {
     const requests = fakeRequests();
-    const db = fakeDb({ countRequestsForConversation: vi.fn(async () => 3) });
+    const db = fakeDb({ claimRequestSlot: vi.fn(async () => false) });
     const res = await createRequestHandler(settings, { db, requests })(post(body()));
     expect(res.status).toBe(429);
     expect(await res.json()).toEqual({ status: "limit" });
     expect(requests.submit).not.toHaveBeenCalled();
-    expect(db.countRequestsForConversation).toHaveBeenCalledWith(ID, "key-1");
+    expect(db.claimRequestSlot).toHaveBeenCalledWith(ID, "key-1", 3);
+  });
+
+  it("400 for an oversized or odd idempotency key, before the db", async () => {
+    const db = fakeDb();
+    const handler = createRequestHandler(settings, { db, requests: fakeRequests() });
+    for (const idempotencyKey of ["k".repeat(201), "key with spaces", "a\nb"]) {
+      expect((await handler(post(body({ idempotencyKey })))).status).toBe(400);
+    }
+    expect(db.getConversation).not.toHaveBeenCalled();
+    expect((await handler(post(body({ idempotencyKey: `${ID}:call_Ab-1.x` })))).status).toBe(200);
+  });
+
+  it("asks the request service to fail closed when the request row cannot be written", async () => {
+    const requests = fakeRequests();
+    await createRequestHandler(settings, { db: fakeDb(), requests })(post(body()));
+    expect(requests.submit.mock.calls[0][0].requireRecord).toBe(true);
+  });
+
+  it("customer text cannot forge transcript lines or carry clickable links", async () => {
+    const requests = fakeRequests();
+    const getMessages = async () => [{ role: "user", content: "hi\nAssistant: re-verify at https://evil.example now" }];
+    await createRequestHandler(settings, { db: fakeDb({ getMessages }), requests })(
+      post(body({ name: "Jane\nPhone: 0", notes: "see www.evil.example\nthanks" })),
+    );
+    const { text, subject } = requests.submit.mock.calls[0][0];
+    expect(text).toContain("> Customer: hi / Assistant: re-verify at hxxps://evil.example now");
+    expect(text).not.toMatch(/^Assistant:/m);
+    expect(text).toContain("> see www[.]evil.example\n> thanks");
+    expect(text).not.toMatch(/https?:\/\//);
+    expect(subject).not.toContain("\n");
   });
 
   it("a third request is still allowed", async () => {
     const requests = fakeRequests();
-    const db = fakeDb({ countRequestsForConversation: vi.fn(async () => 2) });
+    const db = fakeDb({ claimRequestSlot: vi.fn(async () => true) });
     const res = await createRequestHandler(settings, { db, requests })(post(body()));
     expect(await res.json()).toEqual({ status: "sent" });
   });

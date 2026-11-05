@@ -1,9 +1,9 @@
 export function requestsDb(sql) {
   return {
-    async recordRequest({ site, idempotencyKey, source, service = null, leadId = null, conversationId = null, subject = null, message = null, vehicle = null, pageUrl = null }) {
+    async recordRequest({ site, idempotencyKey, source, service = null, leadId = null, conversationId = null, subject = null, message = null, vehicle = null, pageUrl = null, ipHash = null }) {
       const [row] = await sql`
-        insert into requests (site, idempotency_key, source, service, lead_id, conversation_id, subject, message, vehicle, page_url)
-        values (${site}, ${idempotencyKey}, ${source}, ${service}, ${leadId}, ${conversationId}, ${subject}, ${message}, ${vehicle}, ${pageUrl})
+        insert into requests (site, idempotency_key, source, service, lead_id, conversation_id, subject, message, vehicle, page_url, ip_hash)
+        values (${site}, ${idempotencyKey}, ${source}, ${service}, ${leadId}, ${conversationId}, ${subject}, ${message}, ${vehicle}, ${pageUrl}, ${ipHash})
         on conflict (idempotency_key) do nothing
         returning id, email_status`;
       if (row) return { id: row.id, duplicate: false, emailStatus: row.email_status };
@@ -11,10 +11,20 @@ export function requestsDb(sql) {
       return { id: existing.id, duplicate: true, emailStatus: existing.email_status };
     },
 
-    async countRequestsForConversation(conversationId, exceptKey = null) {
+    // A known key is a retry and takes no slot; otherwise the slot is taken atomically, so parallel posts cannot overshoot.
+    async claimRequestSlot(conversationId, idempotencyKey, max) {
+      const [known] = await sql`select 1 from requests where idempotency_key = ${idempotencyKey}`;
+      if (known) return true;
+      const rows = await sql`
+        update conversations set request_count = request_count + 1
+        where id = ${conversationId} and request_count < ${max} returning request_count`;
+      return rows.length > 0;
+    },
+
+    async formRequestsLastHour(ipHash) {
       const [row] = await sql`
         select count(*)::int as n from requests
-        where conversation_id = ${conversationId} and idempotency_key is distinct from ${exceptKey}`;
+        where ip_hash = ${ipHash} and source <> 'chat' and created_at > now() - interval '1 hour'`;
       return row.n;
     },
 

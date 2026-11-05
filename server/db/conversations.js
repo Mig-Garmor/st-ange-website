@@ -31,6 +31,11 @@ export function conversationsDb(sql) {
       await sql`update conversations set lead_id = ${leadId} where id = ${conversationId}`;
     },
 
+    async countAttempt(id, max) {
+      const rows = await sql`update conversations set attempts = attempts + 1 where id = ${id} and attempts < ${max} returning attempts`;
+      return rows.length > 0;
+    },
+
     async userMessagesLastHour(ipHash) {
       const [row] = await sql`
         select count(*)::int as n from messages m join conversations c on c.id = m.conversation_id

@@ -37,6 +37,19 @@ describe("request service", () => {
     expect(calls.status).toEqual([{ id: 11, status: "sent", error: null }]);
   });
 
+  it("with requireRecord, a failed insert sends no email", async () => {
+    const { service, calls } = setup({ dbOverrides: { recordRequest: async () => { throw new Error("index row too large"); } } });
+    const r = await service.submit({ ...input, requireRecord: true });
+    expect(r).toEqual({ emailStatus: "failed", duplicate: false, leadId: 7 });
+    expect(calls.sent).toEqual([]);
+  });
+
+  it("without requireRecord, a failed insert still emails so a form lead is not lost", async () => {
+    const { service, calls } = setup({ dbOverrides: { recordRequest: async () => { throw new Error("db down"); } } });
+    expect((await service.submit(input)).emailStatus).toBe("sent");
+    expect(calls.sent).toHaveLength(1);
+  });
+
   it("records failed with the error when the email throws", async () => {
     const { service, calls } = setup({ emailError: new Error("brevo down") });
     const r = await service.submit(input);

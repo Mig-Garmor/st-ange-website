@@ -1,6 +1,10 @@
+import { CUSTOMER_HEADER, oneLine, quoted } from "./emailText.js";
 import { toPagePath } from "./pagePath.js";
+import { formatPhone } from "./proposal.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// Postgres rejects unique-index entries over about 2.7 KB, which made oversized keys skip the request row.
+const KEY = /^[\w:.-]{1,200}$/;
 const SENT_NOTE = "[Request sent to the shop]";
 const MAX_REQUESTS = 3;
 const MAX_LENGTH = { name: 100, vehicle: 100, email: 200, notes: 1000 };
@@ -27,14 +31,14 @@ export function createRequestHandler(settings, { db, requests, validateLead }) {
     }
     const conversationId = body?.conversationId;
     const idempotencyKey = str(body?.idempotencyKey);
-    if (typeof conversationId !== "string" || !UUID.test(conversationId) || !idempotencyKey) {
+    if (typeof conversationId !== "string" || !UUID.test(conversationId) || !KEY.test(idempotencyKey)) {
       return Response.json({ error: "Invalid request" }, { status: 400 });
     }
 
     try {
       const conversation = await db.getConversation(conversationId);
       if (!conversation?.verifiedAt) return Response.json({ error: "Verification failed" }, { status: 403 });
-      if ((await db.countRequestsForConversation(conversationId, idempotencyKey)) >= MAX_REQUESTS) {
+      if (!(await db.claimRequestSlot(conversationId, idempotencyKey, MAX_REQUESTS))) {
         return Response.json({ status: "limit" }, { status: 429 });
       }
     } catch (error) {
@@ -62,18 +66,22 @@ export function createRequestHandler(settings, { db, requests, validateLead }) {
     }
 
     const text = [
-      `Name: ${lead.name}`,
-      `Phone: ${str(body.phone)}`,
-      `Email: ${lead.email || "not given"}`,
-      `Vehicle: ${lead.vehicle}`,
+      CUSTOMER_HEADER,
+      "",
+      `Name: ${oneLine(lead.name)}`,
+      `Phone: ${formatPhone(lead.phone)}`,
+      `Email: ${oneLine(lead.email) || "not given"}`,
+      `Vehicle: ${oneLine(lead.vehicle)}`,
       `Service: ${serviceName}`,
-      `Notes: ${notes}`,
       pageUrl && `Page: ${pageUrl}`,
+      "",
+      "Notes:",
+      quoted(notes),
       "",
       "Conversation:",
       ...transcript
         .filter(({ role, content }) => !(role === "assistant" && /^\[.*\]$/.test(content.trim())))
-        .map(({ role, content }) => `${label(role)}: ${content}`),
+        .map(({ role, content }) => `> ${label(role)}: ${oneLine(content)}`),
     ]
       .filter((line) => line !== null && line !== false && line !== undefined)
       .join("\n");
@@ -83,12 +91,13 @@ export function createRequestHandler(settings, { db, requests, validateLead }) {
       service: slug,
       idempotencyKey,
       lead,
-      subject: `[Chat] ${serviceName} request from ${lead.name}`,
+      subject: `[Chat] ${serviceName} request from ${oneLine(lead.name)}`,
       text,
       message: notes,
       vehicle: lead.vehicle,
       pageUrl,
       conversationId,
+      requireRecord: true,
     });
 
     if (emailStatus !== "sent") return Response.json({ status: "failed" });
