@@ -55,6 +55,8 @@ Customers mention these in reviews. They can only become shop statements on the 
 
 ## Tooling
 
+- **Chat: answer a plain "yes" to the request offer without the AI.** When the bot's last reply offered a request and the visitor's whole message is a short yes ("yes", "sure", "ok please", "go ahead"), the server opens the form itself instead of calling the model, saving a couple of seconds and the tokens. It replies with the usual line plus the form, prefilled the same way (car and contact details from the chat, the service matched by keyword, the visitor's own description as notes), saves both messages and the card note so transcripts, emails and summaries stay complete, and still counts toward the message limits. Anything else ("no", "yes but how much?", a yes to another question) goes to the model as today. Do it on the server rather than in the browser, so the transcript and limits stay in one place; later forms can register their own instant "yes" step the same way.
+
 - **Automated review check.** Design and limits are in `AGENTS.md` under "Planned: automated review check".
 - **Chat go-live.** Follow the "Before going live" checklist in the README's "Chat and lead tracking" section: run `npm run db:migrate`, add the chat variables to the fork's Vercel project, then do the manual checks.
 - **Monthly: turn unanswered chat questions into FAQs.** The daily insight job records, for each chat, the questions the site couldn't answer (`conversations.unanswered`). Once a month, list the most common ones (through the Neon MCP server), and add the good ones as FAQs on the matching service page. The chat's knowledge is built from those pages, so the site, the bot and search all improve together.
