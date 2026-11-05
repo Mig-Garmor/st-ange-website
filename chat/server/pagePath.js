@@ -1,4 +1,6 @@
 const MAX = 200;
+// The path reaches the model's instructions, so only URL-shaped paths pass; "/ignore%20the%20rules" does not.
+const PATH = /^\/[a-z0-9\-_/.]*$/i;
 
 export function toPagePath(value) {
   if (typeof value !== "string" || !value.trim()) return null;
@@ -10,5 +12,5 @@ export function toPagePath(value) {
   }
   if (url.protocol !== "http:" && url.protocol !== "https:") return null;
   const path = url.pathname;
-  return path.length > MAX ? null : path;
+  return path.length > MAX || !PATH.test(path) ? null : path;
 }

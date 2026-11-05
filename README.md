@@ -23,8 +23,9 @@ Server (Vercel project settings and `.env.local`; see `.env.example`):
 | `BREVO_API_KEY` | Email sending |
 | `TURNSTILE_SECRET_KEY` | Verifies the visitor's first chat message, and every contact and quote form post once set |
 | `CRON_SECRET` | Bearer token for the insight job |
-| `IP_HASH_SALT` | Salt for `ip_hash` (raw IPs are never stored); also turns on the forms' limit of 5 posts per IP per hour |
+| `IP_HASH_SALT` | Salt for `ip_hash` (raw IPs are never stored); also turns on the forms' limit of 5 posts per IP per hour. The daily job clears hashes older than 7 days |
 | `CHAT_DAILY_CAP_EUR` | Daily spend cap, default 5 |
+| `TURNSTILE_HOSTNAMES` | Optional, comma-separated, for example `stangeautoservice.com,www.stangeautoservice.com`. When set, a Turnstile token solved on any other hostname is refused. Leave it unset locally: Cloudflare's test keys report `example.com` |
 
 ### Choosing a model
 
@@ -57,6 +58,8 @@ The contact and quote forms send a Turnstile token whenever `VITE_TURNSTILE_SITE
 ### Cost control
 
 Every call asks OpenRouter for its real cost in USD, which is converted with `eurPerUsd` in `server/chatSettings.js` and added to `ai_usage_daily` with the token counts. A `:free` model reports a cost of 0, which counts. The `models` price table there is only a fallback for a call that reports no cost. If a call reports no cost and its model has no price either, the chat pauses itself and the alert email says so; add a price or change `CHAT_MODEL` before resuming.
+
+The cap is checked before each call and charged after it, so a burst of simultaneous messages can pass it by the cost of those calls (cents at most). The per-conversation counters are atomic and cannot be overshot.
 
 Prompt caching depends on the model and the provider behind it. OpenAI models cache the unchanging start of the instructions automatically; for `anthropic/` models the code marks that start as a cache breakpoint. Caches last minutes, so they mostly help within one conversation and between chats close together.
 

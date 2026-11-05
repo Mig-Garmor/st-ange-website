@@ -6,7 +6,7 @@ export const chatClientSettings = {
   enabled: import.meta.env.VITE_CHAT_ENABLED === "true" && !!siteKey,
   turnstileSiteKey: siteKey,
   greeting: "Hi! How can we help with your car today?",
-  notice: "We save this chat to help with your request.",
+  notice: "Automated assistant. Prices and promises only count once the shop confirms them. We save this chat to help with your request.",
   privacyPath: "/privacy",
   quickReplies: ["Wheel alignment", "Brake repair", "Get a quote", "Hours & location"],
   localAnswers: { "Hours & location": hoursAndLocation },

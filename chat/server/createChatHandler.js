@@ -3,9 +3,11 @@ import { createProposeRequest } from "./ai.js";
 import { clientIp, hashIp } from "./ipHash.js";
 import { assertPriced, checkLimits, isAvailable, recordUsage } from "./limits.js";
 import { toPagePath } from "./pagePath.js";
+import { rejectCrossSite } from "./sameSite.js";
 import { buildInstructions } from "./prompt.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const VISITOR = /^[\w-]{1,64}$/;
 const HISTORY = 20;
 const NOTE = /^\[[^\]]*\]$/;
 const CARD_NOTE = /^\[Request card shown/;
@@ -44,6 +46,8 @@ export function createChatHandler(
   const unavailable = () => notice("error", copy.unavailable);
 
   return async function handleChat(request) {
+    const crossSite = rejectCrossSite(request);
+    if (crossSite) return crossSite;
     let body;
     try {
       body = await request.json();
@@ -53,7 +57,7 @@ export function createChatHandler(
     const { id, visitorId, turnstileToken } = body ?? {};
     const pageUrl = toPagePath(body?.pageUrl);
     const messages = Array.isArray(body?.messages) ? body.messages : [];
-    if (typeof id !== "string" || !UUID.test(id) || typeof visitorId !== "string" || !visitorId) {
+    if (typeof id !== "string" || !UUID.test(id) || typeof visitorId !== "string" || !VISITOR.test(visitorId)) {
       return Response.json({ error: "Invalid request" }, { status: 400 });
     }
     const last = messages.at(-1);

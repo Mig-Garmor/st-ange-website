@@ -36,6 +36,13 @@ export function conversationsDb(sql) {
       return rows.length > 0;
     },
 
+    async forgetIpHashes(days) {
+      await sql.transaction([
+        sql`update conversations set ip_hash = null where ip_hash is not null and created_at < now() - make_interval(days => ${days})`,
+        sql`update requests set ip_hash = null where ip_hash is not null and created_at < now() - make_interval(days => ${days})`,
+      ]);
+    },
+
     async userMessagesLastHour(ipHash) {
       const [row] = await sql`
         select count(*)::int as n from messages m join conversations c on c.id = m.conversation_id

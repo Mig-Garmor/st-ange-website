@@ -2,6 +2,9 @@ import { z } from "zod";
 import { assertPriced, isAvailable, recordUsage } from "./limits.js";
 
 const BATCH = 50;
+const IP_HASH_DAYS = 7;
+const MAX_UNANSWERED = 10;
+const MAX_QUESTION = 200;
 const UNREADABLE = { outcome: "abandoned" };
 
 export const insightsSchema = (serviceSlugs) =>
@@ -34,6 +37,8 @@ export function createInsightsJob(settings, { db, ai, email, model, cronSecret, 
     if (!cronSecret || request.headers.get("authorization") !== `Bearer ${cronSecret}`) {
       return Response.json({ error: "unauthorized" }, { status: 401 });
     }
+    // The hashes only serve the one-hour rate limits; dropping them keeps old rows unlinkable.
+    await db.forgetIpHashes(IP_HASH_DAYS).catch((error) => console.error("Forgetting IP hashes failed", error));
     try {
       assertPriced(settings, model);
     } catch (error) {
@@ -53,7 +58,9 @@ export function createInsightsJob(settings, { db, ai, email, model, cronSecret, 
           console.error("Insight usage not recorded", error),
         );
         if (object) {
-          await db.saveInsights(id, requestSent ? { ...object, outcome: "request_sent" } : object);
+          // Visitors can steer these fields, so they are bounded here rather than trusted.
+          const unanswered = object.unanswered.slice(0, MAX_UNANSWERED).map((q) => q.slice(0, MAX_QUESTION));
+          await db.saveInsights(id, { ...object, unanswered, ...(requestSent && { outcome: "request_sent" }) });
           processed += 1;
         } else {
           console.error("Insight output failed the schema; marking the conversation done", id);

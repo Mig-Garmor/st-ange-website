@@ -235,6 +235,20 @@ describe("createChatHandler", () => {
     error.mockRestore();
   });
 
+  it("400 for an oversized or odd visitorId, and 403 for a cross-site post", async () => {
+    const db = fakeDb();
+    const { handler } = setup({ db });
+    expect((await handler(post(body({ visitorId: "v".repeat(65) })))).status).toBe(400);
+    expect((await handler(post(body({ visitorId: "a b" })))).status).toBe(400);
+    const crossSite = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: "https://evil.example" },
+      body: JSON.stringify(body()),
+    });
+    expect((await handler(crossSite)).status).toBe(403);
+    expect(db.getConversation).not.toHaveBeenCalled();
+  });
+
   it("400 for a message with a NUL or other control character, before any database call", async () => {
     const db = fakeDb();
     const { handler, ai } = setup({ db });
