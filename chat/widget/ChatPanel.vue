@@ -196,6 +196,22 @@ function retry() {
   regenerate();
 }
 
+// Grows with its text up to the CSS max-height (four lines), then scrolls inside itself.
+function fitField() {
+  const el = field.value;
+  if (!el) return;
+  el.style.height = "auto";
+  el.style.height = `${el.scrollHeight + el.offsetHeight - el.clientHeight}px`;
+}
+watch(draft, () => nextTick(fitField));
+
+// Enter sends and Shift+Enter adds a line; Enter that confirms an IME composition must not send.
+function onEnter(event) {
+  if (event.isComposing) return;
+  event.preventDefault();
+  submit();
+}
+
 function focusInput() {
   nextTick(() => field.value?.focus());
 }
@@ -356,16 +372,18 @@ onBeforeUnmount(() => {
     <div ref="challenge" class="challenge"></div>
 
     <form v-if="!verifyFailed" class="composer" @submit.prevent="submit">
-      <input
+      <textarea
         ref="field"
         aria-label="Your message"
         v-model="draft"
-        type="text"
+        rows="1"
         :maxlength="MAX_CHARS"
         autocomplete="off"
         :placeholder="placeholder"
         :disabled="unusable"
-      />
+        @input="fitField"
+        @keydown.enter.exact="onEnter"
+      ></textarea>
       <button ref="sendButton" type="submit" class="send" :class="{ shake: shaking }" :disabled="unusable">Send</button>
     </form>
   </section>
@@ -484,15 +502,17 @@ onBeforeUnmount(() => {
   @apply hidden;
 }
 .composer {
-  @apply flex gap-2 border-t border-gray-200 bg-white p-2;
+  @apply flex items-end gap-2 border-t border-gray-200 bg-white p-2;
 }
-.composer input {
-  @apply min-w-0 flex-1 rounded-lg border border-gray-300 p-2 text-[16px] focus:outline-none focus:ring-2 focus:ring-blue-400;
+.composer textarea {
+  @apply min-w-0 flex-1 resize-none overflow-y-auto overscroll-contain rounded-lg border border-gray-300 p-2 text-[16px] leading-6 focus:outline-none focus:ring-2 focus:ring-blue-400;
+  /* Four lines of 24px plus padding and border; past that the box scrolls instead of growing. */
+  max-height: calc(4 * 1.5rem + 1rem + 2px);
 }
 .send {
-  @apply rounded-lg bg-brand-navy px-4 font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60;
+  @apply h-[42px] shrink-0 rounded-lg bg-brand-navy px-4 font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60;
 }
-.composer input:disabled {
+.composer textarea:disabled {
   @apply cursor-not-allowed bg-gray-100;
 }
 .send.shake {
