@@ -12,7 +12,7 @@ const HISTORY = 20;
 const NOTE = /^\[[^\]]*\]$/;
 const CARD_NOTE = /^\[Request card shown/;
 const SENT_NOTE = /^\[Request sent/;
-const CLAIMS_CARD = /tap (the )?send request|send request (button|below)/i;
+const CLAIMS_CARD = /tap (the )?send request|send request (button|below)|(the |in the )form below/i;
 
 const textOf = (message) =>
   (message?.parts ?? [])
@@ -153,6 +153,8 @@ export function createChatHandler(
         messages: history,
         maxOutputTokens: settings.maxOutputTokens,
         tools,
+        // A small model often answers "Get a quote" with a question; that message should always open the form.
+        forceTool: settings.formTriggers?.includes(text) ? "proposeRequest" : undefined,
         onFinish,
         onSettled: settle,
         errorText: copy.unavailable,

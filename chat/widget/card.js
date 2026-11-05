@@ -33,3 +33,18 @@ export function fieldError(field, value, { localAreaCodes = [] } = {}) {
   }
   return "";
 }
+
+export const STEPS = [
+  { title: "Your car", fields: ["service", "vehicle", "notes"] },
+  { title: "How we reach you", fields: ["name", "phone"] },
+  { title: "Almost done", fields: ["email"] },
+];
+
+export const stepErrors = (form, step, options) =>
+  Object.fromEntries(STEPS[step].fields.map((f) => [f, fieldError(f, form[f], options)]).filter(([, e]) => e));
+
+// A prefilled card skips straight to the first step that still needs something, or to the last step to review and send.
+export function firstIncompleteStep(form, options) {
+  const index = STEPS.findIndex((_, step) => Object.keys(stepErrors(form, step, options)).length);
+  return index === -1 ? STEPS.length - 1 : index;
+}

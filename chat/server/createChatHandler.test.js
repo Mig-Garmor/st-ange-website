@@ -273,6 +273,19 @@ describe("createChatHandler", () => {
     expect(ai.streamReply).not.toHaveBeenCalled();
   });
 
+  it("forces the form tool only for a form trigger message", async () => {
+    const triggered = { ...settings, formTriggers: ["Get a quote"] };
+    const ai = fakeAi();
+    const make = () =>
+      createChatHandler(triggered, {
+        db: fakeDb(), ai, email: { send: vi.fn() }, turnstile: { verify: async () => true },
+        ipSalt: "salt", model: "m", validateLead: vi.fn(), now: () => new Date("2026-11-04T15:00:00Z"),
+      });
+    await make()(post(body({ messages: [userMessage("Get a quote")] })));
+    await make()(post(body({ messages: [userMessage("How much is a quote?")] })));
+    expect(ai.streamReply.mock.calls.map((c) => c[0].forceTool)).toEqual(["proposeRequest", undefined]);
+  });
+
   it("onFinish saves the assistant text and records usage", async () => {
     const { handler, ai, db } = setup();
     await handler(post(body()));
@@ -325,7 +338,7 @@ describe("createChatHandler", () => {
     expect(db.saveMessage).not.toHaveBeenCalled();
   });
 
-  it("the proposeRequest tool validates with the injected validator", async () => {
+  it("the proposeRequest tool normalises with the injected validator", async () => {
     const validateLead = vi.fn(() => ({ ok: false, errors: { phone: "bad" }, lead: {} }));
     const ai = fakeAi();
     await createChatHandler(settings, {
@@ -334,8 +347,8 @@ describe("createChatHandler", () => {
     })(post(body()));
     const { tools } = ai.streamReply.mock.calls[0][0];
     const result = await tools.proposeRequest.execute({ service: "brakes", name: "Ann", phone: "1", email: "a@b.co", vehicle: "Civic" });
-    expect(result).toMatchObject({ ok: false, errors: { phone: "bad" } });
-    expect(validateLead).toHaveBeenCalledWith(expect.objectContaining({ phone: "1" }), { requireVehicle: true, requireEmail: true });
+    expect(result).toMatchObject({ ok: true, card: { phone: "1" } });
+    expect(validateLead).toHaveBeenCalledWith(expect.objectContaining({ phone: "1" }));
   });
 
   it("onFinish logs errors instead of throwing, and still records usage", async () => {

@@ -24,6 +24,10 @@ describe("widget messages", () => {
     expect(hasUnsentFirstMessage([user("hi"), notice("offline")])).toBe(false);
   });
 
+  it("a reply pointing at a form that never opened counts as missing", () => {
+    expect(lastReplyMissing([user("hi"), reply("Hello."), user("quote"), reply("Fill in the form below, it takes three quick steps.")])).toBe(true);
+  });
+
   it("sentNote adds one local follow-up per card and keeps the chat open", () => {
     const list = [user("brakes"), reply("Check the card.")];
     const once = sentNote("call-1", list);

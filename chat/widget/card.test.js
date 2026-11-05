@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIELDS, fieldError, initialForm, okCard, latestCardId } from "./card.js";
+import { FIELDS, STEPS, fieldError, firstIncompleteStep, initialForm, okCard, latestCardId, stepErrors } from "./card.js";
 
 const card = { service: "brakes", name: "Ann", phone: "832-555-0100", email: "ann@example.com", vehicle: "Civic", notes: "" };
 const part = (output, state = "output-available") => ({ type: "tool-proposeRequest", toolCallId: "t1", state, input: {}, output });
@@ -55,5 +55,24 @@ describe("latestCardId", () => {
   it("a 7-digit phone asks for the area code when the local codes are known", () => {
     expect(fieldError("phone", "572-7121", { localAreaCodes: ["281", "832"] })).toBe("Add the area code (281 or 832)");
     expect(fieldError("phone", "572-7121")).toBe("Enter a 10-digit US phone number");
+  });
+
+  it("splits the request into three steps of one to three fields, covering every field once", () => {
+    expect(STEPS.map((s) => s.fields.length)).toEqual([3, 2, 1]);
+    expect(STEPS.flatMap((s) => s.fields).sort()).toEqual([...FIELDS].sort());
+  });
+
+  it("stepErrors checks only that step's fields", () => {
+    const form = initialForm({ service: "", vehicle: "", name: "", phone: "555-0100", email: "x" });
+    expect(stepErrors(form, 0)).toEqual({ vehicle: "Vehicle is required" });
+    expect(stepErrors(form, 1, { localAreaCodes: ["281"] })).toEqual({ name: "Name is required", phone: "Add the area code (281)" });
+    expect(stepErrors(form, 2)).toEqual({ email: "Invalid email address" });
+  });
+
+  it("firstIncompleteStep opens at the first step that needs something, or at the last step when all is filled", () => {
+    expect(firstIncompleteStep(initialForm({}))).toBe(0);
+    expect(firstIncompleteStep(initialForm({ vehicle: "Civic" }))).toBe(1);
+    expect(firstIncompleteStep(initialForm({ vehicle: "Civic", name: "Ann", phone: "8325550100" }))).toBe(2);
+    expect(firstIncompleteStep(initialForm({ service: "brakes", vehicle: "Civic", name: "Ann", phone: "832-555-0100", email: "ann@example.com" }))).toBe(2);
   });
 });
