@@ -2,6 +2,7 @@ import { isSevenDigits, missingAreaCode, validateName, validateEmail } from "../
 import { normalizePhone } from "./phone.js";
 
 const MAX_LENGTH = { name: 100, vehicle: 100, email: 200 };
+const MAX_PHONE = 30;
 
 const phoneError = (phone) => (isSevenDigits(phone) ? missingAreaCode() : "Enter a 10-digit US phone number");
 
@@ -12,7 +13,8 @@ export function validateLead({ name, phone, email, vehicle }, { requireVehicle =
 
   const nameError = validateName(lead.name);
   if (nameError) errors.name = nameError;
-  if (!lead.phone) errors.phone = phoneError(phone);
+  if (String(phone ?? "").length > MAX_PHONE) errors.phone = `Use ${MAX_PHONE} characters or fewer`;
+  else if (!lead.phone) errors.phone = phoneError(phone);
   if (lead.email || requireEmail) {
     const emailError = validateEmail(lead.email);
     if (emailError) errors.email = emailError;

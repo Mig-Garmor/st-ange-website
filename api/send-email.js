@@ -1,3 +1,5 @@
+import { clientIp, hashIp } from "../chat/server/ipHash.js";
+import { createTurnstile } from "../chat/server/turnstile.js";
 import { getSql } from "../server/db/client.js";
 import { createDb } from "../server/db/index.js";
 import { createEmail } from "../server/email.js";
@@ -24,6 +26,15 @@ export async function POST(request) {
   });
   const requests = createRequestService({ db, email, site: "st-ange" });
 
-  const { status, json } = await handleSendEmail(body, { requests });
+  const ip = clientIp(request);
+  const salt = process.env.IP_HASH_SALT;
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  const { status, json } = await handleSendEmail(body, {
+    requests,
+    ip,
+    ipHash: salt ? hashIp(ip, salt) : null,
+    countRecent: process.env.DATABASE_URL ? (ipHash) => db.formRequestsLastHour(ipHash) : null,
+    turnstile: secret ? createTurnstile({ secret }) : null,
+  });
   return Response.json(json, { status });
 }

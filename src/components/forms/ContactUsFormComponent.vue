@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, onMounted, watch } from "vue";
+import { computed, reactive, ref, onBeforeUnmount, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import InputFieldComponent from "@components/forms/InputFieldComponent.vue";
@@ -10,6 +10,7 @@ import {
   validateMessage,
 } from "@modules/validate.js";
 import { submitForm } from "@api/forms";
+import { useFormTurnstile } from "@modules/formTurnstile.js";
 import { services } from "@/config/business";
 
 const route = useRoute();
@@ -32,6 +33,10 @@ const hasErrors = computed(() => Object.values(errors).some(Boolean));
 onMounted(() => {
   subject.value = route.query.subject || "";
 });
+
+const challenge = ref(null);
+const turnstile = useFormTurnstile(challenge);
+onBeforeUnmount(turnstile.remove);
 
 let idempotencyKey = null;
 watch(form, () => {
@@ -58,7 +63,15 @@ async function handleSubmit() {
 
   status.value = "sending";
   const { confirmEmail, ...fields } = form;
+  let turnstileToken;
+  try {
+    turnstileToken = await turnstile.token();
+  } catch {
+    status.value = "error";
+    return;
+  }
   status.value = await submitForm("send-email", {
+    turnstileToken,
     subject: subject.value,
     ...fields,
     source: "contact_form",
@@ -131,6 +144,7 @@ async function handleSubmit() {
     <div v-if="status === 'error'" class="banner-error" role="alert">
       {{ hasErrors ? "Please check the fields above." : "Something went wrong. Try again or call us." }}
     </div>
+    <div ref="challenge"></div>
   </form>
 </template>
 

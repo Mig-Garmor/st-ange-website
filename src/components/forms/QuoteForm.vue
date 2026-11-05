@@ -1,9 +1,10 @@
 <script setup>
-import { computed, reactive, ref, watch } from "vue";
+import { computed, onBeforeUnmount, reactive, ref, watch } from "vue";
 
 import InputFieldComponent from "@components/forms/InputFieldComponent.vue";
 import { validateName, validatePhone } from "@modules/validate.js";
 import { submitForm } from "@api/forms";
+import { useFormTurnstile } from "@modules/formTurnstile.js";
 
 const props = defineProps({
   subject: { type: String, required: true },
@@ -16,6 +17,10 @@ const form = reactive(emptyForm());
 const errors = reactive(emptyForm());
 const status = ref(""); // "" | "sending" | "success" | "error"
 const hasErrors = computed(() => Object.values(errors).some(Boolean));
+
+const challenge = ref(null);
+const turnstile = useFormTurnstile(challenge);
+onBeforeUnmount(turnstile.remove);
 
 let idempotencyKey = null;
 watch(form, () => {
@@ -40,7 +45,15 @@ async function handleSubmit() {
 
   status.value = "sending";
   errors.notes = "";
+  let turnstileToken;
+  try {
+    turnstileToken = await turnstile.token();
+  } catch {
+    status.value = "error";
+    return;
+  }
   status.value = await submitForm("send-email", {
+    turnstileToken,
     subject: `${props.subject} from ${form.name}`,
     name: form.name,
     email: "",
@@ -100,6 +113,7 @@ async function handleSubmit() {
     <div v-if="status === 'error'" class="banner-error" role="alert">
       {{ hasErrors ? "Please check the fields above." : "Something went wrong. Try again or call us." }}
     </div>
+    <div ref="challenge"></div>
   </form>
 </template>
 

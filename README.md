@@ -21,9 +21,9 @@ Server (Vercel project settings and `.env.local`; see `.env.example`):
 | `CHAT_MODEL` | OpenRouter model id, required; recommended `openai/gpt-6-luna` (see Choosing a model) |
 | `LEAD_EMAIL_TO` | Where request and alert emails go |
 | `BREVO_API_KEY` | Email sending |
-| `TURNSTILE_SECRET_KEY` | Verifies the visitor's first message |
+| `TURNSTILE_SECRET_KEY` | Verifies the visitor's first chat message, and every contact and quote form post once set |
 | `CRON_SECRET` | Bearer token for the insight job |
-| `IP_HASH_SALT` | Salt for `ip_hash` (raw IPs are never stored) |
+| `IP_HASH_SALT` | Salt for `ip_hash` (raw IPs are never stored); also turns on the forms' limit of 5 posts per IP per hour |
 | `CHAT_DAILY_CAP_EUR` | Daily spend cap, default 5 |
 
 ### Choosing a model
@@ -46,9 +46,11 @@ The chat asks for name, phone, email and vehicle (email is required in the chat;
 
 Set `VITE_CHAT_ENABLED=true` and `VITE_TURNSTILE_SITE_KEY` (the public Turnstile key) at build time; the bubble shows only when both are set. Otherwise it stays hidden and forms keep emailing as before.
 
+The contact and quote forms send a Turnstile token whenever `VITE_TURNSTILE_SITE_KEY` is built in, and `/api/send-email` requires one whenever `TURNSTILE_SECRET_KEY` is set, so set both together or neither: a secret without the public key rejects every form post. Each gate stays off while its variable is unset, so the live forms keep working before the chat is configured.
+
 ### Commands
 
-- `npm run db:migrate` applies pending migrations using `DATABASE_URL_UNPOOLED` (the direct URL). Run it after pulling the change that adds `002_resume_allowance.sql`; the resume SQL below needs that column.
+- `npm run db:migrate` applies pending migrations using `DATABASE_URL_UNPOOLED` (the direct URL). Run it after pulling a change that adds a migration, before that change is deployed: `003_abuse_counters.sql` adds the counters the chat now checks on every message, so a database without it makes the chat unavailable.
 - `npm test` runs the unit tests; the database tests are skipped without `TEST_DATABASE_URL`.
 - `npm run test:db` runs the database tests and the end-to-end chat test against `TEST_DATABASE_URL` (reads `.env.local`).
 

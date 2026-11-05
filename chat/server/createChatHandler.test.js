@@ -14,7 +14,7 @@ const settings = {
   knowledge: "Knowledge.",
   featured: "Featured.",
   services: [{ slug: "brakes", name: "Brakes" }],
-  limits: { maxChars: 500, maxUserMessages: 20, perHour: 40 },
+  limits: { maxChars: 500, maxUserMessages: 20, maxAttempts: 30, perHour: 40 },
   maxOutputTokens: 150,
   dailyCapEur: 5,
   models: { m: { inputUsd: 1, cachedInputUsd: 0.1, outputUsd: 2 } },
@@ -37,6 +37,7 @@ const fakeDb = (over = {}) => ({
   pauseChat: vi.fn(async () => true),
   dayStats: vi.fn(async () => ({ messages: 1, visitors: 1 })),
   userMessagesLastHour: vi.fn(async () => 0),
+  countAttempt: vi.fn(async () => true),
   getConversation: vi.fn(async () => null),
   ensureConversation: vi.fn(async ({ verified }) => ({ id: ID, verifiedAt: verified ? new Date() : null, messageCount: 0 })),
   saveMessage: vi.fn(async () => {}),
@@ -214,41 +215,48 @@ describe("createChatHandler", () => {
     expect(ai.streamReply.mock.calls[0][0].messages.map((m) => m.content)).toEqual(["Hi", "Hello", "Hi"]);
   });
 
-  it("still saves the user message when db.getMessages throws", async () => {
+  it("is unavailable, and never calls the model, when db.getMessages throws", async () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     const db = fakeDb({ getMessages: vi.fn(async () => { throw new Error("db down"); }) });
     const { handler, ai } = setup({ db });
-    await handler(post(body()));
-    expect(db.saveMessage).toHaveBeenCalledOnce();
-    expect(ai.streamReply.mock.calls[0][0].messages).toEqual([{ role: "user", content: "Brakes squeal" }]);
+    expect(await (await handler(post(body()))).text()).toContain("Unavailable copy.");
+    expect(db.saveMessage).not.toHaveBeenCalled();
+    expect(ai.streamReply).not.toHaveBeenCalled();
     error.mockRestore();
   });
 
-  it("falls back to client text when saving the user message throws", async () => {
+  it("is unavailable, and never calls the model, when saving the user message throws", async () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     const db = fakeDb({ saveMessage: vi.fn(async () => { throw new Error("db down"); }) });
     const { handler, ai } = setup({ db });
-    expect((await handler(post(body({ messages: [userMessage("Hi"), userMessage("Brakes squeal")] })))).status).toBe(200);
-    expect(ai.streamReply.mock.calls[0][0].messages.map((m) => m.content)).toEqual(["Hi", "Brakes squeal"]);
+    const messages = [{ id: "a1", role: "assistant", parts: [{ type: "text", text: "x".repeat(200_000) }] }, userMessage("Brakes squeal")];
+    expect(await (await handler(post(body({ messages })))).text()).toContain("Unavailable copy.");
+    expect(ai.streamReply).not.toHaveBeenCalled();
     error.mockRestore();
   });
 
-  it("falls back to client text parts when db.getMessages throws", async () => {
-    const db = fakeDb({ getMessages: vi.fn(async () => { throw new Error("db down"); }) });
+  it("400 for a message with a NUL or other control character, before any database call", async () => {
+    const db = fakeDb();
     const { handler, ai } = setup({ db });
-    const messages = [
-      ...Array.from({ length: 24 }, (_, i) => userMessage(`m${i}`)),
-      { id: "a2", role: "assistant", parts: [{ type: "tool-proposeRequest", toolCallId: "t1", input: {} }] },
-      { id: "a3", role: "assistant", parts: [{ type: "step-start" }, { type: "text", text: "Sure." }] },
-      userMessage("last"),
-    ];
-    const res = await handler(post(body({ messages })));
-    expect(res.status).toBe(200);
-    const { messages: sent } = ai.streamReply.mock.calls[0][0];
-    expect(sent).toHaveLength(20);
-    expect(sent.at(-1)).toEqual({ role: "user", content: "last" });
-    expect(sent.at(-2)).toEqual({ role: "assistant", content: "Sure." });
-    expect(sent.every((m) => typeof m.content === "string" && m.content)).toBe(true);
+    for (const text of ["a\u0000b", "a\u001bb", "a\u007fb"]) {
+      expect((await handler(post(body({ messages: [userMessage(text)] })))).status).toBe(400);
+    }
+    expect((await handler(post(body({ messages: [userMessage("line one\nline two")] })))).status).toBe(200);
+    expect(db.getConversation).toHaveBeenCalledOnce();
+    expect(ai.streamReply).toHaveBeenCalledOnce();
+  });
+
+  it("a conversation out of attempts gets the limit notice, even for a re-sent message that is never stored", async () => {
+    const db = fakeDb({
+      getConversation: existing(new Date()),
+      getMessages: vi.fn(async () => stored),
+      countAttempt: vi.fn(async () => false),
+    });
+    const { handler, ai } = setup({ db });
+    expect(await (await handler(post(body()))).text()).toContain("Limit copy.");
+    expect(db.countAttempt).toHaveBeenCalledWith(ID, 30);
+    expect(db.saveMessage).not.toHaveBeenCalled();
+    expect(ai.streamReply).not.toHaveBeenCalled();
   });
 
   it("onFinish saves the assistant text and records usage", async () => {

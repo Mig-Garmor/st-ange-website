@@ -139,16 +139,31 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("data access", () => {
     expect(await isAvailable({ db, settings, now: new Date() })).toBe(false);
   });
 
-  it("countRequestsForConversation counts the conversation's requests, minus the given key", async () => {
+  it("claimRequestSlot hands out exactly 3 slots to 6 parallel new keys, and a known key takes none", async () => {
     const conv = await newConversation();
-    const other = await newConversation();
-    const keys = [randomUUID(), randomUUID()];
-    for (const idempotencyKey of keys) await db.recordRequest({ site, idempotencyKey, source: "chat", conversationId: conv.id });
-    await db.recordRequest({ site, idempotencyKey: randomUUID(), source: "chat", conversationId: other.id });
-    expect(await db.countRequestsForConversation(conv.id)).toBe(2);
-    expect(await db.countRequestsForConversation(conv.id, keys[0])).toBe(1);
-    expect(await db.countRequestsForConversation(conv.id, "unknown-key")).toBe(2);
-    expect(await db.countRequestsForConversation(randomUUID())).toBe(0);
+    const keys = Array.from({ length: 6 }, () => randomUUID());
+    const granted = await Promise.all(keys.map((k) => db.claimRequestSlot(conv.id, k, 3)));
+    expect(granted.filter(Boolean)).toHaveLength(3);
+    const known = randomUUID();
+    await db.recordRequest({ site, idempotencyKey: known, source: "chat", conversationId: conv.id });
+    expect(await db.claimRequestSlot(conv.id, known, 3)).toBe(true);
+    expect(await db.claimRequestSlot(conv.id, randomUUID(), 3)).toBe(false);
+  });
+
+  it("countAttempt allows exactly max attempts, even in parallel", async () => {
+    const conv = await newConversation();
+    const results = await Promise.all(Array.from({ length: 8 }, () => db.countAttempt(conv.id, 5)));
+    expect(results.filter(Boolean)).toHaveLength(5);
+    expect(await db.countAttempt(conv.id, 5)).toBe(false);
+  });
+
+  it("formRequestsLastHour counts one IP's recent form requests, not chat ones", async () => {
+    const ipHash = randomUUID();
+    for (const source of ["contact_form", "quote_form", "chat"]) {
+      await db.recordRequest({ site, idempotencyKey: randomUUID(), source, ipHash });
+    }
+    await db.recordRequest({ site, idempotencyKey: randomUUID(), source: "contact_form", ipHash: randomUUID() });
+    expect(await db.formRequestsLastHour(ipHash)).toBe(2);
   });
 
   it("activePlaybooks returns only active versions", async () => {

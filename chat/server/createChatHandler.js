@@ -18,12 +18,8 @@ const textOf = (message) =>
     .map((part) => part.text)
     .join("");
 
-const clientHistory = (messages) =>
-  messages
-    .filter((m) => m?.role === "user" || m?.role === "assistant")
-    .map((m) => ({ role: m.role, content: textOf(m) }))
-    .filter((m) => m.content)
-    .slice(-HISTORY);
+// Postgres text cannot hold NUL, and a failed save used to skip every counter; other C0 controls have no place in a chat.
+const CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
 
 function notice(state, text) {
   const stream = createUIMessageStream({
@@ -62,7 +58,7 @@ export function createChatHandler(
     }
     const last = messages.at(-1);
     const text = last?.role === "user" ? textOf(last) : "";
-    if (!text) return Response.json({ error: "Invalid request" }, { status: 400 });
+    if (!text || CONTROL.test(text)) return Response.json({ error: "Invalid request" }, { status: 400 });
 
     const ip = clientIp(request);
     try {
@@ -80,35 +76,38 @@ export function createChatHandler(
 
       const limits = await checkLimits({ db, settings, conversation, ipHash, text });
       if (!limits.ok) return notice("limit", copy.limit);
+      // Counted before any history check, so a re-sent message that is never stored still uses up the conversation's budget.
+      if (!(await db.countAttempt(id, settings.limits.maxAttempts))) return notice("limit", copy.limit);
     } catch (error) {
       console.error("Chat gate failed", error);
       return unavailable();
     }
 
-    let stored = null;
+    let stored;
     try {
       stored = (await db.getMessages(id)).map(({ role, content }) => ({ role, content }));
     } catch (error) {
-      console.error("Chat history failed, using client text", error);
+      console.error("Chat history failed", error);
+      return unavailable();
     }
-    const latest = stored?.at(-1);
+    const latest = stored.at(-1);
     // A reload mid-reply re-sends a message that was stored but never answered.
     const unanswered = latest?.role === "user" && latest.content === text;
     if (!unanswered) {
       try {
         await db.saveMessage({ site, conversationId: id, role: "user", content: text });
-        stored?.push({ role: "user", content: text });
+        stored.push({ role: "user", content: text });
       } catch (error) {
-        console.error("Chat message save failed, using client text", error);
-        stored = null;
+        console.error("Chat message save failed", error);
+        return unavailable();
       }
     }
     // Bracketed notes are for transcripts; the model copied them verbatim, so it gets them as context instead.
-    const history = stored ? stored.filter((m) => m.role !== "assistant" || !NOTE.test(m.content)).slice(-HISTORY) : clientHistory(messages);
-    const cardShown = Boolean(stored?.some((m) => m.role === "assistant" && CARD_NOTE.test(m.content)));
+    const history = stored.filter((m) => m.role !== "assistant" || !NOTE.test(m.content)).slice(-HISTORY);
+    const cardShown = Boolean(stored.some((m) => m.role === "assistant" && CARD_NOTE.test(m.content)));
     const earlier = [
       cardShown && "A request card was shown earlier in this chat.",
-      stored?.some((m) => m.role === "assistant" && SENT_NOTE.test(m.content)) && "The visitor already sent a request to the shop in this chat.",
+      stored.some((m) => m.role === "assistant" && SENT_NOTE.test(m.content)) && "The visitor already sent a request to the shop in this chat.",
     ].filter(Boolean);
 
     let playbooks = [];

@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import { CUSTOMER_HEADER } from "../chat/server/emailText.js";
 import { handleSendEmail } from "./sendEmailHandler.js";
 
 function fakeRequests(emailStatus = "sent") {
@@ -21,7 +22,9 @@ describe("handleSendEmail", () => {
     const requests = fakeRequests();
     const r = await handleSendEmail({ data: contact }, { requests });
     expect(r).toEqual({ status: 200, json: { message: "Email sent successfully" } });
-    expect(requests.submitted[0].text).toBe("Name: Ann\nMessage: Hello\nFrom: a@b.co\nPhone: (832) 572-7121");
+    expect(requests.submitted[0].text).toBe(
+      `${CUSTOMER_HEADER}\n\nName: Ann\nPhone: 832-572-7121\nFrom: a@b.co\n\nMessage:\n> Hello`,
+    );
     expect(requests.submitted[0].lead.phone).toBe("8325727121");
     expect(requests.submitted[0].idempotencyKey).toBeTruthy();
   });
@@ -86,5 +89,59 @@ describe("handleSendEmail", () => {
     const requests = fakeRequests();
     const data = { ...contact, name: "n".repeat(100), email: `${"e".repeat(194)}@x.com`, message: "m".repeat(2000) };
     expect((await handleSendEmail({ data }, { requests })).status).toBe(200);
+  });
+
+  it("builds the subject on the server and ignores the client's", async () => {
+    const requests = fakeRequests();
+    await handleSendEmail({ data: { ...contact, subject: "URGENT: verify your account at https://evil.example" } }, { requests });
+    await handleSendEmail({ data: { ...contact, service: "car-alignment" } }, { requests });
+    await handleSendEmail(
+      { data: { name: "Ann", phone: "8325727121", vehicle: "Civic", source: "quote_form", service: "car-alignment" } },
+      { requests },
+    );
+    expect(requests.submitted.map((r) => r.subject)).toEqual([
+      "[Contact] Website message from Ann",
+      "[Contact] Car Alignment from Ann",
+      "[Quote] Car Alignment request from Ann",
+    ]);
+  });
+
+  it("quotes the message and defangs its links", async () => {
+    const requests = fakeRequests();
+    await handleSendEmail({ data: { ...contact, message: "Call me\nhttps://evil.example" } }, { requests });
+    expect(requests.submitted[0].text).toMatch(/Message:\n> Call me\n> hxxps:\/\/evil\.example$/);
+  });
+
+  it("403 and no email when Turnstile is configured and the token fails", async () => {
+    const requests = fakeRequests();
+    const turnstile = { verify: vi.fn(async () => false) };
+    const r = await handleSendEmail({ data: { ...contact, turnstileToken: "t" } }, { requests, turnstile, ip: "1.2.3.4" });
+    expect(r.status).toBe(403);
+    expect(turnstile.verify).toHaveBeenCalledWith("t", "1.2.3.4");
+    expect(requests.submitted).toHaveLength(0);
+  });
+
+  it("429 and no email after 5 form requests from one IP in an hour", async () => {
+    const requests = fakeRequests();
+    const countRecent = vi.fn(async () => 5);
+    const r = await handleSendEmail({ data: contact }, { requests, ipHash: "h", countRecent });
+    expect(r.status).toBe(429);
+    expect(countRecent).toHaveBeenCalledWith("h");
+    expect(requests.submitted).toHaveLength(0);
+  });
+
+  it("under the limit, the request is stored with its IP hash", async () => {
+    const requests = fakeRequests();
+    await handleSendEmail({ data: contact }, { requests, ipHash: "h", countRecent: async () => 4 });
+    expect(requests.submitted[0].ipHash).toBe("h");
+  });
+
+  it("400 for an oversized idempotency key or phone", async () => {
+    const requests = fakeRequests();
+    expect((await handleSendEmail({ data: { ...contact, idempotencyKey: "k".repeat(201) } }, { requests })).status).toBe(400);
+    const r = await handleSendEmail({ data: { ...contact, phone: `Verify at https://evil.example ${"7135550100"}` } }, { requests });
+    expect(r.status).toBe(400);
+    expect(r.json.errors.phone).toBe("Use 30 characters or fewer");
+    expect(requests.submitted).toHaveLength(0);
   });
 });
