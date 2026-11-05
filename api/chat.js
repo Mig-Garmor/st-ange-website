@@ -1,5 +1,5 @@
 import { waitUntil } from "@vercel/functions";
-import { createAi, reasoningEffortFor } from "../chat/server/ai.js";
+import { createAi, providerOrderFor, reasoningEffortFor } from "../chat/server/ai.js";
 import { createChatHandler } from "../chat/server/createChatHandler.js";
 import { createTurnstile } from "../chat/server/turnstile.js";
 import { chatServerSettings } from "../server/chatSettings.js";
@@ -21,6 +21,8 @@ export async function POST(request) {
       apiKey: process.env.OPENROUTER_API_KEY,
       model,
       reasoningEffort: reasoningEffortFor(chatServerSettings, model),
+      zdr: chatServerSettings.zdr,
+      providerOrder: providerOrderFor(chatServerSettings, model),
     }),
     email: createEmail({
       apiKey: process.env.BREVO_API_KEY,

@@ -24,7 +24,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("migrate", () => {
 
   it("applies every migration once", async () => {
     const sql = await reset();
-    expect(await migrate(sql)).toEqual(["001_init.sql", "002_resume_allowance.sql", "003_abuse_counters.sql"]);
+    expect(await migrate(sql)).toEqual(["001_init.sql", "002_resume_allowance.sql", "003_abuse_counters.sql", "004_carry_over.sql", "005_carry_details.sql", "006_callback_consent.sql"]);
     expect(await migrate(sql)).toEqual([]);
   });
 
@@ -32,6 +32,6 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("migrate", () => {
     const sql = await reset();
     await migrate(sql);
     const rows = await sql`select name from schema_migrations`;
-    expect(rows.map((row) => row.name).sort()).toEqual(["001_init.sql", "002_resume_allowance.sql", "003_abuse_counters.sql"]);
+    expect(rows.map((row) => row.name).sort()).toEqual(["001_init.sql", "002_resume_allowance.sql", "003_abuse_counters.sql", "004_carry_over.sql", "005_carry_details.sql", "006_callback_consent.sql"]);
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SENT_FOLLOW_UP, displayParts, hasUnsentFirstMessage, nextBurst, isLocal, isVerified, lastReplyMissing, localExchange, sentNote, textOf } from "./messages.js";
+import { SENT_CLOSED, SENT_FOLLOW_UP, blocksChat, chatReason, displayParts, localForm, serverState, hasUnsentFirstMessage, nextBurst, isLocal, isVerified, lastReplyMissing, localExchange, sentNote, textOf } from "./messages.js";
 
 const user = (text) => ({ role: "user", parts: [{ type: "text", text }] });
 const reply = (text) => ({ role: "assistant", parts: [{ type: "text", text }] });
@@ -39,6 +39,37 @@ describe("widget messages", () => {
     expect(displayParts({ parts: [step, card, step, text] })).toEqual([text, step, card, step]);
     const plain = { parts: [text, step] };
     expect(displayParts(plain)).toBe(plain.parts);
+  });
+
+  it("localForm opens an empty request form that renders as a card, without the model", () => {
+    const form = localForm("abc");
+    expect(form).toMatchObject({ id: "form-abc", role: "assistant", metadata: { local: true } });
+    expect(form.parts[0]).toMatchObject({ type: "tool-proposeRequest", toolCallId: "local-abc", state: "output-available", output: { ok: true, card: {} } });
+    expect(lastReplyMissing([user("hi"), notice("limit"), form])).toBe(false);
+  });
+
+  it("serverState ignores local messages, so a form opened after a limit keeps the chat limited", () => {
+    const list = [user("hi"), reply("Hello."), notice("limit"), localForm("x")];
+    expect(serverState(list)).toBe("limit");
+    expect(serverState(sentNote("local-x", list, SENT_CLOSED))).toBe("limit");
+    expect(serverState([user("hi"), reply("Hello.")])).toBeUndefined();
+  });
+
+  it("blocksChat stops the chat for offline and real limits, not for a message that was only too long", () => {
+    const limit = (reason) => ({ role: "assistant", parts: [{ type: "data-chat-state", data: { state: "limit", reason } }, { type: "text", text: "x" }] });
+    expect(chatReason(limit("hourly_limit"))).toBe("hourly_limit");
+    expect(blocksChat([user("hi"), limit("hourly_limit")])).toBe(true);
+    expect(blocksChat([user("hi"), limit("conversation_limit")])).toBe(true);
+    expect(blocksChat([user("hi"), limit()])).toBe(true);
+    expect(blocksChat([user("hi"), notice("offline")])).toBe(true);
+    expect(blocksChat([user("hi"), limit("too_long")])).toBe(false);
+    expect(blocksChat([user("hi"), limit("hourly_limit"), localForm("f")])).toBe(true);
+    expect(blocksChat([user("hi"), reply("Hello.")])).toBe(false);
+  });
+
+  it("sentNote can close the chat instead of offering more help", () => {
+    expect(textOf(sentNote("t", [], SENT_CLOSED).at(-1))).toBe(SENT_CLOSED);
+    expect(textOf(sentNote("t", []).at(-1))).toBe(SENT_FOLLOW_UP);
   });
 
   it("a reply pointing at a form that never opened counts as missing", () => {

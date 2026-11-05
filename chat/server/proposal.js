@@ -16,8 +16,11 @@ export const cleanService = (value, slugs) => {
 export const formatPhone = (digits) => `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
 
 // The card collects missing or invalid details in steps, so anything known is a usable prefill, never a refusal.
-export function checkProposal(input, { slugs, validateLead }) {
-  const raw = Object.fromEntries(Object.keys(MAX).map((field) => [field, str(input?.[field]).slice(0, MAX[field])]));
+// known: details the visitor gave in an earlier chat they chose to continue; anything said in this chat wins.
+export function checkProposal(input, { slugs, validateLead, known = null }) {
+  const raw = Object.fromEntries(
+    Object.keys(MAX).map((field) => [field, (str(input?.[field]) || str(known?.[field])).slice(0, MAX[field])]),
+  );
   const email = cleanEmail(raw.email) ?? "";
   const { lead } = validateLead({ name: raw.name, phone: raw.phone, email, vehicle: raw.vehicle });
   const missing = ["name", "phone", "email", "vehicle"].filter((field) => !(field === "phone" ? lead.phone : field === "email" ? email : raw[field]));

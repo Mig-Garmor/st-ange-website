@@ -5,8 +5,10 @@ import { createRequestHandler as create } from "./createRequestHandler.js";
 
 const createRequestHandler = (settings, deps) => create(settings, { validateLead, ...deps });
 
+const CONSENT = "St Ange Auto Service may call or text me about this request. Reply STOP to stop texts.";
 const settings = {
   site: "test-site",
+  callbackConsent: CONSENT,
   services: [{ slug: "car-alignment", name: "Car Alignment" }],
 };
 
@@ -40,6 +42,7 @@ const body = (over = {}) => ({
   vehicle: "2015 Civic",
   notes: "Pulls left",
   pageUrl: "http://localhost/",
+  consent: CONSENT,
   ...over,
 });
 
@@ -129,6 +132,19 @@ describe("createRequestHandler", () => {
     const { text } = requests.submit.mock.calls[0][0];
     expect(text).toContain("Customer: [2019 Civic] pulls left");
     expect(text).not.toContain("[Request card shown");
+  });
+
+  it("400 and no email without the exact consent wording; the wording is stored with the request", async () => {
+    const requests = fakeRequests();
+    const handler = createRequestHandler(settings, { db: fakeDb(), requests });
+    for (const consent of [undefined, "", "Something else"]) {
+      const res = await handler(post(body({ consent })));
+      expect(res.status).toBe(400);
+      expect((await res.json()).errors.consent).toBeTruthy();
+    }
+    expect(requests.submit).not.toHaveBeenCalled();
+    await handler(post(body()));
+    expect(requests.submit.mock.calls[0][0].consentText).toBe(CONSENT);
   });
 
   it("links the lead and saves the closing message on success", async () => {

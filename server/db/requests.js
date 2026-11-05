@@ -1,9 +1,10 @@
 export function requestsDb(sql) {
   return {
-    async recordRequest({ site, idempotencyKey, source, service = null, leadId = null, conversationId = null, subject = null, message = null, vehicle = null, pageUrl = null, ipHash = null }) {
+    async recordRequest({ site, idempotencyKey, source, service = null, leadId = null, conversationId = null, subject = null, message = null, vehicle = null, pageUrl = null, ipHash = null, consentText = null }) {
       const [row] = await sql`
-        insert into requests (site, idempotency_key, source, service, lead_id, conversation_id, subject, message, vehicle, page_url, ip_hash)
-        values (${site}, ${idempotencyKey}, ${source}, ${service}, ${leadId}, ${conversationId}, ${subject}, ${message}, ${vehicle}, ${pageUrl}, ${ipHash})
+        insert into requests (site, idempotency_key, source, service, lead_id, conversation_id, subject, message, vehicle, page_url, ip_hash, consent_text, consent_at)
+        values (${site}, ${idempotencyKey}, ${source}, ${service}, ${leadId}, ${conversationId}, ${subject}, ${message}, ${vehicle}, ${pageUrl}, ${ipHash},
+          ${consentText}, case when ${consentText}::text is not null then now() end)
         on conflict (idempotency_key) do nothing
         returning id, email_status`;
       if (row) return { id: row.id, duplicate: false, emailStatus: row.email_status };

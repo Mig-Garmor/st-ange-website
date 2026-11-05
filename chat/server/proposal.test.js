@@ -48,6 +48,12 @@ describe("proposal", () => {
     expect(checkProposal({ ...valid, phone: "+34643847584" }, { slugs, validateLead }).note).toContain("asks for phone");
   });
 
+  it("known details from a continued chat fill only what this chat did not give", () => {
+    const known = { name: "Dana", phone: "2815550166", email: "dana@mailinator.com", vehicle: "2015 Ford F-150" };
+    const { card } = checkProposal({ service: "brakes", vehicle: "2019 Civic" }, { slugs, validateLead, known });
+    expect(card).toEqual({ service: "brakes", name: "Dana", phone: "281-555-0166", email: "dana@mailinator.com", vehicle: "2019 Civic", notes: "" });
+  });
+
   it("over-long values are cut to the endpoint's limits instead of failing", () => {
     const { card } = checkProposal({ ...valid, notes: "x".repeat(1500), name: "n".repeat(150) }, { slugs, validateLead });
     expect(card.notes).toHaveLength(1000);

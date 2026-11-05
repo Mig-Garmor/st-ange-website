@@ -1,3 +1,4 @@
+import { localFlag, localOverride } from "./localOverride.js";
 import { business, fullAddress, serviceZipsText, services } from "../src/config/business.js";
 import { faqs } from "../src/content/home.js";
 import { relocationFaq } from "../src/content/relocation.js";
@@ -48,11 +49,16 @@ export const chatServerSettings = {
   timeZone: "America/Chicago",
   phoneDisplay: business.phone.display,
   localAreaCodes: business.localAreaCodes,
+  callbackConsent: business.callbackConsent,
+  retention: business.retention,
   knowledge,
   featured,
   services: services.map(({ slug, name }) => ({ slug, name })),
   // maxChars covers a burst of quick messages sent as one turn; MAX_TURN_CHARS in chat/widget/messages.js matches it.
-  limits: { maxChars: 1000, maxUserMessages: 20, maxAttempts: 30, perHour: 40 },
+  // perHour is per IP across chats; CHAT_LIMIT_PER_HOUR (0 = off) only overrides it in local development.
+  limits: { maxChars: 1000, maxUserMessages: 20, maxAttempts: 30, perHour: localOverride("CHAT_LIMIT_PER_HOUR", 40) },
+  // Zero data retention on every AI call; CHAT_ZDR=false only works locally, to test models with no ZDR provider.
+  zdr: localFlag("CHAT_ZDR", true),
   // Must match the quick reply text in src/chatSettings.client.js.
   formTriggers: ["Get a quote"],
   maxOutputTokens: 150,
@@ -64,8 +70,12 @@ export const chatServerSettings = {
   // OpenRouter USD per 1M tokens, read 2026-11-04 from openrouter.ai/api/v1/models.
   models: {
     "openai/gpt-6-luna": { inputUsd: 0.1, cachedInputUsd: 0.01, cacheWriteUsd: 0.125, outputUsd: 0.5 },
-    "anthropic/claude-haiku-5.5": { inputUsd: 0.1, cachedInputUsd: 0.01, cacheWriteUsd: 0.125, outputUsd: 0.5 },
+    // Bedrock: measured 5,498 of 5,506 prompt tokens read from cache under ZDR (2026-11-05); spreading across providers read none.
+    "anthropic/claude-haiku-5.5": { inputUsd: 0.1, cachedInputUsd: 0.01, cacheWriteUsd: 0.125, outputUsd: 0.5, providerOrder: ["amazon-bedrock"] },
     // Reasons by default; off so the 150-token budget goes to the reply. Prices for prompts under 32k tokens.
+    // Zero-retention test model. PrimeIntellect does not cache but cost $0.00006 a call against Parasail's $0.00017 cached (2026-11-05).
+    // Fallback price only, set to the dearer providers in case the preferred one is down.
+    "qwen/qwen3.6-35b-a3b": { inputUsd: 0.1, cachedInputUsd: 0.1, outputUsd: 0.95, reasoningEffort: "none", providerOrder: ["primeintellect"] },
     "qwen/qwen3.7-flash": {
       inputUsd: 0.03,
       cachedInputUsd: 0.006,
@@ -77,8 +87,11 @@ export const chatServerSettings = {
   // ECB reference rate for 2026-11-04: 1 EUR = 1.1267 USD.
   eurPerUsd: 0.8875,
   copy: {
-    offline: `Our chat is offline right now. Call us at ${business.phone.display} or send a quote request.`,
+    offline: `Our chat is taking a break right now. Call us at ${business.phone.display}, or send a request and we'll call you back.`,
     limit: `Let's pick this up by phone: call us at ${business.phone.display}.`,
+    limitConversation: `This chat has gotten long. Start a new chat to keep going, or call us at ${business.phone.display}.`,
+    limitHourly: `You've sent a lot of messages in a short time. Please try again in a little while, call us at ${business.phone.display}, or send a request and we'll call you back.`,
+    tooLong: "That message is a bit long for the chat. Could you shorten it?",
     unavailable: `Chat is unavailable right now. Call us at ${business.phone.display}.`,
   },
   hours: business.hours,

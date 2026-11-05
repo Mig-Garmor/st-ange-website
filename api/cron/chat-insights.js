@@ -1,4 +1,4 @@
-import { createAi, reasoningEffortFor } from "../../chat/server/ai.js";
+import { createAi, providerOrderFor, reasoningEffortFor } from "../../chat/server/ai.js";
 import { createInsightsJob } from "../../chat/server/createInsightsJob.js";
 import { chatServerSettings } from "../../server/chatSettings.js";
 import { getSql } from "../../server/db/client.js";
@@ -14,6 +14,8 @@ export async function GET(request) {
       apiKey: process.env.OPENROUTER_API_KEY,
       model,
       reasoningEffort: reasoningEffortFor(chatServerSettings, model),
+      zdr: chatServerSettings.zdr,
+      providerOrder: providerOrderFor(chatServerSettings, model),
     }),
     email: createEmail({
       apiKey: process.env.BREVO_API_KEY,

@@ -4,9 +4,9 @@ import { useChat } from "@ai-sdk/vue";
 import { DefaultChatTransport } from "ai";
 import RequestCard from "./RequestCard.vue";
 import { createTurnstile } from "./turnstile.js";
-import { isExpired, loadSession, saveSession, visitorId } from "./storage.js";
-import { latestCardId as findLatestCardId, okCard } from "./card.js";
-import { chatState, displayParts, hasUnsentFirstMessage, isVerified, lastReplyMissing, localExchange, nextBurst, sentNote, textOf } from "./messages.js";
+import { forgetChat, isExpired, loadSession, recentChatId, rememberChat, saveSession, visitorId } from "./storage.js";
+import { clearDraft, latestCardId as findLatestCardId, loadDraft, okCard, saveDraft } from "./card.js";
+import { SENT_CLOSED, blocksChat, chatReason, chatState, displayParts, hasUnsentFirstMessage, isVerified, lastReplyMissing, localExchange, localForm, nextBurst, sentNote, textOf } from "./messages.js";
 
 const props = defineProps({
   settings: { type: Object, required: true },
@@ -31,7 +31,48 @@ let graceTimer = null;
 let turnstile = null;
 
 const saved = loadSession();
-const conversation = shallowRef({ id: saved?.id ?? crypto.randomUUID(), messages: saved?.messages ?? [] });
+const conversation = shallowRef(
+  saved
+    ? { id: saved.id, messages: saved.messages, previousId: saved.previousId ?? null }
+    : { id: crypto.randomUUID(), messages: [], previousId: null },
+);
+const continuing = computed(() => Boolean(conversation.value.previousId));
+
+// Nothing from an earlier chat is reused until the visitor chooses to continue it.
+const resumeOffer = ref(null);
+async function offerResume(previousId) {
+  if (!previousId) return;
+  try {
+    const response = await fetch("/api/chat-resume", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ previousId, visitorId: visitorId() }),
+    });
+    const { resume } = await response.json();
+    if (resume && !messages.value.length) resumeOffer.value = { previousId, details: resume };
+    else if (!resume) forgetChat();
+  } catch {
+  }
+}
+const resumeSummary = computed(() => {
+  const d = resumeOffer.value?.details ?? {};
+  return [d.vehicle, d.phone && `phone ${d.phone}`, d.email].filter(Boolean).join(", ");
+});
+
+function continueChat() {
+  const { previousId } = resumeOffer.value;
+  const unfinished = loadDraft(previousId);
+  if (Object.values(unfinished).some((v) => String(v ?? "").trim())) saveDraft(conversation.value.id, unfinished);
+  conversation.value = { ...conversation.value, previousId };
+  resumeOffer.value = null;
+  focusInput();
+}
+
+function startFresh() {
+  if (resumeOffer.value) clearDraft(resumeOffer.value.previousId);
+  forgetChat();
+  resumeOffer.value = null;
+}
 let lastActive = saved?.savedAt ?? Date.now();
 
 const transport = new DefaultChatTransport({
@@ -40,6 +81,7 @@ const transport = new DefaultChatTransport({
     visitorId: visitorId(),
     pageUrl: location.href,
     turnstileToken: isVerified(messages.value) ? undefined : await turnstile.token(),
+    previousId: conversation.value.previousId ?? undefined,
   }),
 });
 
@@ -58,13 +100,17 @@ const noReply = computed(() => status.value === "ready" && !verifyFailed.value &
 watch([id, messages, status], () => {
   if (status.value === "streaming") return;
   lastActive = Date.now();
-  saveSession({ id: id.value, messages: messages.value }, lastActive);
+  saveSession({ id: id.value, messages: messages.value, previousId: conversation.value.previousId }, lastActive);
+  if (isVerified(messages.value)) rememberChat(id.value, lastActive);
 });
 
 // The old conversation stays in the database; the visitor id still links it to this one.
 function startNewChat() {
   if (busy.value) return;
-  conversation.value = { id: crypto.randomUUID(), messages: [] };
+  const earlier = isVerified(messages.value) ? id.value : resumeOffer.value?.previousId ?? conversation.value.previousId;
+  conversation.value = { id: crypto.randomUUID(), messages: [], previousId: null };
+  resumeOffer.value = null;
+  offerResume(earlier);
   clearTimeout(graceTimer);
   graceTimer = null;
   queue.value = [];
@@ -86,7 +132,7 @@ watch(error, async (err) => {
     return;
   }
   const texts = (messages.value.at(-1)?.parts ?? []).filter((p) => p.type === "text").map((p) => p.text);
-  conversation.value = { id: crypto.randomUUID(), messages: [] };
+  conversation.value = { id: crypto.randomUUID(), messages: [], previousId: conversation.value.previousId };
   await nextTick();
   sendTexts(texts);
 });
@@ -94,7 +140,7 @@ watch(error, async (err) => {
 // Send is greyed only when a message cannot go anywhere; an empty box or a reply in progress is not that.
 const online = ref(typeof navigator === "undefined" || navigator.onLine !== false);
 const updateOnline = () => (online.value = navigator.onLine !== false);
-const unusable = computed(() => !online.value || ["offline", "limit"].includes(chatState(messages.value.at(-1) ?? {})));
+const unusable = computed(() => !online.value || blocksChat(messages.value));
 
 const placeholder = computed(() => (unusable.value ? "Chat unavailable right now" : "Type your message"));
 
@@ -165,6 +211,7 @@ watch(status, (now) => {
 });
 
 function ask(reply) {
+  if (resumeOffer.value) startFresh();
   const answer = props.settings.localAnswers?.[reply];
   if (!answer) {
     queue.value = [...queue.value, reply];
@@ -174,13 +221,19 @@ function ask(reply) {
   messages.value = [...messages.value, ...localExchange(reply, answer)];
 }
 
+// A conversation the server verified can send a request from the form even when the chat itself has stopped.
+function openForm() {
+  messages.value = [...messages.value, localForm()];
+}
+
 function onSent(toolCallId) {
-  messages.value = sentNote(toolCallId, messages.value);
+  messages.value = sentNote(toolCallId, messages.value, unusable.value ? SENT_CLOSED : undefined);
   focusInput();
 }
 
 function submit() {
   if (unusable.value) return;
+  if (resumeOffer.value && draft.value.trim()) startFresh();
   const text = draft.value.trim().slice(0, MAX_CHARS);
   if (!text) return nudgeEmpty();
   if (verifyFailed.value) return retry();
@@ -236,6 +289,7 @@ watch(
 );
 
 onMounted(() => {
+  if (!saved) offerResume(recentChatId());
   window.addEventListener("online", updateOnline);
   window.addEventListener("offline", updateOnline);
   requestAnimationFrame(() => requestAnimationFrame(() => (shown.value = props.open)));
@@ -289,6 +343,17 @@ onBeforeUnmount(() => {
         {{ settings.notice }}
         <a :href="settings.privacyPath">Privacy</a>
       </p>
+      <p v-if="continuing" class="continuing">Continuing from your earlier chat</p>
+      <div v-else-if="resumeOffer" class="resume" role="group" aria-label="Continue your earlier chat">
+        <p>
+          Welcome back. Want to pick up where you left off? We'll reuse what you told us before<template v-if="resumeSummary">
+            ({{ resumeSummary }})</template> so you don't have to repeat it.
+        </p>
+        <div class="resume-actions">
+          <button type="button" class="resume-continue" @click="continueChat">Continue</button>
+          <button type="button" class="resume-fresh" @click="startFresh">Start fresh</button>
+        </div>
+      </div>
 
       <div v-if="!messages.length && !queue.length" class="quick-replies">
         <button v-for="reply in settings.quickReplies" :key="reply" type="button" @click="ask(reply)">
@@ -299,9 +364,11 @@ onBeforeUnmount(() => {
       <template v-for="message in messages" :key="message.id">
         <div v-if="STATES.includes(chatState(message))" class="state-view" role="status">
           <p>{{ textOf(message) || unavailable }}</p>
-          <div class="state-links">
+          <div v-if="chatReason(message) !== 'too_long'" class="state-links">
             <a :href="settings.phoneHref" class="call">Call {{ settings.phoneDisplay }}</a>
-            <a href="/contact-us" class="quote">Request a quote</a>
+            <button v-if="chatReason(message) === 'conversation_limit'" type="button" class="quote" @click="startNewChat">New chat</button>
+            <button v-else-if="isVerified(messages)" type="button" class="quote" @click="openForm">Request a quote</button>
+            <a v-else href="/contact-us" class="quote">Request a quote</a>
           </div>
         </div>
         <template v-else>
@@ -322,6 +389,7 @@ onBeforeUnmount(() => {
               :phone-href="settings.phoneHref"
               :superseded="part.toolCallId !== latestCardId"
               :local-area-codes="settings.localAreaCodes"
+              :consent-text="settings.callbackConsent"
               @sent="onSent(part.toolCallId)"
             />
           </template>
@@ -457,6 +525,21 @@ onBeforeUnmount(() => {
 }
 .from-visitor {
   @apply self-end bg-brand-navy text-white;
+}
+.resume {
+  @apply rounded-lg border border-brand-yellow/60 bg-brand-yellow/15 p-3 text-[14px] text-gray-900;
+}
+.resume-actions {
+  @apply mt-2 grid grid-cols-2 gap-2;
+}
+.resume-continue {
+  @apply rounded-lg bg-brand-navy py-2 font-bold text-white hover:opacity-90;
+}
+.resume-fresh {
+  @apply rounded-lg border-2 border-brand-navy py-2 font-bold text-brand-navy hover:bg-white;
+}
+.continuing {
+  @apply self-center rounded-full bg-brand-yellow/25 px-3 py-1 text-[12px] font-semibold text-brand-navy;
 }
 .notice {
   @apply text-xs text-gray-600;

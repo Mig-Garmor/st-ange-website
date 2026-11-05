@@ -161,6 +161,12 @@ describe("checkLimits", () => {
     expect(await run({}, db)).toEqual({ ok: false, reason: "hourly_limit" });
     expect(db.userMessagesLastHour).toHaveBeenCalledWith("h");
   });
+  it("perHour 0 switches the hourly limit off without counting", async () => {
+    const db = fakeDb({ userMessagesLastHour: vi.fn(async () => 999) });
+    const off = { ...settings, limits: { ...settings.limits, perHour: 0 } };
+    expect(await checkLimits({ db, settings: off, conversation: { messageCount: 1 }, ipHash: "h", text: "hi" })).toEqual({ ok: true });
+    expect(db.userMessagesLastHour).not.toHaveBeenCalled();
+  });
 });
 
 describe("recordUsage", () => {

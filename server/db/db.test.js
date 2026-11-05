@@ -139,6 +139,32 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("data access", () => {
     expect(await isAvailable({ db, settings, now: new Date() })).toBe(false);
   });
 
+  it("purgeExpired removes chats past 18 months and leads past 3 years, keeping anything newer or still referenced", async () => {
+    const s = `${site}-purge`;
+    const [oldChat, newChat] = [await newConversation({ site: s }), await newConversation({ site: s })];
+    for (const c of [oldChat, newChat]) await db.saveMessage({ site: s, conversationId: c.id, role: "user", content: "hi" });
+    await sql`update conversations set last_message_at = now() - interval '19 months' where id = ${oldChat.id}`;
+    const [oldLead] = await sql`insert into leads (site, name, phone, updated_at) values (${s}, 'Old', '2815550001', now() - interval '4 years') returning id`;
+    const [keptLead] = await sql`insert into leads (site, name, phone, updated_at) values (${s}, 'Kept', '2815550002', now() - interval '4 years') returning id`;
+    await db.recordRequest({ site: s, idempotencyKey: randomUUID(), source: "chat", leadId: keptLead.id, conversationId: oldChat.id });
+    expect(await db.purgeExpired({ site: s, chatMonths: 18, leadYears: 3 })).toEqual({ chats: 1, leads: 1 });
+    expect((await sql`select id from conversations where site = ${s}`).map((r) => r.id)).toEqual([newChat.id]);
+    expect(await sql`select 1 from messages where conversation_id = ${oldChat.id}`).toEqual([]);
+    expect((await sql`select name from leads where site = ${s}`).map((r) => r.name)).toEqual(["Kept"]);
+    const [request] = await sql`select conversation_id from requests where site = ${s}`;
+    expect(request.conversation_id).toBeNull();
+    void oldLead;
+  });
+
+  it("recordRequest stores the consent wording with the time it was given", async () => {
+    const key = randomUUID();
+    await db.recordRequest({ site, idempotencyKey: key, source: "chat", consentText: "May call or text me." });
+    await db.recordRequest({ site, idempotencyKey: randomUUID(), source: "contact_form" });
+    const [withConsent] = await sql`select consent_text, consent_at from requests where idempotency_key = ${key}`;
+    expect(withConsent.consent_text).toBe("May call or text me.");
+    expect(withConsent.consent_at).toBeInstanceOf(Date);
+  });
+
   it("claimRequestSlot hands out exactly 3 slots to 6 parallel new keys, and a known key takes none", async () => {
     const conv = await newConversation();
     const keys = Array.from({ length: 6 }, () => randomUUID());
@@ -163,6 +189,30 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("data access", () => {
     await db.forgetIpHashes(7);
     const rows = await sql`select id, ip_hash from conversations where id in (${old.id}, ${recent.id})`;
     expect(Object.fromEntries(rows.map((r) => [r.id, r.ip_hash]))).toEqual({ [old.id]: null, [recent.id]: "h-new" });
+  });
+
+  it("carryOverSource returns the same visitor's chat from the last 24 hours, and nothing for anyone else", async () => {
+    const prev = await newConversation({ visitorId: "v-carry" });
+    for (const content of ["my car pulls left", "it is a 2018 Camry"]) await db.saveMessage({ site, conversationId: prev.id, role: "user", content });
+    await db.saveMessage({ site, conversationId: prev.id, role: "assistant", content: "We can check that." });
+    const found = await db.carryOverSource({ site, previousId: prev.id, visitorId: "v-carry" });
+    expect(found).toEqual({
+      summary: null,
+      lead: { name: null, phone: null, email: null, vehicle: null },
+      userMessages: ["my car pulls left", "it is a 2018 Camry"],
+    });
+    expect(await db.carryOverSource({ site, previousId: prev.id, visitorId: "someone-else" })).toBeNull();
+    await sql`update conversations set last_message_at = now() - interval '25 hours' where id = ${prev.id}`;
+    expect(await db.carryOverSource({ site, previousId: prev.id, visitorId: "v-carry" })).toBeNull();
+  });
+
+  it("ensureConversation stores the carried context and getConversation returns it", async () => {
+    const prev = await newConversation({ visitorId: "v-store" });
+    const details = { name: "Dana", phone: "2815550166", email: null, vehicle: "2019 Civic" };
+    const next = await db.ensureConversation({ site, id: randomUUID(), visitorId: "v-store", verified: true, previousId: prev.id, carryOver: "brakes on a Civic", carryDetails: details });
+    expect(next.carryOver).toBe("brakes on a Civic");
+    expect(next.carryDetails).toEqual(details);
+    expect((await db.getConversation(next.id)).carryOver).toBe("brakes on a Civic");
   });
 
   it("formRequestsLastHour counts one IP's recent form requests, not chat ones", async () => {

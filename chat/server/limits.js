@@ -22,7 +22,7 @@ export async function checkLimits({ db, settings, conversation, ipHash, text }) 
   const { maxChars, maxUserMessages, perHour } = settings.limits;
   if (text.length > maxChars) return { ok: false, reason: "too_long" };
   if (conversation.messageCount >= maxUserMessages) return { ok: false, reason: "conversation_limit" };
-  if ((await db.userMessagesLastHour(ipHash)) >= perHour) return { ok: false, reason: "hourly_limit" };
+  if (perHour > 0 && (await db.userMessagesLastHour(ipHash)) >= perHour) return { ok: false, reason: "hourly_limit" };
   return { ok: true };
 }
 

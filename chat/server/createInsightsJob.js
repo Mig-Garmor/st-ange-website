@@ -2,7 +2,6 @@ import { z } from "zod";
 import { assertPriced, isAvailable, recordUsage } from "./limits.js";
 
 const BATCH = 50;
-const IP_HASH_DAYS = 7;
 const MAX_UNANSWERED = 10;
 const MAX_QUESTION = 200;
 const UNREADABLE = { outcome: "abandoned" };
@@ -38,7 +37,9 @@ export function createInsightsJob(settings, { db, ai, email, model, cronSecret, 
       return Response.json({ error: "unauthorized" }, { status: 401 });
     }
     // The hashes only serve the one-hour rate limits; dropping them keeps old rows unlinkable.
-    await db.forgetIpHashes(IP_HASH_DAYS).catch((error) => console.error("Forgetting IP hashes failed", error));
+    const { ipHashDays, chatMonths, leadYears } = settings.retention;
+    await db.forgetIpHashes(ipHashDays).catch((error) => console.error("Forgetting IP hashes failed", error));
+    await db.purgeExpired({ site: settings.site, chatMonths, leadYears }).catch((error) => console.error("Retention purge failed", error));
     try {
       assertPriced(settings, model);
     } catch (error) {

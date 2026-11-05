@@ -25,6 +25,8 @@ Server (Vercel project settings and `.env.local`; see `.env.example`):
 | `CRON_SECRET` | Bearer token for the insight job |
 | `IP_HASH_SALT` | Salt for `ip_hash` (raw IPs are never stored); also turns on the forms' limit of 5 posts per IP per hour. The daily job clears hashes older than 7 days |
 | `CHAT_DAILY_CAP_EUR` | Daily spend cap, default 5 |
+| `CHAT_LIMIT_PER_HOUR` | Local development only: overrides the 40 chat messages per IP per hour, `0` switches it off. Ignored on every Vercel deployment, which always uses 40 |
+| `FORM_LIMIT_PER_HOUR` | Local development only: overrides the 5 form posts per IP per hour, `0` switches it off. Ignored on every Vercel deployment, which always uses 5 |
 | `TURNSTILE_HOSTNAMES` | Optional, comma-separated, for example `stangeautoservice.com,www.stangeautoservice.com`. When set, a Turnstile token solved on any other hostname is refused. Leave it unset locally: Cloudflare's test keys report `example.com` |
 
 ### Choosing a model
