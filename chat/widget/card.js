@@ -17,6 +17,12 @@ export const latestCardId = (messages) =>
 
 const orList = (items) => (items.length > 1 ? `${items.slice(0, -1).join(", ")} or ${items.at(-1)}` : items.join(""));
 
+export function displayPhone(value) {
+  let digits = str(value).replace(/\D/g, "");
+  if (digits.length === 11 && digits.startsWith("1")) digits = digits.slice(1);
+  return digits.length === 10 ? `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}` : str(value);
+}
+
 export const initialForm = (card) => Object.fromEntries(FIELDS.map((f) => [f, str(card?.[f])]));
 
 // Mirrors the server rules so an edit is flagged before sending; /api/chat-request still decides.
@@ -33,6 +39,35 @@ export function fieldError(field, value, { localAreaCodes = [] } = {}) {
   }
   return "";
 }
+
+const DRAFT_KEY = (conversationId) => `chat:request-draft:${conversationId}`;
+
+// What the visitor typed into a form survives the form being reopened further down, or a reload.
+export function loadDraft(conversationId) {
+  try {
+    return JSON.parse(sessionStorage.getItem(DRAFT_KEY(conversationId)) ?? "null") ?? {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveDraft(conversationId, form) {
+  try {
+    sessionStorage.setItem(DRAFT_KEY(conversationId), JSON.stringify(form));
+  } catch {
+  }
+}
+
+export function clearDraft(conversationId) {
+  try {
+    sessionStorage.removeItem(DRAFT_KEY(conversationId));
+  } catch {
+  }
+}
+
+// The visitor's own typing beats the bot's prefill; the prefill fills whatever they left empty.
+export const mergeDraft = (form, draft) =>
+  Object.fromEntries(FIELDS.map((f) => [f, str(draft?.[f]).trim() ? str(draft[f]) : form[f]]));
 
 export const STEPS = [
   { title: "Your car", fields: ["service", "vehicle", "notes"] },

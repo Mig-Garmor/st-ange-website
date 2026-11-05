@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SENT_FOLLOW_UP, hasUnsentFirstMessage, isLocal, isVerified, lastReplyMissing, localExchange, sentNote, textOf } from "./messages.js";
+import { SENT_FOLLOW_UP, displayParts, hasUnsentFirstMessage, nextBurst, isLocal, isVerified, lastReplyMissing, localExchange, sentNote, textOf } from "./messages.js";
 
 const user = (text) => ({ role: "user", parts: [{ type: "text", text }] });
 const reply = (text) => ({ role: "assistant", parts: [{ type: "text", text }] });
@@ -22,6 +22,23 @@ describe("widget messages", () => {
     expect(hasUnsentFirstMessage([])).toBe(false);
     expect(hasUnsentFirstMessage([user("hi"), reply("hello"), user("again")])).toBe(false);
     expect(hasUnsentFirstMessage([user("hi"), notice("offline")])).toBe(false);
+  });
+
+  it("nextBurst sends quick messages together up to the turn limit and keeps the rest queued", () => {
+    expect(nextBurst(["hi", "my brakes squeal", "2018 Camry"])).toEqual({ burst: ["hi", "my brakes squeal", "2018 Camry"], rest: [] });
+    const long = ["a".repeat(500), "b".repeat(499), "c"];
+    expect(nextBurst(long)).toEqual({ burst: [long[0], long[1]], rest: ["c"] });
+    expect(nextBurst(["x".repeat(1200)]).burst).toHaveLength(1);
+    expect(nextBurst([])).toEqual({ burst: [], rest: [] });
+  });
+
+  it("displayParts puts the bot's line above its form, and leaves other messages alone", () => {
+    const card = { type: "tool-proposeRequest", toolCallId: "t1", state: "output-available", output: { ok: true, card: {} } };
+    const step = { type: "step-start" };
+    const text = { type: "text", text: "You can finish the request in the form." };
+    expect(displayParts({ parts: [step, card, step, text] })).toEqual([text, step, card, step]);
+    const plain = { parts: [text, step] };
+    expect(displayParts(plain)).toBe(plain.parts);
   });
 
   it("a reply pointing at a form that never opened counts as missing", () => {

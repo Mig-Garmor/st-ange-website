@@ -8,6 +8,13 @@ export const textOf = (message) =>
     .map((part) => part.text)
     .join("");
 
+// The model writes its line after the tool runs; shown above the form, it introduces it instead of trailing it.
+export const displayParts = (message) => {
+  const parts = message.parts ?? [];
+  if (!parts.some((part) => okCard(part))) return parts;
+  return [...parts.filter((part) => part.type === "text"), ...parts.filter((part) => part.type !== "text")];
+};
+
 export const isLocal = (message) => message.metadata?.local === true;
 
 // Answered in the browser from settings; the server never stores this pair.
@@ -16,6 +23,22 @@ export const localExchange = (question, answer, newId = () => crypto.randomUUID(
     ["user", question],
     ["assistant", answer],
   ].map(([role, text]) => ({ id: newId(), role, metadata: { local: true }, parts: [{ type: "text", text }] }));
+
+// Matches the server's limits.maxChars: a burst of quick messages goes out as one turn, joined by line breaks.
+export const MAX_TURN_CHARS = 1000;
+
+// Takes as many queued messages as fit in one turn; the rest wait for the next reply to finish.
+export function nextBurst(queue, max = MAX_TURN_CHARS) {
+  const burst = [];
+  let length = 0;
+  for (const text of queue) {
+    const added = (burst.length ? 1 : 0) + text.length;
+    if (burst.length && length + added > max) break;
+    burst.push(text);
+    length += added;
+  }
+  return { burst, rest: queue.slice(burst.length) };
+}
 
 export const SENT_FOLLOW_UP = "Thanks, we got your request and we'll be in touch shortly. Can I help with anything else?";
 
@@ -31,7 +54,7 @@ export const isVerified = (list) =>
     (m) => m.role === "assistant" && !isLocal(m) && !["offline", "error"].includes(chatState(m)) && m.parts?.length,
   );
 
-const CLAIMS_CARD = /tap (the )?send request|send request (button|below)|(the |in the )form below/i;
+const CLAIMS_CARD = /tap (the )?send request|send request (button|below)|(the |in the |this )form\b/i;
 const hasCard = (message) => (message.parts ?? []).some((part) => okCard(part));
 
 const hasVisibleReply = (message, earlierCard) => {

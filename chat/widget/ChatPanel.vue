@@ -6,7 +6,7 @@ import RequestCard from "./RequestCard.vue";
 import { createTurnstile } from "./turnstile.js";
 import { isExpired, loadSession, saveSession, visitorId } from "./storage.js";
 import { latestCardId as findLatestCardId, okCard } from "./card.js";
-import { chatState, hasUnsentFirstMessage, isVerified, lastReplyMissing, localExchange, sentNote, textOf } from "./messages.js";
+import { chatState, displayParts, hasUnsentFirstMessage, isVerified, lastReplyMissing, localExchange, nextBurst, sentNote, textOf } from "./messages.js";
 
 const props = defineProps({
   settings: { type: Object, required: true },
@@ -17,12 +17,17 @@ const emit = defineEmits(["close", "ready"]);
 const MAX_CHARS = 500;
 const STATES = ["offline", "limit", "error"];
 const SHAKE_MS = 400;
+// People often send a thought in two or three quick messages; waiting this long lets one reply cover them all.
+const GRACE_MS = 1500;
 
 const field = ref(null);
 const log = ref(null);
 const challenge = ref(null);
 const draft = ref("");
 const verifyFailed = ref(false);
+// Shown as the visitor's bubbles at once, sent as one turn after the pause or when the current reply ends.
+const queue = ref([]);
+let graceTimer = null;
 let turnstile = null;
 
 const saved = loadSession();
@@ -60,6 +65,9 @@ watch([id, messages, status], () => {
 function startNewChat() {
   if (busy.value) return;
   conversation.value = { id: crypto.randomUUID(), messages: [] };
+  clearTimeout(graceTimer);
+  graceTimer = null;
+  queue.value = [];
   draft.value = "";
   verifyFailed.value = false;
   turnstile?.warm();
@@ -77,10 +85,10 @@ watch(error, async (err) => {
     verifyFailed.value = true;
     return;
   }
-  const text = textOf(messages.value.at(-1) ?? {});
+  const texts = (messages.value.at(-1)?.parts ?? []).filter((p) => p.type === "text").map((p) => p.text);
   conversation.value = { id: crypto.randomUUID(), messages: [] };
   await nextTick();
-  if (text) send(text);
+  sendTexts(texts);
 });
 
 // Send is greyed only when a message cannot go anywhere; an empty box or a reply in progress is not that.
@@ -128,21 +136,40 @@ watch(
   },
 );
 
+watch(() => queue.value.length, (length, previous) => {
+  if (length > previous) scrollToBottom();
+});
+
 watch([noReply, failed, verifyFailed], (states) => {
   if (states.some(Boolean)) scrollToBottom("smooth");
 });
 
-function send(text) {
-  const value = text.trim().slice(0, MAX_CHARS);
-  if (!value || busy.value) return;
-  if (verifyFailed.value) return retry();
+function sendTexts(texts) {
+  const parts = texts.map((t) => t.trim().slice(0, MAX_CHARS)).filter(Boolean).map((text) => ({ type: "text", text }));
+  if (!parts.length || busy.value) return;
   if (status.value === "error") clearError();
-  sendMessage({ text: value });
+  sendMessage({ parts });
 }
+
+function flush() {
+  clearTimeout(graceTimer);
+  graceTimer = null;
+  if (busy.value || !queue.value.length) return;
+  const { burst, rest } = nextBurst(queue.value);
+  queue.value = rest;
+  sendTexts(burst);
+}
+
+watch(status, (now) => {
+  if (now === "ready" && queue.value.length && !graceTimer) flush();
+});
 
 function ask(reply) {
   const answer = props.settings.localAnswers?.[reply];
-  if (!answer) return send(reply);
+  if (!answer) {
+    queue.value = [...queue.value, reply];
+    return flush();
+  }
   if (busy.value) return;
   messages.value = [...messages.value, ...localExchange(reply, answer)];
 }
@@ -154,10 +181,13 @@ function onSent(toolCallId) {
 
 function submit() {
   if (unusable.value) return;
-  if (!draft.value.trim()) return nudgeEmpty();
-  if (busy.value) return;
-  send(draft.value);
+  const text = draft.value.trim().slice(0, MAX_CHARS);
+  if (!text) return nudgeEmpty();
+  if (verifyFailed.value) return retry();
   draft.value = "";
+  queue.value = [...queue.value, text];
+  clearTimeout(graceTimer);
+  graceTimer = setTimeout(flush, GRACE_MS);
 }
 
 function retry() {
@@ -208,6 +238,7 @@ onBeforeUnmount(() => {
   window.removeEventListener("online", updateOnline);
   window.removeEventListener("offline", updateOnline);
   clearTimeout(shakeTimer);
+  clearTimeout(graceTimer);
 });
 </script>
 
@@ -243,7 +274,7 @@ onBeforeUnmount(() => {
         <a :href="settings.privacyPath">Privacy</a>
       </p>
 
-      <div v-if="!messages.length" class="quick-replies">
+      <div v-if="!messages.length && !queue.length" class="quick-replies">
         <button v-for="reply in settings.quickReplies" :key="reply" type="button" @click="ask(reply)">
           {{ reply }}
         </button>
@@ -258,7 +289,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
         <template v-else>
-          <template v-for="(part, index) in message.parts" :key="`${message.id}-${index}`">
+          <template v-for="(part, index) in displayParts(message)" :key="`${message.id}-${index}`">
             <p
               v-if="part.type === 'text' && part.text"
               class="bubble"
@@ -280,6 +311,8 @@ onBeforeUnmount(() => {
           </template>
         </template>
       </template>
+
+      <p v-for="(text, index) in queue" :key="`queued-${index}`" class="bubble from-visitor">{{ text }}</p>
 
       <p v-if="status === 'submitted'" class="typing" role="status" aria-label="Typing">
         <span></span><span></span><span></span>

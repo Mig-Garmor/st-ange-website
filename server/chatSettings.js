@@ -51,7 +51,8 @@ export const chatServerSettings = {
   knowledge,
   featured,
   services: services.map(({ slug, name }) => ({ slug, name })),
-  limits: { maxChars: 500, maxUserMessages: 20, maxAttempts: 30, perHour: 40 },
+  // maxChars covers a burst of quick messages sent as one turn; MAX_TURN_CHARS in chat/widget/messages.js matches it.
+  limits: { maxChars: 1000, maxUserMessages: 20, maxAttempts: 30, perHour: 40 },
   // Must match the quick reply text in src/chatSettings.client.js.
   formTriggers: ["Get a quote"],
   maxOutputTokens: 150,

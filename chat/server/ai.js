@@ -49,7 +49,7 @@ const loose = () => z.union([z.string(), z.number()]).nullish().transform((v) =>
 export function createProposeRequest(serviceSlugs, { validateLead } = {}) {
   return tool({
     description:
-      "Open the request form in the chat. Call it as soon as the visitor wants a service, a quote or a booking. Pass the service, the problem in notes, and any name, phone, email or vehicle they already gave; leave the rest empty. The form asks for what is missing in three short steps.",
+      "Open the request form in the chat. Call it only after the visitor agreed to send a request, or asked outright for a quote, booking or callback. Pass the service, the car problem in the visitor's words as notes, and any name, phone, email or vehicle they already gave; leave the rest empty. The form asks for what is missing in three short steps.",
     // Lenient on purpose: an input that fails the schema skips execute, so the model's reply can claim a card that never renders.
     inputSchema: z.object({
       service: loose().describe(`One of: ${serviceSlugs.join(", ")}`),
@@ -58,7 +58,7 @@ export function createProposeRequest(serviceSlugs, { validateLead } = {}) {
       email: loose(),
       vehicle: loose(),
       notes: loose().describe(
-        "One or two short lines for the mechanic: the problem or request in the customer's words (e.g. pulls to the right since hitting a pothole), plus anything they said about timing.",
+        "Only the car's problem or the work wanted, in a few words from the customer (e.g. pulls to the right since hitting a pothole), plus any timing they asked for. Never their questions, that they agreed to a request, today's date or anything about this chat.",
       ),
     }),
     ...(validateLead && { execute: async (input) => checkProposal(input, { slugs: serviceSlugs, validateLead }) }),

@@ -1,6 +1,6 @@
 <script setup>
 import { computed, nextTick, reactive, ref, useId, watch } from "vue";
-import { STEPS, fieldError, firstIncompleteStep, initialForm, okCard, stepErrors } from "./card.js";
+import { STEPS, clearDraft, displayPhone, fieldError, firstIncompleteStep, initialForm, loadDraft, mergeDraft, okCard, saveDraft, stepErrors } from "./card.js";
 
 const props = defineProps({
   proposal: { type: Object, required: true },
@@ -14,7 +14,10 @@ const props = defineProps({
 const emit = defineEmits(["sent"]);
 
 const rules = { localAreaCodes: props.localAreaCodes };
-const form = reactive(initialForm(okCard(props.proposal)));
+const form = reactive(mergeDraft(initialForm(okCard(props.proposal)), loadDraft(props.conversationId)));
+watch(form, () => {
+  if (!props.superseded && !locked.value) saveDraft(props.conversationId, { ...form });
+});
 const errors = reactive({});
 const step = ref(firstIncompleteStep(form, rules));
 const confirmed = ref(false);
@@ -88,7 +91,10 @@ async function send() {
       return showStep(result.errors ?? {});
     }
     status.value = response.ok && result.status === "sent" ? "sent" : "failed";
-    if (status.value === "sent") emit("sent");
+    if (status.value === "sent") {
+      clearDraft(props.conversationId);
+      emit("sent");
+    }
   } catch {
     status.value = "failed";
   }
@@ -99,7 +105,9 @@ async function send() {
   <section ref="root" class="request-card" :aria-labelledby="`${uid}-title`">
     <h3 :id="`${uid}-title`" class="title">Your request</h3>
 
-    <template v-if="!superseded">
+    <p v-if="superseded && status !== 'sent'" class="superseded">This form continues further down the chat.</p>
+
+    <template v-else>
       <p class="step-label">
         <template v-if="status === 'sent'">Done</template>
         <template v-else>Step {{ step + 1 }} of {{ STEPS.length }} · {{ STEPS[step].title }}</template>
@@ -116,16 +124,16 @@ async function send() {
       </div>
     </template>
 
-    <dl v-if="superseded || locked" class="summary">
+    <dl v-if="locked" class="summary">
       <dt>Service</dt><dd>{{ serviceName }}</dd>
       <dt>Vehicle</dt><dd>{{ form.vehicle || "Not given" }}</dd>
       <template v-if="form.notes"><dt>Notes</dt><dd>{{ form.notes }}</dd></template>
       <dt>Name</dt><dd>{{ form.name || "Not given" }}</dd>
-      <dt>Phone</dt><dd class="contact">{{ form.phone || "Not given" }}</dd>
+      <dt>Phone</dt><dd class="contact">{{ displayPhone(form.phone) || "Not given" }}</dd>
       <dt>Email</dt><dd class="contact">{{ form.email || "Not given" }}</dd>
     </dl>
 
-    <form v-else class="fields" novalidate @submit.prevent="step < last ? next() : send()">
+    <form v-else-if="!superseded" class="fields" novalidate @submit.prevent="step < last ? next() : send()">
       <template v-if="step === 0">
         <label :for="`${uid}-service`">Service</label>
         <select :id="`${uid}-service`" v-model="form.service">
@@ -160,7 +168,7 @@ async function send() {
           <dt>Service</dt><dd>{{ serviceName }}</dd>
           <dt>Vehicle</dt><dd>{{ form.vehicle }}</dd>
           <dt>Name</dt><dd>{{ form.name }}</dd>
-          <dt>Phone</dt><dd class="contact">{{ form.phone }}</dd>
+          <dt>Phone</dt><dd class="contact">{{ displayPhone(form.phone) }}</dd>
         </dl>
 
         <label class="confirm">
@@ -183,7 +191,6 @@ async function send() {
       <a :href="phoneHref">{{ phoneDisplay }}</a>.
     </p>
 
-    <p v-if="superseded && status !== 'sent'" class="superseded">Replaced by the updated details below.</p>
   </section>
 </template>
 

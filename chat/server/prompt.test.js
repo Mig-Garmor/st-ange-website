@@ -78,7 +78,10 @@ describe("buildInstructions", () => {
 
   it("opens the form instead of asking for details in chat, names the local area codes, and treats the page as context", () => {
     const { stable } = buildInstructions({ ...settings, localAreaCodes: ["281", "832", "346", "713"] }, { now: monday10, pageUrl: "/" });
-    expect(stable).toContain("call the proposeRequest tool in that same reply");
+    expect(stable).toContain("Never open the request form on your own");
+    expect(stable).toContain("ask whether they would like to send a request");
+    expect(stable).toContain("If they keep asking questions instead, keep answering and do not call the tool");
+    expect(stable).toContain("never add dates, the page, times or your own words");
     expect(stable).toContain("Do not ask for their name, phone, email or vehicle in the chat");
     expect(stable).toContain("three quick steps");
     expect(stable).toContain("Baytown numbers start with 281, 832, 346 or 713");
