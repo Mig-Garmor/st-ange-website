@@ -58,9 +58,10 @@ export function conversationsDb(sql) {
               and (insights_claimed_at is null or insights_claimed_at < now() - interval '60 minutes')
             order by last_message_at limit ${limit} for update skip locked)
           returning id)
-        select c.id, string_agg(m.role || ': ' || m.content, E'\n' order by m.created_at, m.id) as transcript
+        select c.id, string_agg(m.role || ': ' || m.content, E'\n' order by m.created_at, m.id) as transcript,
+          exists (select 1 from requests r where r.conversation_id = c.id and r.email_status = 'sent') as request_sent
         from claimed c join messages m on m.conversation_id = c.id group by c.id`;
-      return rows.map((row) => ({ id: row.id, transcript: row.transcript }));
+      return rows.map((row) => ({ id: row.id, transcript: row.transcript, requestSent: row.request_sent }));
     },
 
     async saveInsights(id, { summary = null, services = [], intent = null, unanswered = [], outcome = null }) {

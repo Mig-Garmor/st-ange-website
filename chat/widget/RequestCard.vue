@@ -12,7 +12,11 @@ const props = defineProps({
   localAreaCodes: { type: Array, default: () => [] },
 });
 
+const emit = defineEmits(["sent"]);
+
 const form = reactive(initialForm(okCard(props.proposal)));
+const confirmed = ref(false);
+watch(() => [form.phone, form.email], () => (confirmed.value = false));
 const errors = reactive({});
 
 function check(field) {
@@ -39,7 +43,7 @@ const locked = computed(() => status.value === "sending" || status.value === "se
 const invalid = computed(() => Object.keys(errors).length > 0);
 
 async function send() {
-  if (locked.value || props.superseded) return;
+  if (locked.value || props.superseded || !confirmed.value) return;
   for (const field of ["name", "phone", "email", "vehicle"]) check(field);
   if (invalid.value) {
     editing.value = true;
@@ -67,6 +71,7 @@ async function send() {
       return;
     }
     status.value = response.ok && result.status === "sent" ? "sent" : "failed";
+    if (status.value === "sent") emit("sent");
   } catch {
     status.value = "failed";
   }
@@ -109,8 +114,8 @@ async function send() {
     <dl v-else class="summary">
       <dt>Service</dt><dd>{{ serviceName }}</dd>
       <dt>Name</dt><dd>{{ form.name || "Not given" }}</dd>
-      <dt>Phone</dt><dd>{{ form.phone || "Not given" }}</dd>
-      <template v-if="form.email"><dt>Email</dt><dd>{{ form.email }}</dd></template>
+      <dt>Phone</dt><dd class="contact">{{ form.phone || "Not given" }}</dd>
+      <template v-if="form.email"><dt>Email</dt><dd class="contact">{{ form.email }}</dd></template>
       <dt>Vehicle</dt><dd>{{ form.vehicle || "Not given" }}</dd>
       <template v-if="form.notes"><dt>Notes</dt><dd>{{ form.notes }}</dd></template>
     </dl>
@@ -122,8 +127,12 @@ async function send() {
     </p>
 
     <p v-if="superseded && status !== 'sent'" class="superseded">Replaced by the updated details below.</p>
-    <div v-else-if="status !== 'sent'" class="actions">
-      <button type="button" class="send" :disabled="locked" @click="send">
+    <label v-else-if="status !== 'sent'" class="confirm">
+      <input v-model="confirmed" type="checkbox" :disabled="locked" />
+      <span>My phone and email are correct. We use them to reach you.</span>
+    </label>
+    <div v-if="!superseded && status !== 'sent'" class="actions">
+      <button type="button" class="send" :disabled="locked || !confirmed" @click="send">
         {{ status === "sending" ? "Sending…" : "Send request" }}
       </button>
       <button type="button" class="edit" :disabled="locked || (editing && invalid)" @click="editing = !editing">
@@ -165,6 +174,15 @@ async function send() {
 }
 .summary dd {
   @apply break-words;
+}
+.summary .contact {
+  @apply font-semibold text-brand-navy;
+}
+.confirm {
+  @apply mt-3 flex items-start gap-2 rounded-lg bg-brand-yellow/20 p-2 text-[13px] leading-snug;
+}
+.confirm input {
+  @apply mt-0.5 h-4 w-4 shrink-0 accent-brand-navy;
 }
 .actions {
   @apply mt-3 grid grid-cols-[2fr_1fr] gap-2;
