@@ -1,6 +1,6 @@
 import { CUSTOMER_HEADER, oneLine, quoted } from "./emailText.js";
 import { toPagePath } from "./pagePath.js";
-import { formatPhone } from "./proposal.js";
+import { MAX_LENGTH, formatPhone } from "../lead.js";
 import { rejectCrossSite } from "./sameSite.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -8,17 +8,9 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const KEY = /^[\w:.-]{1,200}$/;
 const SENT_NOTE = "[Request sent to the shop]";
 const MAX_REQUESTS = 3;
-const MAX_LENGTH = { name: 100, vehicle: 100, email: 200, notes: 1000 };
 
 const label = (role) => (role === "user" ? "Customer" : "Assistant");
 const str = (v) => (typeof v === "string" ? v.trim() : "");
-
-const tooLong = (body) =>
-  Object.fromEntries(
-    Object.entries(MAX_LENGTH)
-      .filter(([field, max]) => typeof body[field] === "string" && body[field].trim().length > max)
-      .map(([field, max]) => [field, `Use ${max} characters or fewer`]),
-  );
 
 export function createRequestHandler(settings, { db, requests, validateLead }) {
   const { site, services } = settings;
@@ -49,12 +41,12 @@ export function createRequestHandler(settings, { db, requests, validateLead }) {
       return Response.json({ error: "Verification failed" }, { status: 403 });
     }
 
-    const lengthErrors = tooLong(body);
     const { errors, lead } = validateLead(body, { requireVehicle: true, requireEmail: true });
     // The visitor must have ticked the exact wording this site shows; it is stored as their consent to calls and texts.
     if (body.consent !== settings.callbackConsent) errors.consent = "Please tick the box so we can call or text you about this request.";
-    if (Object.keys(errors).length || Object.keys(lengthErrors).length) {
-      return Response.json({ status: "invalid", errors: { ...errors, ...lengthErrors } }, { status: 400 });
+    if (str(body.notes).length > MAX_LENGTH.notes) errors.notes = `Use ${MAX_LENGTH.notes} characters or fewer`;
+    if (Object.keys(errors).length) {
+      return Response.json({ status: "invalid", errors }, { status: 400 });
     }
 
     const service = services.find((s) => s.slug === str(body.service));

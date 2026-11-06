@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { validateLead } from "../../server/validate.js";
-import { checkProposal, cleanEmail, cleanService, formatPhone } from "./proposal.js";
+import { checkProposal, cleanEmail, cleanService } from "./proposal.js";
 
 const slugs = ["brakes", "car-alignment"];
 const valid = { service: "brakes", name: "Ann", phone: "832.555.0100", email: "ann@example.com", vehicle: "2019 Civic", notes: "Squeal" };
@@ -16,10 +16,6 @@ describe("proposal", () => {
     expect(cleanService(" Car-Alignment ", slugs)).toBe("car-alignment");
     expect(cleanService("oil change", slugs)).toBeNull();
     expect(cleanService(null, slugs)).toBeNull();
-  });
-
-  it("formatPhone uses the shop's display style", () => {
-    expect(formatPhone("8325727121")).toBe("832-572-7121");
   });
 
   it("complete details open the form ready to send, normalised", () => {

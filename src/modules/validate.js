@@ -1,4 +1,7 @@
 import { business } from "../config/business.js";
+import { normalizePhone } from "../../chat/lead.js";
+
+export { MAX_LENGTH } from "../../chat/lead.js";
 
 const orList = (items) => (items.length > 1 ? `${items.slice(0, -1).join(", ")} or ${items.at(-1)}` : items.join(""));
 
@@ -17,8 +20,7 @@ export function validateEmail(email) {
 
 export function validatePhone(phone) {
   if (isSevenDigits(phone)) return missingAreaCode();
-  const regex = /^\(?([0-9]{3})\)?[-.●]?([0-9]{3})[-.●]?([0-9]{4})$/;
-  return regex.test(phone) ? "" : "Invalid phone number";
+  return normalizePhone(phone) ? "" : "Invalid phone number";
 }
 
 export function validateMessage(message) {

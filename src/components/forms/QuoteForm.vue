@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, reactive, ref, watch } from "vue";
 
 import InputFieldComponent from "@components/forms/InputFieldComponent.vue";
-import { validateName, validatePhone } from "@modules/validate.js";
+import { MAX_LENGTH, validateName, validatePhone } from "@modules/validate.js";
 import { submitForm } from "@api/forms";
 import { useFormTurnstile } from "@modules/formTurnstile.js";
 
@@ -79,7 +79,7 @@ async function handleSubmit() {
       v-model="form.name"
       label="Name"
       autocomplete="name"
-      :maxlength="100"
+      :maxlength="MAX_LENGTH.name"
       :error="errors.name"
     />
     <InputFieldComponent
@@ -87,12 +87,13 @@ async function handleSubmit() {
       label="Phone"
       type="tel"
       autocomplete="tel"
+      :maxlength="MAX_LENGTH.phone"
       :error="errors.phone"
     />
     <InputFieldComponent
       v-model="form.vehicle"
       label="Vehicle (year, make, model)"
-      :maxlength="100"
+      :maxlength="MAX_LENGTH.vehicle"
       :error="errors.vehicle"
     />
     <InputFieldComponent

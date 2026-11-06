@@ -25,4 +25,11 @@ describe("validateLead phone errors", () => {
     expect(validatePhone("832-555-0100")).toBe("");
     expect(validatePhone("12345")).toBe("Invalid phone number");
   });
+
+  it("the website forms accept every format the server accepts", () => {
+    for (const phone of ["(281) 555-0166", "281 555 0166", "+1 281-555-0166", "1-832-572-7121"]) {
+      expect(validatePhone(phone)).toBe("");
+      expect(validateLead({ ...lead, phone }).errors.phone).toBeUndefined();
+    }
+  });
 });
