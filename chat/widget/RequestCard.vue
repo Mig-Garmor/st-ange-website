@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, reactive, ref, useId, watch } from "vue";
 import { STEPS, clearDraft, displayPhone, fieldError, firstIncompleteStep, initialForm, loadDraft, mergeDraft, okCard, saveDraft, stepErrors } from "./card.js";
+import { MAX_LENGTH } from "../lead.js";
 
 const props = defineProps({
   proposal: { type: Object, required: true },
@@ -144,26 +145,26 @@ async function send() {
         </select>
 
         <label :for="`${uid}-vehicle`">Vehicle (year, make and model)</label>
-        <input :id="`${uid}-vehicle`" v-model="form.vehicle" maxlength="100" placeholder="2018 Toyota Camry" @input="check('vehicle')" :aria-invalid="!!errors.vehicle" />
+        <input :id="`${uid}-vehicle`" v-model="form.vehicle" :maxlength="MAX_LENGTH.vehicle" placeholder="2018 Toyota Camry" @input="check('vehicle')" :aria-invalid="!!errors.vehicle" />
         <p v-if="errors.vehicle" class="error">{{ errors.vehicle }}</p>
 
         <label :for="`${uid}-notes`">What's going on? <span class="optional">(optional)</span></label>
-        <textarea :id="`${uid}-notes`" v-model="form.notes" maxlength="1000" rows="2"></textarea>
+        <textarea :id="`${uid}-notes`" v-model="form.notes" :maxlength="MAX_LENGTH.notes" rows="2"></textarea>
       </template>
 
       <template v-else-if="step === 1">
         <label :for="`${uid}-name`">Name</label>
-        <input :id="`${uid}-name`" v-model="form.name" maxlength="100" autocomplete="name" @input="check('name')" :aria-invalid="!!errors.name" />
+        <input :id="`${uid}-name`" v-model="form.name" :maxlength="MAX_LENGTH.name" autocomplete="name" @input="check('name')" :aria-invalid="!!errors.name" />
         <p v-if="errors.name" class="error">{{ errors.name }}</p>
 
         <label :for="`${uid}-phone`">Phone</label>
-        <input :id="`${uid}-phone`" v-model="form.phone" maxlength="30" type="tel" autocomplete="tel" @input="check('phone')" :aria-invalid="!!errors.phone" />
+        <input :id="`${uid}-phone`" v-model="form.phone" :maxlength="MAX_LENGTH.phone" type="tel" autocomplete="tel" @input="check('phone')" :aria-invalid="!!errors.phone" />
         <p v-if="errors.phone" class="error">{{ errors.phone }}</p>
       </template>
 
       <template v-else>
         <label :for="`${uid}-email`">Email</label>
-        <input :id="`${uid}-email`" v-model="form.email" maxlength="200" type="email" autocomplete="email" @input="check('email')" :aria-invalid="!!errors.email" />
+        <input :id="`${uid}-email`" v-model="form.email" :maxlength="MAX_LENGTH.email" type="email" autocomplete="email" @input="check('email')" :aria-invalid="!!errors.email" />
         <p v-if="errors.email" class="error">{{ errors.email }}</p>
 
         <dl class="summary review">

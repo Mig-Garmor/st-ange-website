@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 
 import InputFieldComponent from "@components/forms/InputFieldComponent.vue";
 import {
+  MAX_LENGTH,
   validateName,
   validateEmail,
   validatePhone,
@@ -99,7 +100,7 @@ async function handleSubmit() {
       v-model="form.name"
       label="Name"
       autocomplete="name"
-      :maxlength="100"
+      :maxlength="MAX_LENGTH.name"
       :error="errors.name"
     />
     <InputFieldComponent
@@ -107,7 +108,7 @@ async function handleSubmit() {
       label="Your Email"
       type="email"
       autocomplete="email"
-      :maxlength="200"
+      :maxlength="MAX_LENGTH.email"
       :error="errors.email"
     />
     <InputFieldComponent
@@ -115,7 +116,7 @@ async function handleSubmit() {
       label="Confirm Your Email"
       type="email"
       autocomplete="email"
-      :maxlength="200"
+      :maxlength="MAX_LENGTH.email"
       :error="errors.confirmEmail"
     />
     <InputFieldComponent
@@ -123,6 +124,7 @@ async function handleSubmit() {
       label="Phone"
       type="tel"
       autocomplete="tel"
+      :maxlength="MAX_LENGTH.phone"
       :error="errors.phone"
     />
     <InputFieldComponent

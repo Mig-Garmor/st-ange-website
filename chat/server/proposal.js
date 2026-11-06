@@ -1,5 +1,6 @@
+import { MAX_LENGTH, formatPhone } from "../lead.js";
+
 const PLACEHOLDER_EMAILS = new Set(["", "none", "n/a", "na", "no", "-", "null", "no email"]);
-const MAX = { name: 100, vehicle: 100, email: 200, phone: 30, notes: 1000 };
 
 const str = (v) => (typeof v === "string" ? v.trim() : "");
 
@@ -13,13 +14,11 @@ export const cleanService = (value, slugs) => {
   return slugs.includes(slug) ? slug : null;
 };
 
-export const formatPhone = (digits) => `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
-
 // The card collects missing or invalid details in steps, so anything known is a usable prefill, never a refusal.
 // known: details the visitor gave in an earlier chat they chose to continue; anything said in this chat wins.
 export function checkProposal(input, { slugs, validateLead, known = null }) {
   const raw = Object.fromEntries(
-    Object.keys(MAX).map((field) => [field, (str(input?.[field]) || str(known?.[field])).slice(0, MAX[field])]),
+    Object.keys(MAX_LENGTH).map((field) => [field, (str(input?.[field]) || str(known?.[field])).slice(0, MAX_LENGTH[field])]),
   );
   const email = cleanEmail(raw.email) ?? "";
   const { lead } = validateLead({ name: raw.name, phone: raw.phone, email, vehicle: raw.vehicle });

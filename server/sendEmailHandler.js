@@ -1,5 +1,5 @@
 import { toPagePath } from "../chat/server/pagePath.js";
-import { formatPhone } from "../chat/server/proposal.js";
+import { formatPhone } from "../chat/lead.js";
 import { services } from "../src/config/business.js";
 import { CUSTOMER_HEADER, oneLine, quoted } from "../chat/server/emailText.js";
 import { localOverride } from "./localOverride.js";

@@ -1,3 +1,5 @@
+import { formatPhone, normalizePhone } from "../lead.js";
+
 export const FIELDS = ["service", "name", "phone", "email", "vehicle", "notes"];
 
 const str = (v) => (typeof v === "string" ? v : "");
@@ -18,9 +20,8 @@ export const latestCardId = (messages) =>
 const orList = (items) => (items.length > 1 ? `${items.slice(0, -1).join(", ")} or ${items.at(-1)}` : items.join(""));
 
 export function displayPhone(value) {
-  let digits = str(value).replace(/\D/g, "");
-  if (digits.length === 11 && digits.startsWith("1")) digits = digits.slice(1);
-  return digits.length === 10 ? `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}` : str(value);
+  const digits = normalizePhone(value);
+  return digits ? formatPhone(digits) : str(value);
 }
 
 export const initialForm = (card) => Object.fromEntries(FIELDS.map((f) => [f, str(card?.[f])]));
@@ -32,10 +33,9 @@ export function fieldError(field, value, { localAreaCodes = [] } = {}) {
   if (field === "vehicle") return v ? "" : "Vehicle is required";
   if (field === "email") return !v ? "Email is required" : EMAIL.test(v) ? "" : "Invalid email address";
   if (field === "phone") {
-    let digits = v.replace(/\D/g, "");
-    if (digits.length === 7 && localAreaCodes.length) return `Add the area code (${orList(localAreaCodes)})`;
-    if (digits.length === 11 && digits.startsWith("1")) digits = digits.slice(1);
-    return digits.length === 10 ? "" : "Enter a 10-digit US phone number";
+    if (normalizePhone(v)) return "";
+    if (v.replace(/\D/g, "").length === 7 && localAreaCodes.length) return `Add the area code (${orList(localAreaCodes)})`;
+    return "Enter a 10-digit US phone number";
   }
   return "";
 }
