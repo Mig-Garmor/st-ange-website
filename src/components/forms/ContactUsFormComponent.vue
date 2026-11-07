@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 
 import InputFieldComponent from "@components/forms/InputFieldComponent.vue";
+import EmailSuggestion from "../../../chat/widget/EmailSuggestion.vue";
 import {
   MAX_LENGTH,
   validateName,
@@ -17,8 +18,8 @@ const route = useRoute();
 
 const subject = ref("");
 const challenge = ref(null);
-const { form, errors, status, hasErrors, send } = useLeadForm(
-  () => ({ name: "", email: "", confirmEmail: "", phone: "", message: "" }),
+const { form, errors, status, hasErrors, sentEmail, send } = useLeadForm(
+  () => ({ name: "", email: "", phone: "", message: "" }),
   challenge,
 );
 
@@ -29,9 +30,7 @@ onMounted(() => {
 
 function validateForm() {
   errors.name = validateName(form.name);
-  errors.email = validateEmail(form.email);
-  errors.confirmEmail =
-    form.email === form.confirmEmail ? "" : "Emails do not match";
+  errors.email = validateEmail(form.email.trim());
   errors.phone = validatePhone(form.phone);
   errors.message = validateMessage(form.message);
 
@@ -44,9 +43,9 @@ function showServerErrors(serverErrors) {
 
 async function handleSubmit() {
   if (!validateForm()) return;
-  const { confirmEmail, ...fields } = form;
   await send({
-    ...fields,
+    ...form,
+    email: form.email.trim(),
     source: "contact_form",
     service: services.find((s) => s.name === subject.value)?.slug ?? null,
   }, { onFieldErrors: showServerErrors });
@@ -76,14 +75,7 @@ async function handleSubmit() {
       :maxlength="MAX_LENGTH.email"
       :error="errors.email"
     />
-    <InputFieldComponent
-      v-model="form.confirmEmail"
-      label="Confirm Your Email"
-      type="email"
-      autocomplete="email"
-      :maxlength="MAX_LENGTH.email"
-      :error="errors.confirmEmail"
-    />
+    <EmailSuggestion class="-mt-3 mb-4" :email="form.email" @use="(email) => (form.email = email)" />
     <InputFieldComponent
       v-model="form.phone"
       label="Phone"
@@ -106,7 +98,7 @@ async function handleSubmit() {
 
     <div v-if="status === 'success'" class="banner-success" role="status">
       Your message was sent. <br />
-      We will be in touch with you shortly.
+      We will be in touch with you shortly at <strong>{{ sentEmail }}</strong>.
     </div>
     <div v-if="status === 'error'" class="banner-error" role="alert">
       {{ hasErrors ? "Please check the fields above." : "Something went wrong. Try again or call us." }}
