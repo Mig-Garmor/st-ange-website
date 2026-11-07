@@ -17,10 +17,8 @@ export async function handleSendEmail(body, { requests, turnstile = null, ip = n
   const data = body?.data ?? {};
   const source = data.source || "contact_form";
   if (!SOURCES.includes(source)) return { status: 400, json: { error: "Invalid request", errors: { source: "Unknown source" } } };
-  const { ok, errors, lead } = validateLead(data, {
-    requireVehicle: source === "quote_form",
-    requireEmail: source === "contact_form",
-  });
+  // Every request needs an email: it is the shop's second way to reach the customer, and the lead keeps it.
+  const { ok, errors, lead } = validateLead(data, { requireVehicle: source === "quote_form", requireEmail: true });
   const message = typeof data.message === "string" ? data.message : "";
   if (message.length > MAX_MESSAGE) errors.message = `Use ${MAX_MESSAGE} characters or fewer`;
   if (!ok || errors.message) return { status: 400, json: { error: "Invalid request", errors } };
@@ -46,7 +44,7 @@ export async function handleSendEmail(body, { requests, turnstile = null, ip = n
     "",
     `Name: ${name}`,
     `Phone: ${formatPhone(lead.phone)}`,
-    `From: ${oneLine(lead.email) || "not given (call back by phone)"}`,
+    `From: ${oneLine(lead.email)}`,
     "",
     "Message:",
     quoted(message),
