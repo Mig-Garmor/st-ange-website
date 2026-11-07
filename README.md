@@ -47,7 +47,7 @@ As soon as a visitor wants a service, a quote or a booking, the bot calls the `p
 
 ### Service click tracking
 
-With `VITE_HUB_PK` (the publishable key from Website Hub's Keys page) and `VITE_HUB_URL` (for example `https://website-hub-six.vercel.app`) set at build time, every page loads the hub's tracker (`async`, so it never holds up rendering). A click on a service card (`ServiceCard` with a `service` slug) is counted as the `service_click` tag with the service's slug; the hub's Tags page shows the counts per service. Without the variables nothing is loaded. Set them for Production only: the hub drops events from origins not on its Keys page, so a preview would only add dropped-event counts.
+With `VITE_HUB_PK` (the publishable key from Website Hub's Keys page) and `HUB_URL` (the same one the server forwards to) set at build time, every page loads the hub's tracker (`async`, so it never holds up rendering). A click on a service card (`ServiceCard` with a `service` slug) is counted as the `service_click` tag with the service's slug; the hub's Tags page shows the counts per service. Without the variables nothing is loaded. Set them for Production only: the hub drops events from origins not on its Keys page, so a preview would only add dropped-event counts.
 
 ### Switching the bubble on
 
