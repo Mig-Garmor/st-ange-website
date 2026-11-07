@@ -70,12 +70,12 @@ export function conversationsDb(sql) {
       return row.n;
     },
 
-    async dayStats(site, day) {
+    async dayStats(site, day, timeZone) {
       const [row] = await sql`
         select count(*)::int as messages, count(distinct c.visitor_id)::int as visitors
         from messages m join conversations c on c.id = m.conversation_id
         where m.site = ${site} and m.role = 'user'
-          and (m.created_at at time zone 'America/Chicago')::date = ${day}::date`;
+          and (m.created_at at time zone ${timeZone})::date = ${day}::date`;
       return { messages: row.messages, visitors: row.visitors };
     },
 

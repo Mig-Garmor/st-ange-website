@@ -1,4 +1,4 @@
-import { business, hoursAndLocation, services } from "@/config/business";
+import { business, chatUnavailable, hoursAndLocation, services } from "@/config/business";
 
 const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY ?? "";
 
@@ -10,6 +10,7 @@ export const chatClientSettings = {
   privacyPath: "/privacy",
   quickReplies: ["Wheel alignment", "Brake repair", "Get a quote", "Hours & location"],
   localAnswers: { "Hours & location": hoursAndLocation },
+  unavailable: chatUnavailable,
   phoneDisplay: business.phone.display,
   phoneHref: business.phone.href,
   localAreaCodes: business.localAreaCodes,

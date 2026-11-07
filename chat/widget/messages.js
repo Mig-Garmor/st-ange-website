@@ -95,3 +95,12 @@ export const lastReplyMissing = (list) => {
 
 // The server stores only the latest user text, so an unverified trailing message must be re-sent, not followed.
 export const hasUnsentFirstMessage = (list) => !isVerified(list) && list.at(-1)?.role === "user";
+
+// A 403 or failed challenge before the server first replied means the chat never started;
+// once it had replied, the last message is resent in a fresh conversation.
+export function afterVerifyError(err, list) {
+  const challengeFailed = err && !err.statusCode && err.message?.startsWith("Turnstile");
+  if (err?.statusCode !== 403 && !challengeFailed) return { verifyFailed: false };
+  if (!isVerified(list.slice(0, -1))) return { verifyFailed: true };
+  return { resend: (list.at(-1)?.parts ?? []).filter((p) => p.type === "text").map((p) => p.text) };
+}

@@ -54,7 +54,7 @@ async function alertPaused({ db, email, settings, day, now, subject, lines }) {
   let messages = "unavailable";
   let visitors = "unavailable";
   try {
-    ({ messages, visitors } = await db.dayStats(settings.site, day));
+    ({ messages, visitors } = await db.dayStats(settings.site, day, settings.timeZone));
   } catch (error) {
     console.error("Cap alert stats failed", error);
   }

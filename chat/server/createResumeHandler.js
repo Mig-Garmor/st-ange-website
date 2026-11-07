@@ -1,8 +1,6 @@
 import { detailsFrom, maskDetails } from "./details.js";
+import { UUID, VISITOR } from "./input.js";
 import { rejectCrossSite } from "./sameSite.js";
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const VISITOR = /^[\w-]{1,64}$/;
 
 // Answers "is there an earlier chat to continue, and what would we reuse?" with masked details only.
 export function createResumeHandler(settings, { db }) {

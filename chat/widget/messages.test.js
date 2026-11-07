@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SENT_CLOSED, SENT_FOLLOW_UP, blocksChat, chatReason, displayParts, localForm, serverState, hasUnsentFirstMessage, nextBurst, isLocal, isVerified, lastReplyMissing, localExchange, sentNote, textOf } from "./messages.js";
+import { SENT_CLOSED, SENT_FOLLOW_UP, afterVerifyError, blocksChat, chatReason, displayParts, localForm, serverState, hasUnsentFirstMessage, nextBurst, isLocal, isVerified, lastReplyMissing, localExchange, sentNote, textOf } from "./messages.js";
 
 const user = (text) => ({ role: "user", parts: [{ type: "text", text }] });
 const reply = (text) => ({ role: "assistant", parts: [{ type: "text", text }] });
@@ -129,5 +129,15 @@ describe("widget messages", () => {
     expect(lastReplyMissing([...verified, user("book"), earlier, user("ok?"), { role: "assistant", parts: [claim] }])).toBe(false);
     expect(lastReplyMissing([user("hi")])).toBe(false);
     expect(lastReplyMissing([])).toBe(false);
+  });
+
+  it("afterVerifyError ignores other errors, stops an unverified chat and resends on a verified one", () => {
+    const forbidden = Object.assign(new Error("Forbidden"), { statusCode: 403 });
+    expect(afterVerifyError(null, [user("hi")])).toEqual({ verifyFailed: false });
+    expect(afterVerifyError(Object.assign(new Error("x"), { statusCode: 500 }), [user("hi")])).toEqual({ verifyFailed: false });
+    expect(afterVerifyError(forbidden, [user("hi")])).toEqual({ verifyFailed: true });
+    expect(afterVerifyError(new Error("Turnstile failed"), [user("hi")])).toEqual({ verifyFailed: true });
+    const burst = { role: "user", parts: [{ type: "text", text: "a" }, { type: "text", text: "b" }] };
+    expect(afterVerifyError(forbidden, [user("hi"), reply("hello"), burst])).toEqual({ resend: ["a", "b"] });
   });
 });

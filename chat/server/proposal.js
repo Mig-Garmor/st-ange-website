@@ -1,8 +1,7 @@
 import { MAX_LENGTH, formatPhone } from "../lead.js";
+import { str } from "./input.js";
 
 const PLACEHOLDER_EMAILS = new Set(["", "none", "n/a", "na", "no", "-", "null", "no email"]);
-
-const str = (v) => (typeof v === "string" ? v.trim() : "");
 
 export const cleanEmail = (value) => {
   const email = str(value);

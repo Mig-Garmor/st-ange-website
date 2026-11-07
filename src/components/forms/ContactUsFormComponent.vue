@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, onBeforeUnmount, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 
 import InputFieldComponent from "@components/forms/InputFieldComponent.vue";
@@ -10,38 +10,21 @@ import {
   validatePhone,
   validateMessage,
 } from "@modules/validate.js";
-import { submitForm } from "@api/forms";
-import { useFormTurnstile } from "@modules/formTurnstile.js";
+import { useLeadForm } from "@modules/useLeadForm.js";
 import { services } from "@/config/business";
 
 const route = useRoute();
 
-const emptyForm = () => ({
-  name: "",
-  email: "",
-  confirmEmail: "",
-  phone: "",
-  message: "",
-});
-
 const subject = ref("");
-const form = reactive(emptyForm());
-const errors = reactive(emptyForm());
-const status = ref(""); // "" | "sending" | "success" | "error"
-const hasErrors = computed(() => Object.values(errors).some(Boolean));
+const challenge = ref(null);
+const { form, errors, status, hasErrors, send } = useLeadForm(
+  () => ({ name: "", email: "", confirmEmail: "", phone: "", message: "" }),
+  challenge,
+);
 
 // The query only exists in the browser; reading it at render time breaks hydration of the pre-rendered page.
 onMounted(() => {
   subject.value = route.query.subject || "";
-});
-
-const challenge = ref(null);
-const turnstile = useFormTurnstile(challenge);
-onBeforeUnmount(turnstile.remove);
-
-let idempotencyKey = null;
-watch(form, () => {
-  idempotencyKey ??= crypto.randomUUID();
 });
 
 function validateForm() {
@@ -61,30 +44,12 @@ function showServerErrors(serverErrors) {
 
 async function handleSubmit() {
   if (!validateForm()) return;
-
-  status.value = "sending";
   const { confirmEmail, ...fields } = form;
-  let turnstileToken;
-  try {
-    turnstileToken = await turnstile.token();
-  } catch {
-    status.value = "error";
-    return;
-  }
-  status.value = await submitForm("send-email", {
-    turnstileToken,
-    subject: subject.value,
+  await send({
     ...fields,
     source: "contact_form",
     service: services.find((s) => s.name === subject.value)?.slug ?? null,
-    pageUrl: location.href,
-    idempotencyKey,
   }, { onFieldErrors: showServerErrors });
-
-  if (status.value === "success") {
-    Object.assign(form, emptyForm());
-    idempotencyKey = null;
-  }
 }
 </script>
 

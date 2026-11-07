@@ -240,6 +240,6 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("data access", () => {
     await db.saveMessage({ site: s, conversationId: c.id, role: "user", content: "outside" });
     await sql`update messages set created_at = '2026-01-16 03:00:00+00' where site = ${s} and content = 'x'`;
     await sql`update messages set created_at = '2026-01-16 07:00:00+00' where site = ${s} and content = 'outside'`;
-    expect(await db.dayStats(s, day)).toEqual({ messages: 2, visitors: 2 });
+    expect(await db.dayStats(s, day, "America/Chicago")).toEqual({ messages: 2, visitors: 2 });
   });
 });
