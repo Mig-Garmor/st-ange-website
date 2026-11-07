@@ -229,12 +229,12 @@ const details = {
   },
 
   tires: {
-    seoTitle: "New & Used Tires in Baytown, TX | St Ange Auto Service",
+    seoTitle: "New Tires in Baytown, TX | St Ange Auto Service",
     metaDescription:
-      `Affordable new and quality used tires in Baytown, TX, mounted and balanced at St Ange Auto Service, ${business.address.street}. Call 832-572-7121.`,
-    h1: "New & Used Tires in Baytown, TX",
+      `Affordable new tires in Baytown, TX, mounted and balanced at St Ange Auto Service, ${business.address.street}. Call 832-572-7121.`,
+    h1: "New Tires in Baytown, TX",
     intro: [
-      "Tires are the only part of your car that touches the road, so they affect your braking, handling and fuel economy. We sell both new tires and quality used tires, so you can choose the option that fits your car and your budget.",
+      "Tires are the only part of your car that touches the road, so they affect your braking, handling and fuel economy. We sell new tires and help you choose the one that fits your car and your budget.",
       "Tires are where our story started: our owner first learned the trade at his uncle's tire shop. Today our Baytown auto repair shop helps you pick the right tire, mounts and balances it, and sends you off with the correct pressures.",
     ],
     signsTitle: "Signs it's time for new tires",
@@ -249,16 +249,10 @@ const details = {
     processTitle: "What you get with us",
     process: [
       "Help choosing the right size and type for your car and budget",
-      "Used tires checked for tread depth and damage before they go on",
       "Mounting and balancing for a smooth ride",
       "Setting the correct tire pressures before you leave",
     ],
     faqs: [
-      {
-        question: "Are used tires safe?",
-        answer:
-          "A used tire with healthy tread and no damage can be a sensible, budget-friendly choice. We check every used tire and will tell you honestly if new tires are the better option for your car.",
-      },
       {
         question: "How do I check my tread depth?",
         answer:

@@ -107,9 +107,9 @@ export const services = [
   },
   {
     slug: "tires",
-    name: "New & Used Tires",
+    name: "New Tires",
     image: "/assets/tires-repair.webp",
     summary:
-      "Affordable new and quality used tires, mounted and balanced, so you can get back on the road without overspending.",
+      "Affordable new tires, mounted and balanced, so you can get back on the road without overspending.",
   },
 ];

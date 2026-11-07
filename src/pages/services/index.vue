@@ -18,7 +18,7 @@ const crumbs = [
 usePageSeo({
   title: "Auto Repair Services in Baytown, TX | St Ange Auto Service",
   description:
-    "Car repair and service in Baytown, TX: alignments, A/C, brakes, suspension and steering, and new & used tires. Upfront pricing. Call 832-572-7121.",
+    "Car repair and service in Baytown, TX: alignments, A/C, brakes, suspension and steering, and new tires. Upfront pricing. Call 832-572-7121.",
   path: "/services",
 });
 
