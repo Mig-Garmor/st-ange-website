@@ -12,6 +12,7 @@ import ReviewCard from "@components/blocks/ReviewCard.vue";
 import ReviewThemes from "@components/blocks/ReviewThemes.vue";
 import FaqList from "@components/blocks/FaqList.vue";
 import { usePageSeo } from "@composables/usePageSeo";
+import { pageDescriptions } from "@/content/pages";
 import { business, fullAddress, services } from "@/config/business";
 import { reasons, faqs } from "@/content/home";
 import { addressNote } from "@/content/relocation";
@@ -30,7 +31,7 @@ useHead({
 
 usePageSeo({
   title: "Auto Repair Shop & Mechanic in Baytown, TX | St Ange Auto Service",
-  description: "Family-owned auto repair shop and mechanic: brakes, A/C, alignments and tires.",
+  description: pageDescriptions.home,
   path: "/",
 });
 

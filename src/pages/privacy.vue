@@ -2,13 +2,14 @@
 // Draft wording; owner to review.
 import PageLayout from "@components/wrappers/PageLayout.vue";
 import { usePageSeo } from "@composables/usePageSeo";
+import { pageDescriptions } from "@/content/pages";
 import { business } from "@/config/business";
 
 const { retention } = business;
 
 usePageSeo({
   title: "Privacy | St Ange Auto Service",
-  description: "What we collect when you contact us or use our chat, and how to delete it.",
+  description: pageDescriptions.privacy,
   path: "/privacy",
   crumbs: [{ label: "Home", to: "/" }, { label: "Privacy", to: "/privacy" }],
 });

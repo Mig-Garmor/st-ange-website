@@ -4,6 +4,7 @@ import Breadcrumbs from "@components/utilities/Breadcrumbs.vue";
 import ServiceCard from "@components/ServiceCard.vue";
 import CallToActionBand from "@components/blocks/CallToActionBand.vue";
 import { usePageSeo } from "@composables/usePageSeo";
+import { pageDescriptions } from "@/content/pages";
 import { business } from "@/config/business";
 import { servicePages } from "@/content/services";
 
@@ -14,7 +15,7 @@ const crumbs = [
 
 usePageSeo({
   title: "Auto Repair Services in Baytown, TX | St Ange Auto Service",
-  description: "Car repair: alignments, A/C, brakes, suspension, steering and new tires.",
+  description: pageDescriptions.services,
   path: "/services",
   crumbs,
 });
