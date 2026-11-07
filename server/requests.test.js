@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { createRequestService } from "./requests.js";
 
-function setup({ dbOverrides = {}, emailError = null } = {}) {
+function setup({ dbOverrides = {}, emailError = null, hub = null } = {}) {
   const calls = { upsert: [], record: [], status: [], sent: [] };
   const db = {
     upsertLead: async (a) => (calls.upsert.push(a), { id: 7 }),
@@ -15,9 +15,11 @@ function setup({ dbOverrides = {}, emailError = null } = {}) {
       if (emailError) throw emailError;
     },
   };
-  const logger = { error: () => {} };
-  const service = createRequestService({ db, email, site: "st-ange", logger });
-  return { service, calls };
+  const logger = { error: vi.fn() };
+  calls.deferred = [];
+  const waitUntil = (p) => calls.deferred.push(p);
+  const service = createRequestService({ db, email, site: "st-ange", logger, hub, waitUntil });
+  return { service, calls, logger };
 }
 
 const input = {
@@ -96,5 +98,41 @@ describe("request service", () => {
     expect(r.emailStatus).toBe("sent");
     expect(calls.sent).toHaveLength(1);
     expect(calls.status).toHaveLength(0);
+  });
+
+  const fakeHub = (result = { ok: true, data: {} }) => ({ requests: { submit: vi.fn(async () => result) } });
+
+  it("forwards the request to the hub in the background, after the email", async () => {
+    const hub = fakeHub();
+    const { service, calls } = setup({ hub });
+    await service.submit({ ...input, pageUrl: "/contact-us" });
+    await Promise.all(calls.deferred);
+    expect(hub.requests.submit).toHaveBeenCalledWith(
+      expect.objectContaining({ idempotencyKey: "k1", source: "quote_form", service: "car-alignment", contact: { name: "Ann", phone: "8325727121" }, pagePath: "/contact-us" }),
+    );
+  });
+
+  it("forwards a duplicate too, so a retry fills in a forward that failed (the hub ignores repeats)", async () => {
+    const hub = fakeHub();
+    const { service, calls } = setup({ hub, dbOverrides: dup("sent") });
+    await service.submit(input);
+    await Promise.all(calls.deferred);
+    expect(hub.requests.submit).toHaveBeenCalledOnce();
+  });
+
+  it("does not forward a chat request it could not record, since the shop never got it", async () => {
+    const hub = fakeHub();
+    const { service, calls } = setup({ hub, dbOverrides: { recordRequest: async () => { throw new Error("db"); } } });
+    await service.submit({ ...input, requireRecord: true });
+    expect(calls.deferred).toHaveLength(0);
+    expect(hub.requests.submit).not.toHaveBeenCalled();
+  });
+
+  it("a hub failure is logged and changes nothing for the visitor", async () => {
+    const hub = fakeHub({ ok: false, error: "unauthorized", status: 401 });
+    const { service, calls, logger } = setup({ hub });
+    expect((await service.submit(input)).emailStatus).toBe("sent");
+    await Promise.all(calls.deferred);
+    expect(logger.error).toHaveBeenCalledWith("Hub request not forwarded:", "unauthorized");
   });
 });

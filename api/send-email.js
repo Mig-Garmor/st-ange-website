@@ -1,9 +1,10 @@
+import { waitUntil } from "@vercel/functions";
 import { clientIp, hashIp } from "../chat/server/ipHash.js";
 import { rejectCrossSite } from "../chat/server/sameSite.js";
 import { chatServerSettings } from "../server/chatSettings.js";
 import { createRequestService } from "../server/requests.js";
 import { handleSendEmail } from "../server/sendEmailHandler.js";
-import { db as openDb, email, hasDb, turnstile } from "../server/services.js";
+import { db as openDb, email, hub, hasDb, turnstile } from "../server/services.js";
 
 export async function POST(request) {
   const crossSite = rejectCrossSite(request);
@@ -16,7 +17,7 @@ export async function POST(request) {
   }
 
   const db = openDb();
-  const requests = createRequestService({ db, email: email(), site: chatServerSettings.site });
+  const requests = createRequestService({ db, email: email(), site: chatServerSettings.site, hub: hub(), waitUntil });
 
   const ip = clientIp(request);
   const salt = process.env.IP_HASH_SALT;
