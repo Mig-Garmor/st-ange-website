@@ -77,7 +77,7 @@ const trustPoints = [
           and later running a mobile mechanic business from his truck. Today our Baytown shop handles
           <RouterLink to="/services/car-alignment">wheel alignments</RouterLink> on our new alignment machine,
           A/C repair, <RouterLink to="/services/brake-repair">brake repair</RouterLink>, suspension and steering,
-          and new and used tires.
+          and new tires.
         </p>
         <p>
           Whether your car needs routine car service or a car repair that can't wait, like a new noise, an A/C

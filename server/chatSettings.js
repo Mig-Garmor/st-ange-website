@@ -36,6 +36,8 @@ Google rating: ${googleReviews.rating.toFixed(1)} out of 5 from ${googleReviews.
 
 ## Services
 
+We sell new tires only; we do not sell used tires.
+
 ${servicePages.map(servicePageKnowledge).join("\n\n")}
 
 ## General questions

@@ -40,7 +40,7 @@ export const faqs = [
   {
     question: "What car repairs do you handle?",
     answer:
-      "We do wheel alignments, A/C repair, brake repair, suspension and steering work, and sell new and used tires. If you're not sure what's wrong, call us and describe the problem.",
+      "We do wheel alignments, A/C repair, brake repair, suspension and steering work, and sell new tires. If you're not sure what's wrong, call us and describe the problem.",
   },
   {
     question: "Will you show me the problem and the price before you start?",
@@ -73,8 +73,8 @@ export const faqs = [
     ],
   },
   {
-    question: "Do you sell used tires?",
+    question: "Do you sell tires?",
     answer:
-      "Yes. We carry both new and quality used tires, so you can choose the option that fits your budget.",
+      "Yes. We sell new tires, and we mount and balance every tire we install.",
   },
 ];

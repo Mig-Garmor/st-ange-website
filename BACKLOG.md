@@ -17,7 +17,7 @@ Goal: more alignment jobs (the new alignment machine) and more brake jobs. The p
 
 1. **Replace the main photo.** It's a flyer showing the old address, 1300 N Main Street. Use the shop at 108 Schilling Ave instead, and add more photos (there are about four): the new alignment machine, a car on it, a brake job, the bays and the team. Keep adding photos regularly.
 2. **Categories.** Primary stays Auto repair shop. Add secondary: Wheel alignment service, Brake shop, Tire shop, Auto air conditioning service, Mechanic.
-3. **Services list.** Only "Oil change" shows today. Add every service from the site's service pages with a short description matching the page: Wheel alignment, Brake repair, Brake pad replacement, Rotor replacement, Brake fluid service, Suspension & steering, New & used tires, A/C repair.
+3. **Services list.** Only "Oil change" shows today. Add every service from the site's service pages with a short description matching the page: Wheel alignment, Brake repair, Brake pad replacement, Rotor replacement, Brake fluid service, Suspension & steering, New tires, A/C repair.
 4. **Business description.** None shows. Use the 750 characters to mention the new alignment machine, brake repair, Baytown and the ZIP codes 77520, 77521 and 77523.
 5. **Posts.** First post: "New alignment machine" with a photo and a Call button. Then every week or two, alternating alignment and brakes, plus seasonal A/C checks and tire offers.
 6. **Links.** Website: the homepage. Appointment link: `https://www.stangeautoservice.com/services/car-alignment#quote`.
