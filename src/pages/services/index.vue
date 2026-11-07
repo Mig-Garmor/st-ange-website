@@ -17,6 +17,7 @@ usePageSeo({
   title: "Auto Repair Services in Baytown, TX | St Ange Auto Service",
   description: pageDescriptions.services,
   path: "/services",
+  type: "CollectionPage",
   crumbs,
 });
 </script>

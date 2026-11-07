@@ -1,7 +1,6 @@
 <script setup>
 import { computed } from "vue";
 import { useRoute } from "vue-router";
-import { useHead } from "@unhead/vue";
 import { Icon } from "@iconify/vue";
 
 import PageLayout from "@components/wrappers/PageLayout.vue";
@@ -17,8 +16,7 @@ import { business } from "@/config/business";
 import { findServicePage, servicePages } from "@/content/services";
 import { reviewsForService } from "@/content/reviews";
 import { reasons } from "@/content/home";
-import { serviceSchema } from "@/seo/serviceSchema";
-import { reviewsSchema } from "@/seo/reviewsSchema";
+import { serviceNode } from "@/seo/serviceSchema";
 
 const route = useRoute();
 const service = computed(() => findServicePage(route.params.slug));
@@ -38,14 +36,9 @@ usePageSeo({
   path: `/services/${service.value.slug}`,
   image: service.value.image,
   crumbs: crumbs.value,
+  mainEntity: serviceNode(service.value),
 });
 
-useHead({
-  script: [
-    { type: "application/ld+json", key: "service", innerHTML: JSON.stringify(serviceSchema(service.value)) },
-    { type: "application/ld+json", key: "reviews", innerHTML: JSON.stringify(reviewsSchema(serviceReviews.value.cards)) },
-  ],
-});
 </script>
 
 <template>

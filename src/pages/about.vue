@@ -11,6 +11,7 @@ usePageSeo({
   title: "About St Ange Auto Service | Family-Owned Mechanic in Baytown, TX",
   description: pageDescriptions.about,
   path: "/about",
+  type: "AboutPage",
   crumbs: [{ label: "Home", to: "/" }, { label: "About", to: "/about" }],
   image: "/assets/st-lucia-family.webp",
 });

@@ -1,11 +1,12 @@
 import { useHead } from "@unhead/vue";
 import { business, withContact } from "@/config/business";
-import { breadcrumbSchema } from "@/seo/serviceSchema";
+import { pageGraph } from "@/seo/pageGraph";
 
-export function usePageSeo({ title, description, path, image = business.defaultImage, crumbs = null }) {
+export function usePageSeo({ title, description, path, image = business.defaultImage, type, crumbs, mainEntity }) {
   const url = new URL(path, business.siteUrl).href;
   const imageUrl = new URL(image, business.siteUrl).href;
   const fullDescription = withContact(description);
+  const graph = pageGraph({ url, type, title, description: fullDescription, imageUrl, crumbs, mainEntity });
 
   useHead({
     title,
@@ -20,8 +21,6 @@ export function usePageSeo({ title, description, path, image = business.defaultI
       { name: "twitter:card", content: "summary_large_image" },
     ],
     link: [{ rel: "canonical", href: url }],
-    script: crumbs
-      ? [{ type: "application/ld+json", key: "breadcrumbs", innerHTML: JSON.stringify(breadcrumbSchema(crumbs)) }]
-      : [],
+    script: [{ type: "application/ld+json", key: "graph", innerHTML: JSON.stringify(graph) }],
   });
 }

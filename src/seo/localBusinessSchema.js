@@ -1,29 +1,34 @@
-import { business } from "@/config/business";
-import { googleReviews } from "@/content/reviews";
+// Imported by the build-time structured data check in Node, so only relative imports work here.
+import { business, serviceZips, services } from "../config/business.js";
 
-export function websiteSchema() {
+export const businessId = `${business.siteUrl}/#business`;
+export const websiteId = `${business.siteUrl}/#website`;
+export const serviceId = (slug) => `${business.siteUrl}/services/${slug}#service`;
+
+export function websiteNode() {
   return {
-    "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": `${business.siteUrl}/#website`,
+    "@id": websiteId,
     name: business.name,
     alternateName: "St. Ange Auto Service",
     url: `${business.siteUrl}/`,
-    publisher: { "@id": `${business.siteUrl}/#business` },
+    inLanguage: "en-US",
+    publisher: { "@id": businessId },
   };
 }
 
-export function localBusinessSchema() {
+// No aggregateRating or reviews: Google's rules forbid a business marking up its own reviews,
+// or ratings copied from another site, and a breach can switch off every rich result on the site.
+export function businessNode() {
   const { address, geo, phone, links } = business;
 
   return {
-    "@context": "https://schema.org",
     "@type": "AutoRepair",
-    "@id": `${business.siteUrl}/#business`,
+    "@id": businessId,
     name: business.name,
     url: `${business.siteUrl}/`,
     image: `${business.siteUrl}${business.defaultImage}`,
-    logo: `${business.siteUrl}/assets/logo-2.webp`,
+    logo: `${business.siteUrl}/android-chrome-512x512.png`,
     telephone: phone.schema,
     email: business.email,
     priceRange: "$$",
@@ -35,13 +40,15 @@ export function localBusinessSchema() {
       postalCode: address.postalCode,
       addressCountry: address.country,
     },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: geo.latitude,
-      longitude: geo.longitude,
-    },
+    geo: { "@type": "GeoCoordinates", latitude: geo.latitude, longitude: geo.longitude },
     hasMap: links.maps,
-    areaServed: { "@type": "City", name: "Baytown, TX" },
+    areaServed: [
+      { "@type": "City", name: "Baytown, TX" },
+      ...serviceZips.map((postalCode) => ({
+        "@type": "Place",
+        address: { "@type": "PostalAddress", addressLocality: "Baytown", addressRegion: "TX", postalCode },
+      })),
+    ],
     openingHoursSpecification: business.hours
       .filter((slot) => slot.days.length)
       .map((slot) => ({
@@ -50,12 +57,25 @@ export function localBusinessSchema() {
         opens: slot.opens,
         closes: slot.closes,
       })),
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: googleReviews.rating,
-      bestRating: 5,
-      worstRating: 1,
-      ratingCount: googleReviews.count,
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: phone.schema,
+      contactType: "customer service",
+      areaServed: "US",
+      availableLanguage: "English",
+    },
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Auto repair services",
+      itemListElement: services.map((service) => ({
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          "@id": serviceId(service.slug),
+          name: service.name,
+          url: `${business.siteUrl}/services/${service.slug}`,
+        },
+      })),
     },
     sameAs: [links.googleProfile, links.facebook],
     description:
