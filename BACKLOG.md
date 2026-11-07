@@ -28,9 +28,6 @@ Goal: more alignment jobs (the new alignment machine) and more brake jobs. The p
 
 Goal: take up more of Google's results page and give the existing result more detail.
 
-- **Site name and logo in search results.** Add `WebSite` structured data on the homepage (`name`: "St Ange Auto Service", `alternateName`: "St. Ange Auto Service", `url`) so Google shows the business name above the result instead of the domain. Make sure the business JSON-LD keeps its `logo` for the brand panel. Done when Google's Rich Results Test reads both. Google can take weeks to show the name.
-- **Breadcrumbs on every page.** Service pages already have `BreadcrumbList` JSON-LD; add it to the homepage, `/services`, `/reviews`, `/about` and `/contact-us` so every result shows the "St Ange Auto Service › Services › Brake Repair" style path. Build it from the same helper in `src/seo/serviceSchema.js`.
-- **Address, phone and hours in every meta description.** Each page's description should end with the full address, phone and short hours (for example "108 Schilling Ave, Baytown, TX 77520 · 832-572-7121 · Open Mon–Sat from 8 AM"), generated from `src/config/business.js` so it updates with the config. Google often shows this text as the snippet.
 - **Google Search Console.** Verify the domain, submit `https://www.stangeautoservice.com/sitemap.xml`, and request indexing for the homepage, `/reviews` and the service pages after each release that adds or changes them.
 
 ## Directory listings (owner)
