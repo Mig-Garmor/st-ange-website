@@ -1,4 +1,7 @@
-export function createRequestService({ db, email, site, logger = console }) {
+import { hubRequest } from "./hub.js";
+
+// hub is null until HUB_URL and HUB_SECRET_KEY are set; waitUntil keeps the forward running after the response is sent.
+export function createRequestService({ db, email, site, logger = console, hub = null, waitUntil = (promise) => promise }) {
   async function safe(label, fn) {
     try {
       return await fn();
@@ -8,8 +11,16 @@ export function createRequestService({ db, email, site, logger = console }) {
     }
   }
 
+  // The hub keeps a copy for the dashboard. It runs in the background, so St Ange's record and email never wait on it,
+  // and a retry forwards again, which the hub ignores (same idempotency key).
+  const forward = (input) => {
+    if (!hub) return;
+    waitUntil(hub.requests.submit(hubRequest(input)).then((r) => r.ok || logger.error("Hub request not forwarded:", r.error)));
+  };
+
   return {
-    async submit({ source, service = null, idempotencyKey, lead = {}, subject, text, message = null, vehicle = null, pageUrl = null, conversationId = null, ipHash = null, requireRecord = false, consentText = null }) {
+    async submit(input) {
+      const { source, service = null, idempotencyKey, lead = {}, subject, text, message = null, vehicle = null, pageUrl = null, conversationId = null, ipHash = null, requireRecord = false, consentText = null } = input;
       const saved = await safe("upsertLead", () => db.upsertLead({ site, ...lead }));
       const request = await safe("recordRequest", () =>
         db.recordRequest({
@@ -19,6 +30,7 @@ export function createRequestService({ db, email, site, logger = console }) {
       );
       // Without a row the per-conversation cap cannot see this request, so an unrecorded chat request is never emailed.
       if (requireRecord && !request) return { emailStatus: "failed", duplicate: false, leadId: saved?.id ?? null };
+      forward(input);
 
       const duplicate = Boolean(request?.duplicate);
       if (duplicate && request.emailStatus !== "failed") return { emailStatus: "sent", duplicate: true, leadId: saved?.id ?? null };

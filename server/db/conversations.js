@@ -102,5 +102,21 @@ export function conversationsDb(sql) {
           unanswered = ${unanswered}::text[], outcome = ${outcome}, insights_at = now()
         where id = ${id}`;
     },
+
+    async conversationForHub(id) {
+      const [row] = await sql`
+        select c.id, c.created_at, c.page_url, c.summary, c.services, c.intent, c.unanswered, c.outcome, l.name, l.phone, l.email
+        from conversations c left join leads l on l.id = c.lead_id where c.id = ${id}`;
+      if (!row) return null;
+      const messages = await sql`select role, content, created_at from messages where conversation_id = ${id} order by created_at, id`;
+      return {
+        id: row.id,
+        startedAt: row.created_at,
+        pagePath: row.page_url,
+        lead: { name: row.name, phone: row.phone, email: row.email },
+        insights: { summary: row.summary, services: row.services, intent: row.intent, unanswered: row.unanswered, outcome: row.outcome },
+        messages: messages.map((m) => ({ role: m.role, content: m.content, at: m.created_at })),
+      };
+    },
   };
 }

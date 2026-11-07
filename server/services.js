@@ -5,6 +5,7 @@ import { chatServerSettings } from "./chatSettings.js";
 import { getSql } from "./db/client.js";
 import { createDb } from "./db/index.js";
 import { createEmail } from "./email.js";
+import { createHub } from "./hub.js";
 
 // The services every api/ route builds from env vars, set up one way.
 const unavailable = () => {
@@ -32,3 +33,7 @@ export const turnstile = () =>
     secret: process.env.TURNSTILE_SECRET_KEY,
     hostnames: (process.env.TURNSTILE_HOSTNAMES ?? "").split(",").map((h) => h.trim()).filter(Boolean),
   });
+
+// Website Hub gets a copy of each request and finished chat. Until both are set, nothing is forwarded.
+export const hub = () =>
+  process.env.HUB_URL && process.env.HUB_SECRET_KEY ? createHub({ secret: process.env.HUB_SECRET_KEY, endpoint: process.env.HUB_URL }) : null;

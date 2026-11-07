@@ -27,6 +27,8 @@ Server (Vercel project settings and `.env.local`; see `.env.example`):
 | `CHAT_DAILY_CAP_EUR` | Daily spend cap, default 5 |
 | `CHAT_LIMIT_PER_HOUR` | Local development only: overrides the 40 chat messages per IP per hour, `0` switches it off. Ignored on every Vercel deployment, which always uses 40 |
 | `FORM_LIMIT_PER_HOUR` | Local development only: overrides the 5 form posts per IP per hour, `0` switches it off. Ignored on every Vercel deployment, which always uses 5 |
+| `HUB_URL` | Website Hub's address, for example `https://website-hub-six.vercel.app`. With `HUB_SECRET_KEY`, turns on forwarding to the hub (see Website Hub) |
+| `HUB_SECRET_KEY` | The St Ange secret key (`hub_sk_…`) from the hub's Keys page. Server only |
 | `TURNSTILE_HOSTNAMES` | Optional, comma-separated, for example `stangeautoservice.com,www.stangeautoservice.com`. When set, a Turnstile token solved on any other hostname is refused. Leave it unset locally: Cloudflare's test keys report `example.com` |
 
 ### Choosing a model
@@ -78,6 +80,15 @@ Keep prepaid OpenRouter credit with auto top-up off as a hard backstop.
 ### Insight job
 
 A Vercel cron (`vercel.json`, daily at 10:00 UTC) calls `/api/cron/chat-insights` with `Authorization: Bearer $CRON_SECRET`. It summarises conversations idle for over 60 minutes.
+
+### Website Hub
+
+St Ange sends a copy of its data to Website Hub, the dashboard Miguel runs for all his sites. St Ange keeps its own database; the hub's copy is for review.
+
+- **Requests:** each contact form, quote form and chat request goes to the hub in the background once St Ange has recorded it. A retry sends it again, and the hub ignores the repeat (same idempotency key).
+- **Chats:** the insight job sends each chat, with its insights, once it has analysed it. Transcript notes such as "[Request sent to the shop]" are left out.
+- A hub that is down or refuses the call is logged ("Hub request not forwarded", "Hub chat not forwarded") and changes nothing for the visitor. Nothing is retried, so data from that time is missing in the hub.
+- `server/hub.js` holds a copy of the hub SDK's `createHub` until the SDK is on npm.
 
 ### Production
 

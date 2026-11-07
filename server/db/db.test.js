@@ -242,4 +242,24 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("data access", () => {
     await sql`update messages set created_at = '2026-01-16 07:00:00+00' where site = ${s} and content = 'outside'`;
     expect(await db.dayStats(s, day, "America/Chicago")).toEqual({ messages: 2, visitors: 2 });
   });
+
+  it("conversationForHub returns the chat with its lead, insights and messages in order, and null for an unknown id", async () => {
+    const lead = await db.upsertLead({ site, name: "Test Hub", phone: "8325550199", email: "owner@example.com" });
+    const chat = await newConversation({ pageUrl: "/services/brake-repair" });
+    await db.linkLead(chat.id, lead.id);
+    await db.saveMessage({ site, conversationId: chat.id, role: "user", content: "first" });
+    await db.saveMessage({ site, conversationId: chat.id, role: "assistant", content: "second" });
+    await db.saveInsights(chat.id, { summary: "S", services: ["brake-repair"], intent: "quote", unanswered: [], outcome: "info_only" });
+
+    const out = await db.conversationForHub(chat.id);
+    expect(out).toMatchObject({
+      id: chat.id, pagePath: "/services/brake-repair",
+      lead: { name: "Test Hub", phone: "8325550199", email: "owner@example.com" },
+      insights: { summary: "S", services: ["brake-repair"], intent: "quote", unanswered: [], outcome: "info_only" },
+    });
+    expect(out.startedAt).toBeInstanceOf(Date);
+    expect(out.messages.map((m) => m.content)).toEqual(["first", "second"]);
+    expect(out.messages[0].at).toBeInstanceOf(Date);
+    expect(await db.conversationForHub(randomUUID())).toBeNull();
+  });
 });
