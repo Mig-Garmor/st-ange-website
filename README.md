@@ -45,6 +45,10 @@ Pick a model that supports tools (the request card needs them). For `openai/`, `
 
 As soon as a visitor wants a service, a quote or a booking, the bot calls the `proposeRequest` tool, which opens a 3-step form in the chat instead of asking for details in messages. The steps are "Your car" (service, vehicle, what's going on), "How we reach you" (name, phone) and "Almost done" (email, a review of the details, and the contact-confirmation tick box before Send request), with "Step N of 3" and a progress bar. Anything the visitor already typed is prefilled (a placeholder email such as "none" counts as missing, an unknown service becomes "Not sure yet", a valid phone is shown as `832-572-7121`), and the form opens at the first step that still needs something. Next checks that step with the same rules as `/api/chat-request`; the endpoint still decides, and a field it rejects sends the visitor back to that field's step. The local area codes suggested for a 7-digit number are `localAreaCodes` in `src/config/business.js`, shared by the chat, the form and the website forms.
 
+### Service click tracking
+
+With `VITE_HUB_PK` (the publishable key from Website Hub's Keys page) and `VITE_HUB_URL` (for example `https://website-hub-six.vercel.app`) set at build time, every page loads the hub's tracker (`async`, so it never holds up rendering). A click on a service card (`ServiceCard` with a `service` slug) is counted as the `service_click` tag with the service's slug; the hub's Tags page shows the counts per service. Without the variables nothing is loaded. Set them for Production only: the hub drops events from origins not on its Keys page, so a preview would only add dropped-event counts.
+
 ### Switching the bubble on
 
 Set `VITE_CHAT_ENABLED=true` and `VITE_TURNSTILE_SITE_KEY` (the public Turnstile key) at build time; the bubble shows only when both are set. Otherwise it stays hidden and forms keep emailing as before.

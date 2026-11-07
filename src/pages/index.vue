@@ -98,6 +98,7 @@ const trustPoints = [
             :name="service.name"
             :summary="service.summary"
             :to="`/services/${service.slug}`"
+            :service="service.slug"
           />
           <ServiceCard
             image="/assets/more-services.webp"
