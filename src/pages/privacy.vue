@@ -8,9 +8,9 @@ const { retention } = business;
 
 usePageSeo({
   title: "Privacy | St Ange Auto Service",
-  description:
-    "What St Ange Auto Service collects when you contact us or use our website chat, why, and how to ask us to delete it.",
+  description: "What we collect when you contact us or use our chat, and how to delete it.",
   path: "/privacy",
+  crumbs: [{ label: "Home", to: "/" }, { label: "Privacy", to: "/privacy" }],
 });
 </script>
 

@@ -11,9 +11,9 @@ import { addressNote } from "@/content/relocation";
 
 usePageSeo({
   title: "Contact St Ange Auto Service | Auto Repair in Baytown, TX",
-  description:
-    "Contact St Ange Auto Service, an auto repair shop in Baytown, TX. Call 832-572-7121 or send a message about brakes, A/C, alignment or any car repair.",
+  description: "Call or message us about brakes, A/C, alignment or any car repair.",
   path: "/contact-us",
+  crumbs: [{ label: "Home", to: "/" }, { label: "Contact us", to: "/contact-us" }],
 });
 </script>
 

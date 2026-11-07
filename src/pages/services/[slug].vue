@@ -17,7 +17,7 @@ import { business } from "@/config/business";
 import { findServicePage, servicePages } from "@/content/services";
 import { reviewsForService } from "@/content/reviews";
 import { reasons } from "@/content/home";
-import { breadcrumbSchema, serviceSchema } from "@/seo/serviceSchema";
+import { serviceSchema } from "@/seo/serviceSchema";
 import { reviewsSchema } from "@/seo/reviewsSchema";
 
 const route = useRoute();
@@ -37,12 +37,12 @@ usePageSeo({
   description: service.value.metaDescription,
   path: `/services/${service.value.slug}`,
   image: service.value.image,
+  crumbs: crumbs.value,
 });
 
 useHead({
   script: [
     { type: "application/ld+json", key: "service", innerHTML: JSON.stringify(serviceSchema(service.value)) },
-    { type: "application/ld+json", key: "breadcrumbs", innerHTML: JSON.stringify(breadcrumbSchema(crumbs.value)) },
     { type: "application/ld+json", key: "reviews", innerHTML: JSON.stringify(reviewsSchema(serviceReviews.value.cards)) },
   ],
 });

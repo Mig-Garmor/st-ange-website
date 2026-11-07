@@ -1,6 +1,18 @@
 import { business } from "@/config/business";
 import { googleReviews } from "@/content/reviews";
 
+export function websiteSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${business.siteUrl}/#website`,
+    name: business.name,
+    alternateName: "St. Ange Auto Service",
+    url: `${business.siteUrl}/`,
+    publisher: { "@id": `${business.siteUrl}/#business` },
+  };
+}
+
 export function localBusinessSchema() {
   const { address, geo, phone, links } = business;
 

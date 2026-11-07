@@ -8,9 +8,9 @@ import { business } from "@/config/business";
 
 usePageSeo({
   title: "About St Ange Auto Service | Family-Owned Mechanic in Baytown, TX",
-  description:
-    "St Ange Auto Service is a family-owned mechanic and auto repair shop in Baytown, TX, with over 30 years of experience in car repair and car service.",
+  description: "Family-owned mechanic and auto repair shop with over 30 years of experience.",
   path: "/about",
+  crumbs: [{ label: "Home", to: "/" }, { label: "About", to: "/about" }],
   image: "/assets/st-lucia-family.webp",
 });
 

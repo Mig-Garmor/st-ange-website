@@ -68,6 +68,10 @@ export const hoursSummary = [
   `closed ${closedSlots.map((slot) => slot.label).join(" and ")}`,
 ].join(", ");
 
+// Ends every meta description; AGENTS.md caps the whole description at 160 characters.
+export const contactLine = `${fullAddress} · ${business.phone.display} · ${business.hoursShort}`;
+export const withContact = (description) => `${description} ${contactLine}`;
+
 export const chatUnavailable = `Chat is unavailable right now. Call us at ${business.phone.display}.`;
 
 export const hoursAndLocation = [
