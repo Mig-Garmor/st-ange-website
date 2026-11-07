@@ -5,7 +5,7 @@ const details = {
   "car-alignment": {
     seoTitle: "Wheel Alignment in Baytown, TX | New Machine | St Ange Auto Service",
     metaDescription:
-      "Wheel alignment on our new alignment machine in Baytown, TX (77520, 77521, 77523). Rated 5.0 on Google, upfront pricing. Call 832-572-7121.",
+      "Wheel alignment on our new alignment machine. Rated 5.0 on Google, upfront pricing.",
     h1: "Car & Wheel Alignment in Baytown, TX",
     zips: serviceZips,
     quote: {
@@ -67,7 +67,7 @@ const details = {
   "ac-repair": {
     seoTitle: "Car A/C Repair in Baytown, TX | St Ange Auto Service",
     metaDescription:
-      "Car A/C blowing warm in the Baytown heat? St Ange Auto Service finds leaks and fixes compressors, fans and controls. Fair, upfront pricing. Call 832-572-7121.",
+      "Car A/C blowing warm? We find leaks and fix compressors, fans and controls.",
     h1: "Car A/C Repair in Baytown, TX",
     intro: [
       "In Baytown's heat and humidity, a weak car A/C is more than uncomfortable. When the air blows warm, smells musty or the system starts making new noises, there's a specific cause behind it, most often a refrigerant leak, a failing compressor or clutch, a blocked condenser or an electrical fault.",
@@ -111,7 +111,7 @@ const details = {
   "brake-repair": {
     seoTitle: "Brake Repair & Brake Service in Baytown, TX | St Ange Auto Service",
     metaDescription:
-      "Brake pads, rotors, calipers and brake fluid service in Baytown, TX (77520, 77521, 77523). Rated 5.0 on Google, upfront pricing. Call 832-572-7121.",
+      "Brake pads, rotors, calipers and brake fluid. Rated 5.0 on Google, upfront pricing.",
     h1: "Brake Repair & Brake Service in Baytown, TX",
     zips: serviceZips,
     quote: {
@@ -179,7 +179,7 @@ const details = {
   "suspension-steering": {
     seoTitle: "Suspension & Steering Repair in Baytown, TX | St Ange Auto Service",
     metaDescription:
-      "Bouncy ride, clunks over bumps or loose steering? St Ange Auto Service in Baytown, TX repairs shocks, struts and steering parts. Call 832-572-7121.",
+      "Bouncy ride or loose steering? We repair shocks, struts and steering parts.",
     h1: "Suspension & Steering Repair in Baytown, TX",
     intro: [
       "Shocks, struts, ball joints, tie rods and control arms keep your tires planted on the road and your steering precise. When they wear out, you feel it as a bouncy ride, clunks over bumps or steering that no longer feels tight. Worn parts also wear your tires faster and can make the car harder to control in an emergency.",
@@ -231,7 +231,7 @@ const details = {
   tires: {
     seoTitle: "New Tires in Baytown, TX | St Ange Auto Service",
     metaDescription:
-      `Affordable new tires in Baytown, TX, mounted and balanced at St Ange Auto Service, ${business.address.street}. Call 832-572-7121.`,
+      "Affordable new tires, mounted and balanced, with the right pressures set.",
     h1: "New Tires in Baytown, TX",
     intro: [
       "Tires are the only part of your car that touches the road, so they affect your braking, handling and fuel economy. We sell new tires and help you choose the one that fits your car and your budget.",

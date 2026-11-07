@@ -6,14 +6,15 @@ import HoursList from "@components/utilities/HoursList.vue";
 import IconText from "@components/utilities/IconText.vue";
 import Badge from "@components/utilities/Badge.vue";
 import { usePageSeo } from "@composables/usePageSeo";
+import { pageDescriptions } from "@/content/pages";
 import { business, fullAddress } from "@/config/business";
 import { addressNote } from "@/content/relocation";
 
 usePageSeo({
   title: "Contact St Ange Auto Service | Auto Repair in Baytown, TX",
-  description:
-    "Contact St Ange Auto Service, an auto repair shop in Baytown, TX. Call 832-572-7121 or send a message about brakes, A/C, alignment or any car repair.",
+  description: pageDescriptions.contact,
   path: "/contact-us",
+  crumbs: [{ label: "Home", to: "/" }, { label: "Contact us", to: "/contact-us" }],
 });
 </script>
 

@@ -1,14 +1,12 @@
 <script setup>
-import { useHead } from "@unhead/vue";
-
 import PageLayout from "@components/wrappers/PageLayout.vue";
 import Breadcrumbs from "@components/utilities/Breadcrumbs.vue";
 import ServiceCard from "@components/ServiceCard.vue";
 import CallToActionBand from "@components/blocks/CallToActionBand.vue";
 import { usePageSeo } from "@composables/usePageSeo";
+import { pageDescriptions } from "@/content/pages";
 import { business } from "@/config/business";
 import { servicePages } from "@/content/services";
-import { breadcrumbSchema } from "@/seo/serviceSchema";
 
 const crumbs = [
   { label: "Home", to: "/" },
@@ -17,15 +15,9 @@ const crumbs = [
 
 usePageSeo({
   title: "Auto Repair Services in Baytown, TX | St Ange Auto Service",
-  description:
-    "Car repair and service in Baytown, TX: alignments, A/C, brakes, suspension and steering, and new tires. Upfront pricing. Call 832-572-7121.",
+  description: pageDescriptions.services,
   path: "/services",
-});
-
-useHead({
-  script: [
-    { type: "application/ld+json", key: "breadcrumbs", innerHTML: JSON.stringify(breadcrumbSchema(crumbs)) },
-  ],
+  crumbs,
 });
 </script>
 

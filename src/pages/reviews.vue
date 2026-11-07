@@ -6,6 +6,7 @@ import ReviewCard from "@components/blocks/ReviewCard.vue";
 import CallToActionBand from "@components/blocks/CallToActionBand.vue";
 import Badge from "@components/utilities/Badge.vue";
 import { usePageSeo } from "@composables/usePageSeo";
+import { pageDescriptions } from "@/content/pages";
 import { useHashHighlight } from "@composables/useHashHighlight";
 import { business } from "@/config/business";
 import { allReviewCards, allReviews, googleReviews, reviewThemes } from "@/content/reviews";
@@ -17,8 +18,9 @@ useHashHighlight();
 
 usePageSeo({
   title: "Customer Reviews | St Ange Auto Service, Baytown TX",
-  description: `Rated ${rating} out of 5 from ${googleReviews.count} Google reviews. Every written review of St Ange Auto Service in Baytown, TX, word for word with a link to the original.`,
+  description: pageDescriptions.reviews,
   path: "/reviews",
+  crumbs: [{ label: "Home", to: "/" }, { label: "Reviews", to: "/reviews" }],
 });
 
 useHead({

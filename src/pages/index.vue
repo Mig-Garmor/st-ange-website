@@ -12,24 +12,26 @@ import ReviewCard from "@components/blocks/ReviewCard.vue";
 import ReviewThemes from "@components/blocks/ReviewThemes.vue";
 import FaqList from "@components/blocks/FaqList.vue";
 import { usePageSeo } from "@composables/usePageSeo";
+import { pageDescriptions } from "@/content/pages";
 import { business, fullAddress, services } from "@/config/business";
 import { reasons, faqs } from "@/content/home";
 import { addressNote } from "@/content/relocation";
 import { featuredReviews, googleReviews } from "@/content/reviews";
+import { websiteSchema } from "@/seo/localBusinessSchema";
 import { reviewsSchema } from "@/seo/reviewsSchema";
 
 const rating = googleReviews.rating.toFixed(1);
 
 useHead({
   script: [
+    { type: "application/ld+json", key: "website", innerHTML: JSON.stringify(websiteSchema()) },
     { type: "application/ld+json", key: "reviews", innerHTML: JSON.stringify(reviewsSchema(featuredReviews)) },
   ],
 });
 
 usePageSeo({
   title: "Auto Repair Shop & Mechanic in Baytown, TX | St Ange Auto Service",
-  description:
-    `Family-owned auto repair shop and mechanic in Baytown, TX. Brakes, A/C, alignments, suspension and tires with upfront pricing. Call ${business.phone.display}.`,
+  description: pageDescriptions.home,
   path: "/",
 });
 
