@@ -1,16 +1,13 @@
 import { CUSTOMER_HEADER, oneLine, quoted } from "./emailText.js";
 import { toPagePath } from "./pagePath.js";
 import { MAX_LENGTH, formatPhone } from "../lead.js";
+import { KEY, UUID, str } from "./input.js";
+import { SENT_NOTE, isNote } from "./notes.js";
 import { rejectCrossSite } from "./sameSite.js";
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-// Postgres rejects unique-index entries over about 2.7 KB, which made oversized keys skip the request row.
-const KEY = /^[\w:.-]{1,200}$/;
-const SENT_NOTE = "[Request sent to the shop]";
 const MAX_REQUESTS = 3;
 
 const label = (role) => (role === "user" ? "Customer" : "Assistant");
-const str = (v) => (typeof v === "string" ? v.trim() : "");
 
 export function createRequestHandler(settings, { db, requests, validateLead }) {
   const { site, services } = settings;
@@ -77,7 +74,7 @@ export function createRequestHandler(settings, { db, requests, validateLead }) {
       "",
       "Conversation:",
       ...transcript
-        .filter(({ role, content }) => !(role === "assistant" && /^\[.*\]$/.test(content.trim())))
+        .filter((m) => !isNote(m))
         .map(({ role, content }) => `> ${label(role)}: ${oneLine(content)}`),
     ]
       .filter((line) => line !== null && line !== false && line !== undefined)

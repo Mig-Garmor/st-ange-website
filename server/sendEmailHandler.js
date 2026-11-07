@@ -2,13 +2,13 @@ import { toPagePath } from "../chat/server/pagePath.js";
 import { formatPhone } from "../chat/lead.js";
 import { services } from "../src/config/business.js";
 import { CUSTOMER_HEADER, oneLine, quoted } from "../chat/server/emailText.js";
+import { KEY } from "../chat/server/input.js";
 import { localOverride } from "./localOverride.js";
 import { validateLead } from "./validate.js";
 
 const MAX_MESSAGE = 2000;
 // FORM_LIMIT_PER_HOUR (0 = off) only overrides the per-IP form limit in local development.
 const PER_HOUR = localOverride("FORM_LIMIT_PER_HOUR", 5);
-const KEY = /^[\w:.-]{1,200}$/;
 
 const SOURCES = ["contact_form", "quote_form"];
 

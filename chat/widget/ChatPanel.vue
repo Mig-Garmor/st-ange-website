@@ -6,7 +6,7 @@ import RequestCard from "./RequestCard.vue";
 import { createTurnstile } from "./turnstile.js";
 import { forgetChat, isExpired, loadSession, recentChatId, rememberChat, saveSession, visitorId } from "./storage.js";
 import { clearDraft, latestCardId as findLatestCardId, loadDraft, okCard, saveDraft } from "./card.js";
-import { SENT_CLOSED, blocksChat, chatReason, chatState, displayParts, hasUnsentFirstMessage, isVerified, lastReplyMissing, localExchange, localForm, nextBurst, sentNote, textOf } from "./messages.js";
+import { SENT_CLOSED, afterVerifyError, blocksChat, chatReason, chatState, displayParts, hasUnsentFirstMessage, isVerified, lastReplyMissing, localExchange, localForm, nextBurst, sentNote, textOf } from "./messages.js";
 
 const props = defineProps({
   settings: { type: Object, required: true },
@@ -92,7 +92,6 @@ const { id, messages, status, error, sendMessage, regenerate, clearError } = use
 }));
 
 const busy = computed(() => status.value === "submitted" || status.value === "streaming");
-const unavailable = computed(() => `Chat is unavailable right now. Call us at ${props.settings.phoneDisplay}.`);
 const failed = computed(() => status.value === "error" && !verifyFailed.value);
 const latestCardId = computed(() => findLatestCardId(messages.value));
 const noReply = computed(() => status.value === "ready" && !verifyFailed.value && lastReplyMissing(messages.value));
@@ -121,20 +120,14 @@ function startNewChat() {
 }
 
 watch(error, async (err) => {
-  const challengeFailed = err && !err.statusCode && err.message?.startsWith("Turnstile");
-  if (err?.statusCode !== 403 && !challengeFailed) {
-    verifyFailed.value = false;
+  const { verifyFailed: failedToStart, resend } = afterVerifyError(err, messages.value);
+  if (!resend) {
+    verifyFailed.value = failedToStart;
     return;
   }
-  const history = messages.value.slice(0, -1);
-  if (!isVerified(history)) {
-    verifyFailed.value = true;
-    return;
-  }
-  const texts = (messages.value.at(-1)?.parts ?? []).filter((p) => p.type === "text").map((p) => p.text);
   conversation.value = { id: crypto.randomUUID(), messages: [], previousId: conversation.value.previousId };
   await nextTick();
-  sendTexts(texts);
+  sendTexts(resend);
 });
 
 // Send is greyed only when a message cannot go anywhere; an empty box or a reply in progress is not that.
@@ -363,7 +356,7 @@ onBeforeUnmount(() => {
 
       <template v-for="message in messages" :key="message.id">
         <div v-if="STATES.includes(chatState(message))" class="state-view" role="status">
-          <p>{{ textOf(message) || unavailable }}</p>
+          <p>{{ textOf(message) || settings.unavailable }}</p>
           <div v-if="chatReason(message) !== 'too_long'" class="state-links">
             <a :href="settings.phoneHref" class="call">Call {{ settings.phoneDisplay }}</a>
             <button v-if="chatReason(message) === 'conversation_limit'" type="button" class="quote" @click="startNewChat">New chat</button>
@@ -417,7 +410,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
       <div v-else-if="failed" class="state-view" role="alert">
-        <p>{{ unavailable }}</p>
+        <p>{{ settings.unavailable }}</p>
         <div class="state-links">
           <a :href="settings.phoneHref" class="call">Call {{ settings.phoneDisplay }}</a>
           <a href="/contact-us" class="quote">Request a quote</a>

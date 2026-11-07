@@ -68,6 +68,8 @@ export const hoursSummary = [
   `closed ${closedSlots.map((slot) => slot.label).join(" and ")}`,
 ].join(", ");
 
+export const chatUnavailable = `Chat is unavailable right now. Call us at ${business.phone.display}.`;
+
 export const hoursAndLocation = [
   `We're at ${fullAddress}.`,
   ...business.hours.map((slot) => `${slot.label}: ${slot.display}`),

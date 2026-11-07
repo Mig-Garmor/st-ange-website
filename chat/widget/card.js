@@ -1,4 +1,4 @@
-import { formatPhone, normalizePhone } from "../lead.js";
+import { formatPhone, normalizePhone, orList } from "../lead.js";
 
 export const FIELDS = ["service", "name", "phone", "email", "vehicle", "notes"];
 
@@ -17,7 +17,6 @@ export const latestCardId = (messages) =>
     .filter((part) => okCard(part))
     .at(-1)?.toolCallId ?? null;
 
-const orList = (items) => (items.length > 1 ? `${items.slice(0, -1).join(", ")} or ${items.at(-1)}` : items.join(""));
 
 export function displayPhone(value) {
   const digits = normalizePhone(value);

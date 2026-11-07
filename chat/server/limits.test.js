@@ -186,6 +186,7 @@ describe("recordUsage", () => {
     const email = { send: vi.fn(async () => {}) };
     await recordUsage({ db, email, settings, model: "m", usage, now });
     expect(db.pauseChat).toHaveBeenCalledWith("st-ange", "daily cap reached");
+    expect(db.dayStats).toHaveBeenCalledWith("st-ange", "2026-11-04", "America/Chicago");
     expect(email.send).toHaveBeenCalledTimes(1);
     const { subject, text } = email.send.mock.calls[0][0];
     expect(subject).toBe("Chat paused: daily cap reached");

@@ -1,4 +1,4 @@
-const orList = (items) => (items.length > 1 ? `${items.slice(0, -1).join(", ")} or ${items.at(-1)}` : items.join(""));
+import { orList } from "../lead.js";
 
 const RULES = (phone, areaCodes) => `You are the chat on a local auto repair shop's website, and you reply as the shop itself, not as a person.
 

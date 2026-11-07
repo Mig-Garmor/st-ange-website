@@ -12,7 +12,6 @@ const details = {
       button: "Get an alignment quote",
       title: "Get an alignment quote",
       text: "Tell us your vehicle and we'll call you back with a price and a time to bring it in.",
-      subject: "Alignment quote request",
     },
     feature: {
       title: "Aligned on our new alignment machine",
@@ -119,7 +118,6 @@ const details = {
       button: "Get a brake quote",
       title: "Get a brake quote",
       text: "Tell us your vehicle and what you're noticing, and we'll call you back with a price and a time to bring it in.",
-      subject: "Brake quote request",
     },
     feature: {
       title: "Brake services we offer",

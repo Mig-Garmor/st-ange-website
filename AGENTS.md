@@ -9,7 +9,7 @@ Open work, including items waiting on the owner, is tracked in `BACKLOG.md`.
 - Vue 3, `vite-ssg` (every route is pre-rendered to static HTML), `vite-plugin-pages` (routes from `src/pages/`), Tailwind 3, `@unhead/vue` for head tags. Hosted on Vercel with `cleanUrls`.
 - `npm run dev` for local work, `npm run build` to pre-render into `dist/`, `npm run preview` to serve `dist/` on port 4173.
 - Always finish with `npm run build` and inspect `dist/`, not just the dev server: the HTML in `dist/` is what crawlers and AI tools read.
-- **Deployment:** this repo's own Vercel project builds every merge to `main`, but the live domain (`www.stangeautoservice.com`) is served from a fork of this repo on another GitHub account. Changes go live only after that fork is synced with this repo, so a stale live site after a merge is expected until the sync happens.
+- **Deployment:** the Vercel project that serves the live domain (`www.stangeautoservice.com`) builds every merge to `main`, so a merge goes live without any further step. A stale live site after a merge means the production deploy failed.
 
 ## SEO checklist (every page and every release)
 
@@ -18,7 +18,7 @@ Open work, including items waiting on the owner, is tracked in `BACKLOG.md`.
 - **One H1** per page, including the location for pages about the business ("in Baytown, TX").
 - **Keywords:** use the phrases people search, naturally and without stuffing: auto repair, auto repair shop, mechanic, car repair, car service, plus the service name ("brake repair", "wheel alignment"). Every service page should mention "auto repair shop" and Baytown at least once.
 - **Images:** every `<img>` has descriptive `alt` text.
-- **Canonical and sitemap:** each page's canonical URL must be exactly its sitemap URL (no trailing slash except the homepage). The sitemap is generated from the pre-rendered routes, so a new page appears automatically; check `dist/sitemap.xml` lists it. After the fork is synced, spot-check the live `https://www.stangeautoservice.com/sitemap.xml` and that each listed URL returns 200.
+- **Canonical and sitemap:** each page's canonical URL must be exactly its sitemap URL (no trailing slash except the homepage). The sitemap is generated from the pre-rendered routes, so a new page appears automatically; check `dist/sitemap.xml` lists it. After the merge deploys, spot-check the live `https://www.stangeautoservice.com/sitemap.xml` and that each listed URL returns 200.
 - **robots.txt** (`public/robots.txt`) must keep allowing everything and point to the sitemap.
 
 ## Where business data lives

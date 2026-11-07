@@ -1,31 +1,16 @@
 <script setup>
-import { computed, onBeforeUnmount, reactive, ref, watch } from "vue";
+import { ref } from "vue";
 
 import InputFieldComponent from "@components/forms/InputFieldComponent.vue";
 import { MAX_LENGTH, validateName, validatePhone } from "@modules/validate.js";
-import { submitForm } from "@api/forms";
-import { useFormTurnstile } from "@modules/formTurnstile.js";
+import { useLeadForm } from "@modules/useLeadForm.js";
 
 const props = defineProps({
-  subject: { type: String, required: true },
   service: { type: String, default: null },
 });
 
-const emptyForm = () => ({ name: "", phone: "", vehicle: "", notes: "" });
-
-const form = reactive(emptyForm());
-const errors = reactive(emptyForm());
-const status = ref(""); // "" | "sending" | "success" | "error"
-const hasErrors = computed(() => Object.values(errors).some(Boolean));
-
 const challenge = ref(null);
-const turnstile = useFormTurnstile(challenge);
-onBeforeUnmount(turnstile.remove);
-
-let idempotencyKey = null;
-watch(form, () => {
-  idempotencyKey ??= crypto.randomUUID();
-});
+const { form, errors, status, hasErrors, send } = useLeadForm(() => ({ name: "", phone: "", vehicle: "", notes: "" }), challenge);
 
 function validateForm() {
   errors.name = validateName(form.name);
@@ -42,34 +27,15 @@ function showServerErrors(serverErrors) {
 
 async function handleSubmit() {
   if (!validateForm()) return;
-
-  status.value = "sending";
   errors.notes = "";
-  let turnstileToken;
-  try {
-    turnstileToken = await turnstile.token();
-  } catch {
-    status.value = "error";
-    return;
-  }
-  status.value = await submitForm("send-email", {
-    turnstileToken,
-    subject: `${props.subject} from ${form.name}`,
+  await send({
     name: form.name,
-    email: "",
     phone: form.phone,
     vehicle: form.vehicle,
     message: `Vehicle: ${form.vehicle}\nNotes: ${form.notes || "none"}`,
     source: "quote_form",
     service: props.service,
-    pageUrl: location.href,
-    idempotencyKey,
   }, { onFieldErrors: showServerErrors });
-
-  if (status.value === "success") {
-    Object.assign(form, emptyForm());
-    idempotencyKey = null;
-  }
 }
 </script>
 

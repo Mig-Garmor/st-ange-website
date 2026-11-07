@@ -1,5 +1,5 @@
 import { localFlag, localOverride } from "./localOverride.js";
-import { business, fullAddress, serviceZipsText, services } from "../src/config/business.js";
+import { business, chatUnavailable, fullAddress, serviceZipsText, services } from "../src/config/business.js";
 import { faqs } from "../src/content/home.js";
 import { relocationFaq } from "../src/content/relocation.js";
 import { googleReviews } from "../src/content/reviews.js";
@@ -92,7 +92,7 @@ export const chatServerSettings = {
     limitConversation: `This chat has gotten long. Start a new chat to keep going, or call us at ${business.phone.display}.`,
     limitHourly: `You've sent a lot of messages in a short time. Please try again in a little while, call us at ${business.phone.display}, or send a request and we'll call you back.`,
     tooLong: "That message is a bit long for the chat. Could you shorten it?",
-    unavailable: `Chat is unavailable right now. Call us at ${business.phone.display}.`,
+    unavailable: chatUnavailable,
   },
   hours: business.hours,
 };

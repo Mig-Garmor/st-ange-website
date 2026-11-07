@@ -7,4 +7,6 @@ export function normalizePhone(input) {
   return digits.length === 10 ? digits : null;
 }
 
+export const orList = (items) => (items.length > 1 ? `${items.slice(0, -1).join(", ")} or ${items.at(-1)}` : items.join(""));
+
 export const formatPhone = (digits) => `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
