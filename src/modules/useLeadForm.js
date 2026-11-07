@@ -8,6 +8,7 @@ export function useLeadForm(emptyForm, challenge) {
   const form = reactive(emptyForm());
   const errors = reactive(emptyForm());
   const status = ref(""); // "" | "sending" | "success" | "error"
+  const sentEmail = ref(""); // shown back after sending, so a mistyped address can be spotted
   const hasErrors = computed(() => Object.values(errors).some(Boolean));
 
   const turnstile = useFormTurnstile(challenge);
@@ -33,10 +34,11 @@ export function useLeadForm(emptyForm, challenge) {
       { onFieldErrors },
     );
     if (status.value === "success") {
+      sentEmail.value = fields.email ?? "";
       Object.assign(form, emptyForm());
       idempotencyKey = null;
     }
   }
 
-  return { form, errors, status, hasErrors, send };
+  return { form, errors, status, hasErrors, sentEmail, send };
 }
