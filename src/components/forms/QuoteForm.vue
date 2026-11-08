@@ -1,9 +1,10 @@
 <script setup>
 import { ref } from "vue";
 
+import ConsentCheckbox from "@components/forms/ConsentCheckbox.vue";
 import InputFieldComponent from "@components/forms/InputFieldComponent.vue";
 import EmailSuggestion from "../../../chat/widget/EmailSuggestion.vue";
-import { MAX_LENGTH, validateEmail, validateName, validatePhone } from "@modules/validate.js";
+import { CONSENT_ERROR, MAX_LENGTH, validateEmail, validateName, validatePhone } from "@modules/validate.js";
 import { useLeadForm } from "@modules/useLeadForm.js";
 
 const props = defineProps({
@@ -11,17 +12,18 @@ const props = defineProps({
 });
 
 const challenge = ref(null);
-const { form, errors, status, hasErrors, sentEmail, send } = useLeadForm(() => ({ name: "", phone: "", email: "", vehicle: "", notes: "" }), challenge);
+const { form, errors, status, hasErrors, sentEmail, send } = useLeadForm(() => ({ name: "", phone: "", email: "", vehicle: "", notes: "", consent: false }), challenge);
 
 function validateForm() {
   errors.name = validateName(form.name);
   errors.phone = validatePhone(form.phone);
   errors.email = validateEmail(form.email.trim());
   errors.vehicle = form.vehicle.trim() ? "" : "Vehicle is required";
-  return !errors.name && !errors.phone && !errors.email && !errors.vehicle;
+  errors.consent = form.consent ? "" : CONSENT_ERROR;
+  return !errors.name && !errors.phone && !errors.email && !errors.vehicle && !errors.consent;
 }
 
-const FIELDS = { name: "name", phone: "phone", email: "email", vehicle: "vehicle", message: "notes" };
+const FIELDS = { name: "name", phone: "phone", email: "email", vehicle: "vehicle", message: "notes", consent: "consent" };
 
 function showServerErrors(serverErrors) {
   for (const [key, field] of Object.entries(FIELDS)) if (serverErrors[key]) errors[field] = serverErrors[key];
@@ -81,6 +83,7 @@ async function handleSubmit() {
       :maxlength="1800"
       :error="errors.notes"
     />
+    <ConsentCheckbox v-model="form.consent" :error="errors.consent" />
 
     <button class="submit-btn" type="submit" :disabled="status === 'sending'">
       {{ status === "sending" ? "Sending…" : "Request my quote" }}

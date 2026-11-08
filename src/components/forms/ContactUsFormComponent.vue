@@ -2,9 +2,11 @@
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 
+import ConsentCheckbox from "@components/forms/ConsentCheckbox.vue";
 import InputFieldComponent from "@components/forms/InputFieldComponent.vue";
 import EmailSuggestion from "../../../chat/widget/EmailSuggestion.vue";
 import {
+  CONSENT_ERROR,
   MAX_LENGTH,
   validateName,
   validateEmail,
@@ -19,7 +21,7 @@ const route = useRoute();
 const subject = ref("");
 const challenge = ref(null);
 const { form, errors, status, hasErrors, sentEmail, send } = useLeadForm(
-  () => ({ name: "", email: "", phone: "", message: "" }),
+  () => ({ name: "", email: "", phone: "", message: "", consent: false }),
   challenge,
 );
 
@@ -33,12 +35,13 @@ function validateForm() {
   errors.email = validateEmail(form.email.trim());
   errors.phone = validatePhone(form.phone);
   errors.message = validateMessage(form.message);
+  errors.consent = form.consent ? "" : CONSENT_ERROR;
 
   return Object.values(errors).every((error) => !error);
 }
 
 function showServerErrors(serverErrors) {
-  for (const field of ["name", "email", "phone", "message"]) if (serverErrors[field]) errors[field] = serverErrors[field];
+  for (const field of ["name", "email", "phone", "message", "consent"]) if (serverErrors[field]) errors[field] = serverErrors[field];
 }
 
 async function handleSubmit() {
@@ -91,6 +94,7 @@ async function handleSubmit() {
       :maxlength="2000"
       :error="errors.message"
     />
+    <ConsentCheckbox v-model="form.consent" :error="errors.consent" />
 
     <button class="submit-btn" type="submit" :disabled="status === 'sending'">
       {{ status === "sending" ? "Sending…" : "Send Email" }}
