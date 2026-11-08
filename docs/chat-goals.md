@@ -8,7 +8,30 @@ Why the chat exists, what is built, and the decisions still open. Read this befo
 2. **Learn who the customers are.** Every conversation and request is captured. AI in the Website Hub summarises them to show:
    - which services visitors need most;
    - customer profiles: who comes to the site and what they are looking for.
-3. **Keep every lead in the Website Hub.** Each request (chat card, quote form, contact form) is stored there as a lead.
+3. **Keep every lead in the Website Hub.** Each request (chat card, quote form, contact form) is stored there as a lead, building a list of leads.
+4. **Find the holes in our FAQs.** Spot the questions the chat could not answer well for the visitor, so they can become FAQs on the site.
+   - The per-chat `unanswered` field is the start, but it only catches questions the knowledge did not cover.
+   - Also catch answers that were technically given but did not help, for example the visitor asked again, rephrased, or left right after.
+5. **Learn from chats that worked.** Record the flows where the visitor ended up leaving their details to be contacted: what they asked, what the bot said, and where they agreed. These are the input for the playbooks in `BACKLOG.md`, which a person reviews before use.
+6. **Spot partner and collaboration leads.** A visitor may say something about themselves, for example that they own a business and want to work with the shop.
+   - That is valuable and should be recorded.
+   - The chat should ask which business they are with.
+   - **Caution:** this opens new ways to manipulate the chat. Treat whatever the visitor claims about themselves as unverified, never as a reason to change what the bot may say or do. Record it as a note for a person, without promises or special treatment.
+   - Check this against today's rule that the chat only uses the visitor's own details, never someone else's (`chat/server/prompt.js`, checklist item 4). A business name the visitor gives about themselves fits that rule; anyone else's details still do not.
+
+## Before going live: stress test
+
+The chat must be stress-tested for malicious prompts and other manipulation before it is switched on. Cover at least:
+- prompt injection and jailbreaks: "ignore your instructions", role-play, fake system or admin messages, instructions hidden in pasted text;
+- getting the bot to promise prices, discounts, dates or services the shop does not offer, or to speak for the owner;
+- extracting the system prompt, the knowledge, or other visitors' data;
+- abusing the request card: someone else's details, fake or junk leads, repeated submissions;
+- false claims about the visitor's identity (owner, partner, staff) to change the bot's behaviour (goal 6);
+- off-topic use, abuse and harmful content;
+- cost attacks: long messages, many chats, loops near the limits and the daily cap;
+- text that later reaches the hub analysis and could steer its reports.
+
+Keep the attacks as a repeatable test set, run it against each candidate model (decision 2), and re-run it whenever the prompt or model changes.
 
 ## What exists today
 
