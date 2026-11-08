@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
 import Pages from "vite-plugin-pages";
 import svgLoader from "vite-svg-loader";
@@ -33,7 +33,12 @@ function writeSiteFiles(outDir = path.resolve(__dirname, "dist")) {
   checkStructuredData(outDir);
 }
 
+// The browser tracker loads from the same hub the server forwards to, so it reuses the server's HUB_URL.
+// Only the URL is passed in: HUB_SECRET_KEY must never reach browser code.
+const hubUrl = loadEnv("", process.cwd(), "HUB_URL").HUB_URL ?? "";
+
 export default defineConfig({
+  define: { __HUB_URL__: JSON.stringify(hubUrl) },
   plugins: [
     vue(),
     Pages({

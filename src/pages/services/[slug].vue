@@ -165,6 +165,7 @@ usePageSeo({
             :image="other.image"
             :name="other.name"
             :to="`/services/${other.slug}`"
+            :service="other.slug"
           />
         </div>
       </section>

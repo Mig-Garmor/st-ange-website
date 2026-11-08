@@ -47,6 +47,7 @@ usePageSeo({
             :name="service.name"
             :summary="service.summary"
             :to="`/services/${service.slug}`"
+            :service="service.slug"
           />
         </div>
       </section>

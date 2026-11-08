@@ -2,7 +2,8 @@
 import { ref } from "vue";
 
 import InputFieldComponent from "@components/forms/InputFieldComponent.vue";
-import { MAX_LENGTH, validateName, validatePhone } from "@modules/validate.js";
+import EmailSuggestion from "../../../chat/widget/EmailSuggestion.vue";
+import { MAX_LENGTH, validateEmail, validateName, validatePhone } from "@modules/validate.js";
 import { useLeadForm } from "@modules/useLeadForm.js";
 
 const props = defineProps({
@@ -10,16 +11,17 @@ const props = defineProps({
 });
 
 const challenge = ref(null);
-const { form, errors, status, hasErrors, send } = useLeadForm(() => ({ name: "", phone: "", vehicle: "", notes: "" }), challenge);
+const { form, errors, status, hasErrors, sentEmail, send } = useLeadForm(() => ({ name: "", phone: "", email: "", vehicle: "", notes: "" }), challenge);
 
 function validateForm() {
   errors.name = validateName(form.name);
   errors.phone = validatePhone(form.phone);
+  errors.email = validateEmail(form.email.trim());
   errors.vehicle = form.vehicle.trim() ? "" : "Vehicle is required";
-  return !errors.name && !errors.phone && !errors.vehicle;
+  return !errors.name && !errors.phone && !errors.email && !errors.vehicle;
 }
 
-const FIELDS = { name: "name", phone: "phone", vehicle: "vehicle", message: "notes" };
+const FIELDS = { name: "name", phone: "phone", email: "email", vehicle: "vehicle", message: "notes" };
 
 function showServerErrors(serverErrors) {
   for (const [key, field] of Object.entries(FIELDS)) if (serverErrors[key]) errors[field] = serverErrors[key];
@@ -31,6 +33,7 @@ async function handleSubmit() {
   await send({
     name: form.name,
     phone: form.phone,
+    email: form.email.trim(),
     vehicle: form.vehicle,
     message: `Vehicle: ${form.vehicle}\nNotes: ${form.notes || "none"}`,
     source: "quote_form",
@@ -57,6 +60,15 @@ async function handleSubmit() {
       :error="errors.phone"
     />
     <InputFieldComponent
+      v-model="form.email"
+      label="Email"
+      type="email"
+      autocomplete="email"
+      :maxlength="MAX_LENGTH.email"
+      :error="errors.email"
+    />
+    <EmailSuggestion class="-mt-3 mb-4" :email="form.email" @use="(email) => (form.email = email)" />
+    <InputFieldComponent
       v-model="form.vehicle"
       label="Vehicle (year, make, model)"
       :maxlength="MAX_LENGTH.vehicle"
@@ -75,7 +87,7 @@ async function handleSubmit() {
     </button>
 
     <div v-if="status === 'success'" class="banner-success" role="status">
-      Thanks, we got your request. We'll call you back shortly.
+      Thanks, we got your request. We'll call you back shortly, or email you at <strong>{{ sentEmail }}</strong>.
     </div>
     <div v-if="status === 'error'" class="banner-error" role="alert">
       {{ hasErrors ? "Please check the fields above." : "Something went wrong. Try again or call us." }}

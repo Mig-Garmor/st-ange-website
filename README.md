@@ -27,6 +27,8 @@ Server (Vercel project settings and `.env.local`; see `.env.example`):
 | `CHAT_DAILY_CAP_EUR` | Daily spend cap, default 5 |
 | `CHAT_LIMIT_PER_HOUR` | Local development only: overrides the 40 chat messages per IP per hour, `0` switches it off. Ignored on every Vercel deployment, which always uses 40 |
 | `FORM_LIMIT_PER_HOUR` | Local development only: overrides the 5 form posts per IP per hour, `0` switches it off. Ignored on every Vercel deployment, which always uses 5 |
+| `HUB_URL` | Website Hub's address, for example `https://website-hub-six.vercel.app`. With `HUB_SECRET_KEY`, turns on forwarding to the hub (see Website Hub) |
+| `HUB_SECRET_KEY` | The St Ange secret key (`hub_sk_…`) from the hub's Keys page. Server only |
 | `TURNSTILE_HOSTNAMES` | Optional, comma-separated, for example `stangeautoservice.com,www.stangeautoservice.com`. When set, a Turnstile token solved on any other hostname is refused. Leave it unset locally: Cloudflare's test keys report `example.com` |
 
 ### Choosing a model
@@ -44,6 +46,10 @@ Pick a model that supports tools (the request card needs them). For `openai/`, `
 ### Request card
 
 As soon as a visitor wants a service, a quote or a booking, the bot calls the `proposeRequest` tool, which opens a 3-step form in the chat instead of asking for details in messages. The steps are "Your car" (service, vehicle, what's going on), "How we reach you" (name, phone) and "Almost done" (email, a review of the details, and the contact-confirmation tick box before Send request), with "Step N of 3" and a progress bar. Anything the visitor already typed is prefilled (a placeholder email such as "none" counts as missing, an unknown service becomes "Not sure yet", a valid phone is shown as `832-572-7121`), and the form opens at the first step that still needs something. Next checks that step with the same rules as `/api/chat-request`; the endpoint still decides, and a field it rejects sends the visitor back to that field's step. The local area codes suggested for a 7-digit number are `localAreaCodes` in `src/config/business.js`, shared by the chat, the form and the website forms.
+
+### Service click tracking
+
+With `VITE_HUB_PK` (the publishable key from Website Hub's Keys page) and `HUB_URL` (the same one the server forwards to) set at build time, every page loads the hub's tracker (`async`, so it never holds up rendering). A click on a service card (`ServiceCard` with a `service` slug) is counted as the `service_click` tag with the service's slug; the hub's Tags page shows the counts per service. Without the variables nothing is loaded. Set them for Production only: the hub drops events from origins not on its Keys page, so a preview would only add dropped-event counts.
 
 ### Switching the bubble on
 
@@ -78,6 +84,15 @@ Keep prepaid OpenRouter credit with auto top-up off as a hard backstop.
 ### Insight job
 
 A Vercel cron (`vercel.json`, daily at 10:00 UTC) calls `/api/cron/chat-insights` with `Authorization: Bearer $CRON_SECRET`. It summarises conversations idle for over 60 minutes.
+
+### Website Hub
+
+St Ange sends a copy of its data to Website Hub, the dashboard Miguel runs for all his sites. St Ange keeps its own database; the hub's copy is for review.
+
+- **Requests:** each contact form, quote form and chat request goes to the hub in the background once St Ange has recorded it. A retry sends it again, and the hub ignores the repeat (same idempotency key).
+- **Chats:** the insight job sends each chat, with its insights, once it has analysed it. Transcript notes such as "[Request sent to the shop]" are left out.
+- A hub that is down or refuses the call is logged ("Hub request not forwarded", "Hub chat not forwarded") and changes nothing for the visitor. Nothing is retried, so data from that time is missing in the hub.
+- `server/hub.js` holds a copy of the hub SDK's `createHub` until the SDK is on npm.
 
 ### Production
 

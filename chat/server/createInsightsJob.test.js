@@ -208,4 +208,17 @@ describe("createInsightsJob", () => {
     expect(db.pauseChat).toHaveBeenCalledWith("test-site", "unpriced call without a reported cost");
     expect(email.send).toHaveBeenCalledTimes(1);
   });
+
+  it("forwards each analysed chat, unreadable ones too, but not a chat whose analysis threw", async () => {
+    const db = fakeDb({ claimForInsights: vi.fn(async () => [{ id: "a" }, { id: "b" }, { id: "c" }]) });
+    const ai = {
+      generateInsights: vi.fn()
+        .mockRejectedValueOnce(new Error("boom"))
+        .mockResolvedValueOnce({ object: insight, usage })
+        .mockResolvedValueOnce({ object: null, usage }),
+    };
+    const forward = vi.fn(async () => {});
+    await job(db, ai, { forward })(req("Bearer s3cret"));
+    expect(forward.mock.calls).toEqual([["b"], ["c"]]);
+  });
 });

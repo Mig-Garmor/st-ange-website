@@ -31,10 +31,20 @@ describe("handleSendEmail", () => {
 
   it("quote_form with service car-alignment is passed through", async () => {
     const requests = fakeRequests();
-    const data = { name: "Ann", email: "", phone: "8325727121", vehicle: "2015 Civic", source: "quote_form", service: "car-alignment", idempotencyKey: "k", pageUrl: "http://x/" };
+    const data = { name: "Ann", email: "owner@example.com", phone: "8325727121", vehicle: "2015 Civic", source: "quote_form", service: "car-alignment", idempotencyKey: "k", pageUrl: "http://x/" };
     const r = await handleSendEmail({ data }, { requests });
     expect(r.status).toBe(200);
     expect(requests.submitted[0]).toMatchObject({ source: "quote_form", service: "car-alignment", idempotencyKey: "k", pageUrl: "/" });
+    expect(requests.submitted[0].lead.email).toBe("owner@example.com");
+  });
+
+  it("400 and nothing sent when a quote form has no email, so the shop can always write back", async () => {
+    const requests = fakeRequests();
+    const data = { name: "Ann", email: "", phone: "8325727121", vehicle: "2015 Civic", source: "quote_form", service: "car-alignment" };
+    const r = await handleSendEmail({ data }, { requests });
+    expect(r.status).toBe(400);
+    expect(r.json.errors.email).toBe("Invalid email address");
+    expect(requests.submitted).toEqual([]);
   });
 
   it("missing source defaults to contact_form", async () => {
@@ -58,7 +68,7 @@ describe("handleSendEmail", () => {
 
   it("an unknown service slug is stored as null", async () => {
     const requests = fakeRequests();
-    const data = { name: "Ann", phone: "8325727121", vehicle: "Civic", source: "quote_form", service: "x".repeat(3000) };
+    const data = { name: "Ann", email: "owner@example.com", phone: "8325727121", vehicle: "Civic", source: "quote_form", service: "x".repeat(3000) };
     await handleSendEmail({ data }, { requests });
     expect(requests.submitted[0].service).toBeNull();
   });
@@ -96,7 +106,7 @@ describe("handleSendEmail", () => {
     await handleSendEmail({ data: { ...contact, subject: "URGENT: verify your account at https://evil.example" } }, { requests });
     await handleSendEmail({ data: { ...contact, service: "car-alignment" } }, { requests });
     await handleSendEmail(
-      { data: { name: "Ann", phone: "8325727121", vehicle: "Civic", source: "quote_form", service: "car-alignment" } },
+      { data: { name: "Ann", email: "owner@example.com", phone: "8325727121", vehicle: "Civic", source: "quote_form", service: "car-alignment" } },
       { requests },
     );
     expect(requests.submitted.map((r) => r.subject)).toEqual([

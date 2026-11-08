@@ -25,13 +25,14 @@ const instructions = (knowledge, services) => `You analyse finished website chat
 
 ${knowledge}`;
 
-export function createInsightsJob(settings, { db, ai, email, model, cronSecret, now = () => new Date() }) {
+export function createInsightsJob(settings, { db, ai, email, model, cronSecret, forward = async () => {}, now = () => new Date() }) {
   const schema = insightsSchema(settings.services.map((s) => s.slug));
   const system = instructions(
     settings.knowledge,
     settings.services.map((s) => `${s.slug} (${s.name})`).join(", "),
   );
 
+  // A chat is finished once it has insights, so that is when the hub gets its copy (forward never throws).
   return async function handler(request) {
     if (!cronSecret || request.headers.get("authorization") !== `Bearer ${cronSecret}`) {
       return Response.json({ error: "unauthorized" }, { status: 401 });
@@ -62,10 +63,12 @@ export function createInsightsJob(settings, { db, ai, email, model, cronSecret, 
           // Visitors can steer these fields, so they are bounded here rather than trusted.
           const unanswered = object.unanswered.slice(0, MAX_UNANSWERED).map((q) => q.slice(0, MAX_QUESTION));
           await db.saveInsights(id, { ...object, unanswered, ...(requestSent && { outcome: "request_sent" }) });
+          await forward(id);
           processed += 1;
         } else {
           console.error("Insight output failed the schema; marking the conversation done", id);
           await db.saveInsights(id, requestSent ? { outcome: "request_sent" } : UNREADABLE);
+          await forward(id);
           failed += 1;
         }
       } catch (error) {

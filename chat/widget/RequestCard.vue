@@ -2,6 +2,7 @@
 import { computed, nextTick, reactive, ref, useId, watch } from "vue";
 import { STEPS, clearDraft, displayPhone, fieldError, firstIncompleteStep, initialForm, loadDraft, mergeDraft, okCard, saveDraft, stepErrors } from "./card.js";
 import { MAX_LENGTH } from "../lead.js";
+import EmailSuggestion from "./EmailSuggestion.vue";
 
 const props = defineProps({
   proposal: { type: Object, required: true },
@@ -166,6 +167,7 @@ async function send() {
         <label :for="`${uid}-email`">Email</label>
         <input :id="`${uid}-email`" v-model="form.email" :maxlength="MAX_LENGTH.email" type="email" autocomplete="email" @input="check('email')" :aria-invalid="!!errors.email" />
         <p v-if="errors.email" class="error">{{ errors.email }}</p>
+        <EmailSuggestion :email="form.email" @use="(email) => { form.email = email; check('email'); }" />
 
         <dl class="summary review">
           <dt>Service</dt><dd>{{ serviceName }}</dd>
@@ -188,7 +190,9 @@ async function send() {
     </form>
 
     <p v-if="status === 'sending'" class="sending" role="status">Sending…</p>
-    <p v-else-if="status === 'sent'" class="banner-success" role="status">Sent. We'll call you back shortly.</p>
+    <p v-else-if="status === 'sent'" class="banner-success" role="status">
+      Sent. We'll call you back shortly, or email you at <strong>{{ form.email }}</strong>.
+    </p>
     <p v-else-if="status === 'failed'" class="banner-error" role="alert">
       We couldn't send your request. Please call us at
       <a :href="phoneHref">{{ phoneDisplay }}</a>.
