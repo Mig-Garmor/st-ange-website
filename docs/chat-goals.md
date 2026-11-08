@@ -39,6 +39,17 @@ For each chat, and rolled up across chats in the hub:
    - **Converted:** the visitor left their details and asked for a request or quote (goals 3 and 5).
 4. **Manipulation.** Chats where the bot was manipulated, and chats where it could have been: an attempt that failed, or a near miss where the bot wavered. Each gets a short note of what was tried and what the bot did, for a person to review (goal 7).
 
+**Suggested additions (proposed by Claude, not yet confirmed by the owner):**
+
+5. **Wrong answers.** Replies that contradict the site or invent facts, such as a price, an hour, a service the shop does not offer, or a promise. This is the most damaging failure, and it is different from a gap: the bot answered, but wrongly.
+6. **Where visitors drop off.** The last bot message before an unconverted visitor left: a price question it could not answer, a request for a phone number, a confusing reply. This shows which replies cost leads.
+7. **Car and urgency.** The make, model and year when given, and how soon they need it ("today", "this week", "just asking"). This shows which cars and jobs the site attracts, and how urgent they are.
+8. **Where and when the chat started.** The starting page (already stored as the page path), and the day and hour. This shows which pages raise questions, and whether chats come in when the shop is closed.
+9. **Language.** Whether the visitor wrote in Spanish or another language. Baytown has many Spanish speakers, so this decides whether a Spanish page or chat is worth it.
+10. **Price sensitivity and competitors.** Questions about cost and discounts, and mentions of other shops or of a quote from elsewhere.
+
+All of these are counted per period in the hub report. None of them may copy a visitor's name, phone or email into a report.
+
 The per-chat job today covers part of 1 (summary, intent, services), part of 2 (`unanswered`), and the "converted" part of 3 (`outcome: request_sent`). Still missing: partnership intent, where each gap belongs, the "answered" signal, and anything for 4.
 
 ## Before going live: stress test
