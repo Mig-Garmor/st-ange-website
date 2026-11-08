@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { CUSTOMER_HEADER } from "../chat/server/emailText.js";
+import { business } from "../src/config/business.js";
 import { handleSendEmail } from "./sendEmailHandler.js";
 
 function fakeRequests(emailStatus = "sent") {
@@ -7,7 +8,8 @@ function fakeRequests(emailStatus = "sent") {
   return { submitted, submit: async (i) => (submitted.push(i), { emailStatus, duplicate: false }) };
 }
 
-const contact = { subject: "Hi", name: "Ann", email: "a@b.co", phone: "(832) 572-7121", message: "Hello" };
+const CONSENT = business.callbackConsent;
+const contact = { subject: "Hi", name: "Ann", email: "a@b.co", phone: "(832) 572-7121", message: "Hello", consent: CONSENT };
 
 describe("handleSendEmail", () => {
   it("400 for phone 572-7121", async () => {
@@ -31,7 +33,7 @@ describe("handleSendEmail", () => {
 
   it("quote_form with service car-alignment is passed through", async () => {
     const requests = fakeRequests();
-    const data = { name: "Ann", email: "owner@example.com", phone: "8325727121", vehicle: "2015 Civic", source: "quote_form", service: "car-alignment", idempotencyKey: "k", pageUrl: "http://x/" };
+    const data = { name: "Ann", email: "owner@example.com", phone: "8325727121", vehicle: "2015 Civic", source: "quote_form", service: "car-alignment", idempotencyKey: "k", pageUrl: "http://x/", consent: CONSENT };
     const r = await handleSendEmail({ data }, { requests });
     expect(r.status).toBe(200);
     expect(requests.submitted[0]).toMatchObject({ source: "quote_form", service: "car-alignment", idempotencyKey: "k", pageUrl: "/" });
@@ -40,11 +42,23 @@ describe("handleSendEmail", () => {
 
   it("400 and nothing sent when a quote form has no email, so the shop can always write back", async () => {
     const requests = fakeRequests();
-    const data = { name: "Ann", email: "", phone: "8325727121", vehicle: "2015 Civic", source: "quote_form", service: "car-alignment" };
+    const data = { name: "Ann", email: "", phone: "8325727121", vehicle: "2015 Civic", source: "quote_form", service: "car-alignment", consent: CONSENT };
     const r = await handleSendEmail({ data }, { requests });
     expect(r.status).toBe(400);
     expect(r.json.errors.email).toBe("Invalid email address");
     expect(requests.submitted).toEqual([]);
+  });
+
+  it("400 and nothing sent without the exact consent wording; the wording is stored with the request", async () => {
+    const requests = fakeRequests();
+    for (const consent of [undefined, "", "Something else"]) {
+      const r = await handleSendEmail({ data: { ...contact, consent } }, { requests });
+      expect(r.status).toBe(400);
+      expect(r.json.errors.consent).toBeTruthy();
+    }
+    expect(requests.submitted).toHaveLength(0);
+    await handleSendEmail({ data: { ...contact, source: "quote_form", vehicle: "Civic" } }, { requests });
+    expect(requests.submitted[0].consentText).toBe(CONSENT);
   });
 
   it("missing source defaults to contact_form", async () => {
@@ -68,7 +82,7 @@ describe("handleSendEmail", () => {
 
   it("an unknown service slug is stored as null", async () => {
     const requests = fakeRequests();
-    const data = { name: "Ann", email: "owner@example.com", phone: "8325727121", vehicle: "Civic", source: "quote_form", service: "x".repeat(3000) };
+    const data = { name: "Ann", email: "owner@example.com", phone: "8325727121", vehicle: "Civic", source: "quote_form", service: "x".repeat(3000), consent: CONSENT };
     await handleSendEmail({ data }, { requests });
     expect(requests.submitted[0].service).toBeNull();
   });
@@ -106,7 +120,7 @@ describe("handleSendEmail", () => {
     await handleSendEmail({ data: { ...contact, subject: "URGENT: verify your account at https://evil.example" } }, { requests });
     await handleSendEmail({ data: { ...contact, service: "car-alignment" } }, { requests });
     await handleSendEmail(
-      { data: { name: "Ann", email: "owner@example.com", phone: "8325727121", vehicle: "Civic", source: "quote_form", service: "car-alignment" } },
+      { data: { name: "Ann", email: "owner@example.com", phone: "8325727121", vehicle: "Civic", source: "quote_form", service: "car-alignment", consent: CONSENT } },
       { requests },
     );
     expect(requests.submitted.map((r) => r.subject)).toEqual([

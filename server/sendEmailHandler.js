@@ -1,6 +1,7 @@
 import { toPagePath } from "../chat/server/pagePath.js";
 import { formatPhone } from "../chat/lead.js";
-import { services } from "../src/config/business.js";
+import { business, services } from "../src/config/business.js";
+import { CONSENT_ERROR } from "../src/modules/validate.js";
 import { CUSTOMER_HEADER, oneLine, quoted } from "../chat/server/emailText.js";
 import { KEY } from "../chat/server/input.js";
 import { localOverride } from "./localOverride.js";
@@ -21,7 +22,9 @@ export async function handleSendEmail(body, { requests, turnstile = null, ip = n
   const { ok, errors, lead } = validateLead(data, { requireVehicle: source === "quote_form", requireEmail: true });
   const message = typeof data.message === "string" ? data.message : "";
   if (message.length > MAX_MESSAGE) errors.message = `Use ${MAX_MESSAGE} characters or fewer`;
-  if (!ok || errors.message) return { status: 400, json: { error: "Invalid request", errors } };
+  // Same rule as the chat form: the visitor ticked the exact wording this site shows, stored as their consent.
+  if (data.consent !== business.callbackConsent) errors.consent = CONSENT_ERROR;
+  if (!ok || errors.message || errors.consent) return { status: 400, json: { error: "Invalid request", errors } };
   if (data.idempotencyKey !== undefined && data.idempotencyKey !== null && !KEY.test(String(data.idempotencyKey))) {
     return { status: 400, json: { error: "Invalid request" } };
   }
@@ -61,6 +64,7 @@ export async function handleSendEmail(body, { requests, turnstile = null, ip = n
     vehicle: lead.vehicle || null,
     pageUrl: toPagePath(data.pageUrl),
     ipHash,
+    consentText: business.callbackConsent,
   });
 
   if (emailStatus === "failed") return { status: 500, json: { error: "Email failed" } };

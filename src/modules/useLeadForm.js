@@ -2,6 +2,7 @@ import { computed, onBeforeUnmount, reactive, ref, watch } from "vue";
 
 import { submitForm } from "@api/forms";
 import { useFormTurnstile } from "@modules/formTurnstile.js";
+import { business } from "@/config/business";
 
 // The state and send flow both website forms share; each form keeps its own fields and checks.
 export function useLeadForm(emptyForm, challenge) {
@@ -30,7 +31,7 @@ export function useLeadForm(emptyForm, challenge) {
     }
     status.value = await submitForm(
       "send-email",
-      { turnstileToken, ...fields, pageUrl: location.href, idempotencyKey },
+      { turnstileToken, ...fields, consent: form.consent ? business.callbackConsent : "", pageUrl: location.href, idempotencyKey },
       { onFieldErrors },
     );
     if (status.value === "success") {

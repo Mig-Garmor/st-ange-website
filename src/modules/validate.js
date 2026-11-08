@@ -4,6 +4,8 @@ import { normalizePhone, orList } from "../../chat/lead.js";
 export { MAX_LENGTH } from "../../chat/lead.js";
 
 
+export const CONSENT_ERROR = "Please tick the box so we can call or text you about this request.";
+
 export const missingAreaCode = (codes = business.localAreaCodes) => `Add the area code (${orList(codes)})`;
 
 export const isSevenDigits = (phone) => String(phone ?? "").replace(/\D/g, "").length === 7;
