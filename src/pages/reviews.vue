@@ -1,5 +1,4 @@
 <script setup>
-import { useHead } from "@unhead/vue";
 
 import PageLayout from "@components/wrappers/PageLayout.vue";
 import ReviewCard from "@components/blocks/ReviewCard.vue";
@@ -10,7 +9,6 @@ import { pageDescriptions } from "@/content/pages";
 import { useHashHighlight } from "@composables/useHashHighlight";
 import { business } from "@/config/business";
 import { allReviewCards, allReviews, googleReviews, reviewThemes } from "@/content/reviews";
-import { reviewsSchema } from "@/seo/reviewsSchema";
 
 const rating = googleReviews.rating.toFixed(1);
 
@@ -23,11 +21,6 @@ usePageSeo({
   crumbs: [{ label: "Home", to: "/" }, { label: "Reviews", to: "/reviews" }],
 });
 
-useHead({
-  script: [
-    { type: "application/ld+json", key: "reviews", innerHTML: JSON.stringify(reviewsSchema(allReviewCards)) },
-  ],
-});
 </script>
 
 <template>

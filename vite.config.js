@@ -8,6 +8,7 @@ import path from "path";
 
 import { business, services } from "./src/config/business.js";
 import { buildLlmsTxt } from "./src/seo/llmsTxt.js";
+import { checkStructuredData } from "./src/seo/checkStructuredData.js";
 
 const prerenderedRoutes = [];
 
@@ -29,6 +30,7 @@ function writeSitemap(outDir) {
 function writeSiteFiles(outDir = path.resolve(__dirname, "dist")) {
   writeSitemap(outDir);
   fs.writeFileSync(path.join(outDir, "llms.txt"), buildLlmsTxt());
+  checkStructuredData(outDir);
 }
 
 // The browser tracker loads from the same hub the server forwards to, so it reuses the server's HUB_URL.

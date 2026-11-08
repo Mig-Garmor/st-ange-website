@@ -30,18 +30,19 @@ Never type business facts into a page or component. Change the source below and 
 | Name, phone, email, address, map links, geo, hours | `src/config/business.js` (`business`) | Header, footer, contact page, hours lists, FAQ answers, AutoRepair JSON-LD, `llms.txt` |
 | Service list (slug, name, image, summary) | `src/config/business.js` (`services`) | Homepage cards, footer, `/services`, pre-rendered routes, sitemap, `llms.txt` |
 | Service page copy (titles, intro, signs, process, FAQs) | `src/content/services.js` | `/services/<slug>`, Service JSON-LD |
-| Google reviews, rating and review count | `src/content/reviews.js` | Review cards, Review JSON-LD, AggregateRating, `llms.txt` |
+| Google reviews, rating and review count | `src/content/reviews.js` | Review cards, rating text, `llms.txt` (never JSON-LD, see below) |
 | Review themes and customer reports | `src/content/reviews.js` (`themes` tags, `customerReports`) | Homepage "What customers mention most", `/reviews`, `llms.txt` |
 | Reviews page | `src/pages/reviews.vue` | `/reviews`: theme index and every written review, each with an anchor (`#review-<id>`, `#theme-<id>`) |
 | Move notice (banner, FAQ, address note) | `src/content/relocation.js` | Banner on every page, homepage FAQ, `llms.txt` |
 | Homepage reasons and FAQs | `src/content/home.js` | Homepage |
-| Business JSON-LD | `src/seo/localBusinessSchema.js` | Every page |
-| Service and breadcrumb JSON-LD | `src/seo/serviceSchema.js` | Service pages |
-| Review JSON-LD | `src/seo/reviewsSchema.js` | Homepage, service pages and `/reviews` |
+| Business and WebSite JSON-LD nodes | `src/seo/localBusinessSchema.js` | Every page |
+| Service and breadcrumb JSON-LD nodes | `src/seo/serviceSchema.js` | Service pages, and breadcrumbs on every page but the homepage |
+| The page's single JSON-LD graph | `src/seo/pageGraph.js`, emitted by `usePageSeo` | Every page |
+| Build check for that graph | `src/seo/checkStructuredData.js` | Fails `npm run build` when a page breaks the rules below |
 | `llms.txt` (plain-text summary for AI assistants) | `src/seo/llmsTxt.js` | `/llms.txt`, generated at build |
 | `sitemap.xml` | `vite.config.js` (`writeSitemap`) | `/sitemap.xml`, generated at build from the pre-rendered routes |
 
-`src/config/business.js`, `src/content/reviews.js`, `src/content/relocation.js` and `src/seo/llmsTxt.js` are imported by `vite.config.js` at build time, so they must use relative imports only (`../config/business.js`), never the `@/` aliases.
+`src/config/business.js`, `src/content/reviews.js`, `src/content/relocation.js` and everything in `src/seo/` are imported by `vite.config.js` at build time, so they must use relative imports only (`../config/business.js`), never the `@/` aliases.
 
 ## What to update when something changes
 
@@ -50,6 +51,7 @@ Never type business facts into a page or component. Change the source below and 
 - **New service:** add it to `services` in `business.js` with a `slug`, then its copy in `src/content/services.js` and an image in `public/assets/`. The page, route, sitemap entry, footer link and `llms.txt` line follow automatically. Check whether any existing review describes it (see below).
 - **New page:** add it under `src/pages/`. The sitemap picks it up automatically, but the "Pages" list in `src/seo/llmsTxt.js` is written by hand, so add it there too, and add it to `src/config/navigation.js` if it belongs in the menus.
 - **After any of these:** run `npm run build` and check `dist/llms.txt`, the JSON-LD in `dist/index.html` and a service page, and `dist/sitemap.xml`.
+- **Structured data:** every page outputs one JSON-LD graph (business, site, the page, its breadcrumbs, and the Service on service pages), linked by `@id`. Never mark up the Google reviews or the rating (`Review`, `AggregateRating`): Google forbids a business marking up its own reviews or ratings copied from another site, and a breach can remove every rich result on the site. The reviews stay visible on the pages; the build check fails if review markup comes back.
 
 ## Google reviews: trust rules
 
@@ -72,7 +74,7 @@ The reviews exist so AI assistants can trust and verify them. These rules are wh
 2. Compare with `src/content/reviews.js`. For each new written review, add an entry with `id`, `author`, `rating`, `postedAgo`, `services`, `themes`, `url`, `authorUrl` and `text`. Get `url` from the review's Share button, then Copy Link. If the review reports a specific detail (a price comparison, a make, a turnaround time), consider adding it to `customerReports`.
 3. Update `googleReviews.rating`, `googleReviews.count` and `googleReviews.capturedAt`, and refresh `postedAgo` on existing entries.
 4. Re-check service tags. As of 2026-10-27 only `car-alignment` (3 reviews) and `ac-repair` (1 review) have matching reviews; `brake-repair`, `suspension-steering` and `tires` show general reviews. A new review naming one of those services should be tagged so it leads on that page.
-5. Run `npm run build`, then confirm the new reviews appear in `dist/llms.txt`, on `/reviews`, in the theme counts, and in the Review JSON-LD of the relevant pages.
+5. Run `npm run build`, then confirm the new reviews appear in `dist/llms.txt`, on `/reviews` and in the theme counts.
 
 ## Planned: automated review check (not built yet)
 
