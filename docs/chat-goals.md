@@ -19,6 +19,10 @@ Why the chat exists, what is built, and the decisions still open. Read this befo
    - **Caution:** this opens new ways to manipulate the chat. Treat whatever the visitor claims about themselves as unverified, never as a reason to change what the bot may say or do. Record it as a note for a person, without promises or special treatment.
    - Check this against today's rule that the chat only uses the visitor's own details, never someone else's (`chat/server/prompt.js`, checklist item 4). A business name the visitor gives about themselves fits that rule; anyone else's details still do not.
 
+7. **Catch manipulation in real chats.** The analysis flags chats where a visitor tried to manipulate the bot, and above all those where it worked: the bot broke a rule, promised something, revealed its instructions, or accepted a false claim.
+   - Each confirmed case is reviewed by a person, fixed in the prompt or code, and added to the stress test set below so it cannot come back.
+   - A flagged chat is evidence for a person, never input for playbooks or the bot's instructions.
+
 ## Before going live: stress test
 
 The chat must be stress-tested for malicious prompts and other manipulation before it is switched on. Cover at least:
