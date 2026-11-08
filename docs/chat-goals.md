@@ -23,6 +23,24 @@ Why the chat exists, what is built, and the decisions still open. Read this befo
    - Each confirmed case is reviewed by a person, fixed in the prompt or code, and added to the stress test set below so it cannot come back.
    - A flagged chat is evidence for a person, never input for playbooks or the bot's instructions.
 
+## What the chat analysis must produce
+
+For each chat, and rolled up across chats in the hub:
+
+1. **Summary and intent.** What the visitor wanted, in short: question, quote, booking, complaint, partnership or other, and which services.
+2. **Content gaps.** Information the visitor needed that the site does not cover or covers badly, with a suggestion of where it belongs:
+   - a new FAQ on an existing page;
+   - added detail on an existing page;
+   - a new information page.
+
+   Adding it to the site also lets the chat answer it, since the chat's knowledge is built from the pages (goal 4).
+3. **Successful flows**, of two kinds:
+   - **Answered:** the visitor got what they came for and was satisfied.
+   - **Converted:** the visitor left their details and asked for a request or quote (goals 3 and 5).
+4. **Manipulation.** Chats where the bot was manipulated, and chats where it could have been: an attempt that failed, or a near miss where the bot wavered. Each gets a short note of what was tried and what the bot did, for a person to review (goal 7).
+
+The per-chat job today covers part of 1 (summary, intent, services), part of 2 (`unanswered`), and the "converted" part of 3 (`outcome: request_sent`). Still missing: partnership intent, where each gap belongs, the "answered" signal, and anything for 4.
+
 ## Before going live: stress test
 
 The chat must be stress-tested for malicious prompts and other manipulation before it is switched on. Cover at least:
