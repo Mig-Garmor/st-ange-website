@@ -2,6 +2,12 @@
 
 Why the chat exists, what is built, and the decisions still open. Read this before planning chat or Website Hub work, and update it when a decision is made.
 
+## The business goal and the priority
+
+- **Business goal:** more customers for **wheel alignments** and **brake jobs**, the two services the shop cares about most. Every chat and website decision is judged against that.
+- **Priority:** the chat analysis ("intel harvesting", goals 2 and 4–7 and the section "What the chat analysis must produce") is **high priority**. It is how we learn what to change in the chat and the site to win those jobs.
+- So the analysis reports alignment and brake chats on their own first: how many there are, how many converted, what stopped the rest, and which questions went unanswered.
+
 ## Goals (set by the owner, 2026-11-08)
 
 1. **Answer visitors without a phone call.** The chat covers the site's FAQs and knowledge and what the business does, so visitors get answers without calling.
