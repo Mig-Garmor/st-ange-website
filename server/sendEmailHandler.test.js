@@ -125,8 +125,8 @@ describe("handleSendEmail", () => {
     );
     expect(requests.submitted.map((r) => r.subject)).toEqual([
       "[Contact] Website message from Ann",
-      "[Contact] Car Alignment from Ann",
-      "[Quote] Car Alignment request from Ann",
+      "[Contact] Wheel Alignment from Ann",
+      "[Quote] Wheel Alignment request from Ann",
     ]);
   });
 

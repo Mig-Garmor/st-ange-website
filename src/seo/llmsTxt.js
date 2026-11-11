@@ -33,7 +33,7 @@ const reportLine = (report) => {
 export function buildLlmsTxt() {
   return `# ${business.name}
 
-> Family-owned auto repair shop and mechanic at ${fullAddress}. Car alignment, A/C repair, brake repair, suspension and steering, and new tires. Call ${business.phone.display}.
+> Family-owned auto repair shop and mechanic at ${fullAddress}. Wheel alignment, A/C repair, brake repair, suspension and steering, and new tires. Call ${business.phone.display}.
 
 ${business.name} is a family-owned St. Lucian mechanic shop on ${business.address.area} in Baytown, Texas. The owner has more than ${business.yearsExperience.replace("+", "")} years of experience, starting at his uncle's tire shop and later running a mobile mechanic business. The shop shows customers the problem and gives a clear price before any work starts.
 
