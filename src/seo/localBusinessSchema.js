@@ -53,7 +53,7 @@ export function businessNode() {
       .filter((slot) => slot.days.length)
       .map((slot) => ({
         "@type": "OpeningHoursSpecification",
-        dayOfWeek: slot.days,
+        dayOfWeek: slot.days.map((day) => `https://schema.org/${day}`),
         opens: slot.opens,
         closes: slot.closes,
       })),
@@ -67,14 +67,12 @@ export function businessNode() {
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "Auto repair services",
+      // Services, not Offers: an Offer reads as a product for sale and validators then demand a price.
       itemListElement: services.map((service) => ({
-        "@type": "Offer",
-        itemOffered: {
-          "@type": "Service",
-          "@id": serviceId(service.slug),
-          name: service.name,
-          url: `${business.siteUrl}/services/${service.slug}`,
-        },
+        "@type": "Service",
+        "@id": serviceId(service.slug),
+        name: service.name,
+        url: `${business.siteUrl}/services/${service.slug}`,
       })),
     },
     sameAs: [links.googleProfile, links.facebook],
