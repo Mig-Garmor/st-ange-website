@@ -41,6 +41,14 @@ Claimed listings with the same name, address and phone fill more of the results 
 - Claim or update Yelp, Facebook, MapQuest, BBB, Bing Places (ChatGPT search relies on Bing), Apple Business Connect and the Baytown Chamber of Commerce with the new address and 832-572-7121.
 - When a listing is live, add its URL to `sameAs` in `src/seo/localBusinessSchema.js`.
 
+## Show the shop's value without listing prices (owner, then code)
+
+Reviews keep praising good prices for excellent work, but the site never shows it. The owner doesn't want prices online because they depend on the make and model, and are only clear after an inspection.
+
+1. **Collect rough prices.** Ask the owner for typical ranges for the main jobs (alignment, brake pads, pads and rotors, A/C recharge), and gather what chains and other Baytown shops charge for the same jobs.
+2. **Choose how to show it** without quoting a fixed price, for example "typically less than the chains" next to the chains' published prices, or a "most cars between $X and $Y, exact price after inspection" range. The owner approves the wording before it goes live.
+3. **Ask the owner whether he offers a free inspection** (brakes, alignment check). If yes, make it the offer on the brake and alignment pages, the quote forms and the Business Profile: a reason to leave contact details and bring the car in.
+
 ## Waiting on owner confirmation
 
 Customers mention these in reviews. They can only become shop statements on the site once the owner confirms them (see review rule 9 in `AGENTS.md`).
