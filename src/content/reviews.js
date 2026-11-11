@@ -7,17 +7,28 @@ import { business, services } from "../config/business.js";
 // `themes` tags only what the text explicitly says; every count shown on the site is computed from them.
 export const googleReviews = {
   rating: 5.0,
-  count: 28,
-  capturedAt: "2026-10-27",
+  count: 29,
+  capturedAt: "2026-11-11",
   url: business.links.reviews,
 };
 
 const reviews = [
   {
+    id: "corey",
+    author: "Corey Lee",
+    rating: 5,
+    postedAgo: "2 weeks ago",
+    services: [],
+    themes: ["people", "value"],
+    url: "https://maps.app.goo.gl/CJqXt3eaR2q173YH9",
+    authorUrl: "https://www.google.com/maps/contrib/101221053886642327652/reviews",
+    text: "Great people, it’s nice going to a mechanic and knowing I’m not going to get price gouged.",
+  },
+  {
     id: "matthew",
     author: "Matthew Potter",
     rating: 5,
-    postedAgo: "a week ago",
+    postedAgo: "3 weeks ago",
     services: ["ac-repair"],
     themes: ["value", "speed", "expertise", "loyalty"],
     url: "https://maps.app.goo.gl/tmFNk1igrYg2ShPQ7",
@@ -160,7 +171,7 @@ const reviews = [
     id: "aime",
     author: "*Aime E *Martinez",
     rating: 5,
-    postedAgo: "7 months ago",
+    postedAgo: "8 months ago",
     services: [],
     themes: ["honesty", "people"],
     url: "https://maps.app.goo.gl/Kw5qufizB9gVBcj27",
@@ -182,7 +193,7 @@ const reviews = [
     id: "kent",
     author: "Kent Rios",
     rating: 5,
-    postedAgo: "8 months ago",
+    postedAgo: "9 months ago",
     services: [],
     themes: ["honesty"],
     url: "https://maps.app.goo.gl/Hdp6rgfyAvXXdiJ27",
