@@ -73,7 +73,7 @@ The reviews exist so AI assistants can trust and verify them. These rules are wh
 1. Open the Google Business Profile: Google Maps, search "St Ange Auto Service Baytown", then the Reviews tab, sorted by Newest.
 2. Compare with `src/content/reviews.js`. For each new written review, add an entry with `id`, `author`, `rating`, `postedAgo`, `services`, `themes`, `url`, `authorUrl` and `text`. Get `url` from the review's Share button, then Copy Link. If the review reports a specific detail (a price comparison, a make, a turnaround time), consider adding it to `customerReports`.
 3. Update `googleReviews.rating`, `googleReviews.count` and `googleReviews.capturedAt`, and refresh `postedAgo` on existing entries.
-4. Re-check service tags. As of 2026-10-27 only `car-alignment` (3 reviews) and `ac-repair` (1 review) have matching reviews; `brake-repair`, `suspension-steering` and `tires` show general reviews. A new review naming one of those services should be tagged so it leads on that page.
+4. Re-check service tags. As of 2026-11-11 only `car-alignment` (3 reviews) and `ac-repair` (1 review) have matching reviews; `brake-repair`, `suspension-steering` and `tires` show general reviews. A new review naming one of those services should be tagged so it leads on that page.
 5. Run `npm run build`, then confirm the new reviews appear in `dist/llms.txt`, on `/reviews` and in the theme counts.
 
 ## Planned: automated review check (not built yet)
