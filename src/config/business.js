@@ -83,7 +83,7 @@ export const hoursAndLocation = [
 export const services = [
   {
     slug: "car-alignment",
-    name: "Car Alignment",
+    name: "Wheel Alignment",
     image: "/assets/car-alignment.webp",
     summary:
       "Car pulling to one side or tires wearing unevenly? We check and adjust your alignment so the car drives straight and your tires last longer.",
