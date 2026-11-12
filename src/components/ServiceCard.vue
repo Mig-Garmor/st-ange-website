@@ -17,7 +17,7 @@ defineProps({
     :data-hub-service="service || null"
   >
     <span class="service-card-container">
-      <img :src="image" :alt="name" class="service-image" loading="lazy" width="200" height="200" />
+      <img :src="image.replace(/\.webp$/, '-400.webp')" :alt="name" class="service-image" loading="lazy" width="200" height="200" />
       <span class="service-name">{{ name }}</span>
     </span>
     <span v-if="summary" class="service-summary">{{ summary }}</span>

@@ -63,6 +63,8 @@ export default defineConfig({
   },
   ssgOptions: {
     dirStyle: "flat",
+    // Inline each page's critical CSS and load the full stylesheet without blocking the first paint.
+    beastiesOptions: { preload: "media" },
     formatting: "minify",
     includedRoutes: staticRoutes,
     onFinished: (outDir) => writeSiteFiles(outDir || undefined),
