@@ -21,7 +21,7 @@ const rating = googleReviews.rating.toFixed(1);
 
 
 usePageSeo({
-  title: "Auto Repair Shop & Mechanic in Baytown, TX | St Ange Auto Service",
+  title: "Auto Repair & Mechanic in Baytown, TX | St Ange Auto Service",
   description: pageDescriptions.home,
   path: "/",
 });
