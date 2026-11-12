@@ -38,7 +38,7 @@ async function close() {
       type="button"
       class="chat-bubble"
       :class="{ 'is-hidden': open && ready }"
-      :aria-label="open ? 'Close chat' : 'Chat with us'"
+      :aria-label="open ? 'Close chat' : 'Ask us a question'"
       :aria-expanded="open"
       :aria-controls="panel ? 'chat-panel' : undefined"
       :aria-busy="open && !ready"
@@ -50,13 +50,14 @@ async function close() {
           d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2ZM6 9h12v2H6V9Zm8 5H6v-2h8v2Zm4-6H6V6h12v2Z"
         />
       </svg>
+      <span class="chat-bubble-label" aria-hidden="true">Ask</span>
     </button>
   </div>
 </template>
 
 <style scoped>
 .chat-bubble {
-  @apply fixed right-4 z-[999] flex h-14 w-14 items-center justify-center rounded-full;
+  @apply fixed right-4 z-[999] flex h-14 items-center justify-center gap-2 rounded-full pl-4 pr-5;
   @apply bg-brand-navy text-brand-yellow border-2 border-brand-yellow shadow-[0_4px_12px_rgba(0,0,0,0.25)];
   @apply transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-yellow/60;
   bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px) + 0.75rem);
@@ -89,5 +90,8 @@ async function close() {
   .chat-bubble.is-hidden {
     transform: none;
   }
+}
+.chat-bubble-label {
+  @apply text-[17px] font-bold leading-none;
 }
 </style>
