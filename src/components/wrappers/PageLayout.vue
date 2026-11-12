@@ -12,6 +12,7 @@ defineProps({
 </script>
 
 <template>
+  <a href="#main" class="skip-link">Skip to main content</a>
   <PageHeaderComponent />
   <RelocationNotice />
   <slot />

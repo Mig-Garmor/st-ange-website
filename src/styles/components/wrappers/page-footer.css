@@ -31,7 +31,8 @@
     @apply mt-8 pt-4 border-t border-white/20 text-center text-[13px] text-white/70;
 
     a {
-      @apply underline underline-offset-2 hover:text-white;
+      /* inline-block + padding gives the 14px-tall link a 24px+ tap target (WCAG 2.5.8). */
+      @apply inline-block py-1.5 underline underline-offset-2 hover:text-white;
     }
   }
 }

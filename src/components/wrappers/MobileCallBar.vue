@@ -34,7 +34,7 @@ onBeforeUnmount(() => observer?.disconnect());
     </a>
     <a :href="business.links.maps" target="_blank" rel="noopener" class="directions">
       <Icon icon="mdi:directions" width="20" height="20" aria-hidden="true" />
-      Directions
+      Directions<span class="sr-only"> (opens in a new tab)</span>
     </a>
   </nav>
 </template>

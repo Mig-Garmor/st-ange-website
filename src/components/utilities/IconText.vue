@@ -20,6 +20,7 @@ defineProps({
   >
     <Icon :icon="icon" :width="iconSize" :height="iconSize" aria-hidden="true" />
     <span>{{ text }}</span>
+    <span v-if="external" class="sr-only"> (opens in a new tab)</span>
   </component>
 </template>
 

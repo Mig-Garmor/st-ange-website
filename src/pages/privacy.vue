@@ -17,7 +17,7 @@ usePageSeo({
 
 <template>
   <PageLayout>
-    <main class="privacy-page-container">
+    <main id="main" class="privacy-page-container">
       <header class="privacy-hero">
         <div class="privacy-hero-inner">
           <h1>Privacy</h1>

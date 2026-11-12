@@ -21,7 +21,7 @@ usePageSeo({
 
 <template>
   <PageLayout>
-    <main class="contact-page">
+    <main id="main" class="contact-page">
       <header class="contact-intro">
         <h1>Contact St Ange Auto Service in Baytown, TX</h1>
         <p>
@@ -40,7 +40,7 @@ usePageSeo({
           />
           <IconText icon="mdi:location" :text="fullAddress" :href="business.links.maps" external :icon-size="20" />
           <p class="contact-address-note">{{ addressNote }}</p>
-          <a :href="business.links.maps" target="_blank" rel="noopener" class="contact-directions">Get directions →</a>
+          <a :href="business.links.maps" target="_blank" rel="noopener" class="contact-directions">Get directions →<span class="sr-only"> (opens in a new tab)</span></a>
           <div class="contact-hours">
             <h3>Hours</h3>
             <HoursList compact />

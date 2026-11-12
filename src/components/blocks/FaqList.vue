@@ -19,7 +19,7 @@ defineProps({
           <p class="faq-sources-title">Sources</p>
           <ul>
             <li v-for="source in item.sources" :key="source.href">
-              <a :href="source.href" target="_blank" rel="noopener">{{ source.label }} ↗</a>
+              <a :href="source.href" target="_blank" rel="noopener">{{ source.label }} ↗<span class="sr-only"> (opens in a new tab)</span></a>
             </li>
           </ul>
         </div>
