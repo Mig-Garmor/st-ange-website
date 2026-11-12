@@ -25,6 +25,7 @@ defineProps({
   >
     <Icon v-if="icon" :icon="icon" :width="iconSize" :height="iconSize" aria-hidden="true" />
     {{ text }}
+    <span v-if="external" class="sr-only"> (opens in a new tab)</span>
   </a>
 </template>
 

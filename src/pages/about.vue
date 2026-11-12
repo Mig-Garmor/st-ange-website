@@ -53,7 +53,7 @@ const story = [
 
 <template>
   <PageLayout>
-    <main class="about-us-page-container">
+    <main id="main" class="about-us-page-container">
       <header class="about-hero">
         <div class="about-hero-inner">
           <h1>About St Ange Auto Service in Baytown, TX</h1>

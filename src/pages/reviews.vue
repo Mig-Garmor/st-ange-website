@@ -25,7 +25,7 @@ usePageSeo({
 
 <template>
   <PageLayout>
-    <main class="reviews-page">
+    <main id="main" class="reviews-page">
       <header class="reviews-hero">
         <div class="reviews-hero-inner">
           <h1>St Ange Auto Service Reviews in Baytown, TX</h1>

@@ -24,7 +24,7 @@ usePageSeo({
 
 <template>
   <PageLayout>
-    <main class="service-page">
+    <main id="main" class="service-page">
       <header class="service-hero service-hero--compact">
         <div class="service-hero-inner">
           <div class="service-hero-text">

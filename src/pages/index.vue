@@ -36,7 +36,7 @@ const trustPoints = [
 
 <template>
   <PageLayout call-bar-hidden-over=".hero">
-    <main class="index-page-container">
+    <main id="main" class="index-page-container">
       <header class="hero">
         <div class="hero-overlay">
           <div class="hero-heading">
@@ -62,8 +62,8 @@ const trustPoints = [
         </div>
       </header>
 
-      <section class="page-section intro">
-        <h2 class="section-title">Your Local Mechanic in Baytown</h2>
+      <section class="page-section intro" aria-labelledby="intro-title">
+        <h2 id="intro-title" class="section-title">Your Local Mechanic in Baytown</h2>
         <p>
           St Ange Auto Service is a family-owned auto repair shop at {{ fullAddress }}.
           Our owner has been fixing cars for more than 30 years, starting at his uncle's tire shop
@@ -79,8 +79,8 @@ const trustPoints = [
         </p>
       </section>
 
-      <section id="services" class="page-section services-section">
-        <h2 class="section-title">Our Auto Repair Services</h2>
+      <section id="services" class="page-section services-section" aria-labelledby="services-title">
+        <h2 id="services-title" class="section-title">Our Auto Repair Services</h2>
         <div class="services">
           <ServiceCard
             v-for="service in services"
@@ -100,8 +100,8 @@ const trustPoints = [
         </div>
       </section>
 
-      <section class="page-section">
-        <h2 class="section-title">Why Baytown Drivers Choose Us</h2>
+      <section class="page-section" aria-labelledby="why-us-title">
+        <h2 id="why-us-title" class="section-title">Why Baytown Drivers Choose Us</h2>
         <ul class="reasons">
           <li v-for="reason in reasons" :key="reason.title" class="reason">
             <span class="reason-icon">
@@ -113,8 +113,8 @@ const trustPoints = [
         </ul>
       </section>
 
-      <section class="page-section reviews-section">
-        <h2 class="section-title">What Our Customers Say</h2>
+      <section class="page-section reviews-section" aria-labelledby="reviews-title">
+        <h2 id="reviews-title" class="section-title">What Our Customers Say</h2>
         <p class="section-lead">
           Rated {{ rating }} out of 5 from {{ googleReviews.count }} Google reviews.
         </p>
@@ -137,9 +137,9 @@ const trustPoints = [
         </div>
       </section>
 
-      <section class="page-section visit">
+      <section class="page-section visit" aria-labelledby="visit-title">
         <div class="visit-details">
-          <h2 class="section-title">Visit Our Baytown Shop</h2>
+          <h2 id="visit-title" class="section-title">Visit Our Baytown Shop</h2>
           <IconText icon="mdi:location" :text="fullAddress" :href="business.links.maps" external />
           <p class="address-note">{{ addressNote }}</p>
           <IconText icon="mdi:phone" :text="business.phone.display" :href="business.phone.href" />
@@ -150,8 +150,8 @@ const trustPoints = [
         <GoogleMapsWidget />
       </section>
 
-      <section class="page-section faq-section">
-        <h2 class="section-title">Frequently Asked Questions</h2>
+      <section class="page-section faq-section" aria-labelledby="faq-title">
+        <h2 id="faq-title" class="section-title">Frequently Asked Questions</h2>
         <FaqList :items="faqs">
           <template #answer="{ item }">
             <HoursList v-if="item.id === 'hours'" />

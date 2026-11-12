@@ -24,3 +24,7 @@
     box-shadow: 0 0 0 3px #f6c220;
   }
 }
+
+.skip-link {
+  @apply sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:font-bold focus:text-brand-navy focus:shadow-lg;
+}

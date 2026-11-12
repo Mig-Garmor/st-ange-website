@@ -23,10 +23,10 @@ defineProps({
       <p>“{{ text }}”</p>
     </blockquote>
     <figcaption class="review-meta">
-      <a v-if="authorUrl" :href="authorUrl" target="_blank" rel="noopener nofollow" class="review-author">{{ author }}</a>
+      <a v-if="authorUrl" :href="authorUrl" target="_blank" rel="noopener nofollow" class="review-author">{{ author }}<span class="sr-only"> (opens in a new tab)</span></a>
       <span v-else class="review-author">{{ author }}</span>
       <span class="review-service">{{ service ? `${service} · ` : "" }}Google review</span>
-      <a :href="url" target="_blank" rel="noopener" class="review-source">Read on Google ↗</a>
+      <a :href="url" target="_blank" rel="noopener" class="review-source" :aria-label="`Read ${author}'s review on Google (opens in a new tab)`">Read on Google ↗</a>
     </figcaption>
   </figure>
 </template>

@@ -43,7 +43,7 @@ usePageSeo({
 
 <template>
   <PageLayout call-bar-hidden-over=".service-hero">
-    <main class="service-page">
+    <main id="main" class="service-page">
       <header class="service-hero">
         <div class="service-hero-inner">
           <div class="service-hero-text">
