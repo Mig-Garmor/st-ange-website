@@ -8,7 +8,7 @@
   }
 
   .header-brand {
-    @apply flex flex-col justify-center gap-1 min-w-0 max-w-[200px] md:max-w-[300px];
+    @apply flex flex-col justify-center min-w-0 max-w-[200px] xl:max-w-[300px];
   }
 
   .logo img {
@@ -20,16 +20,17 @@
   }
 
   .contact-info--mobile {
-    @apply gap-0 md:hidden;
+    /* Logo, contact row and nav only fit side by side from ~1150px; below xl contact sits under the logo. */
+    @apply gap-0 xl:hidden;
 
     /* 24px links with no gap: the 20px links 4px apart failed the tap-target check. */
     .icon-text-container {
-      @apply min-h-6;
+      @apply min-h-6 lg:text-[13px] lg:font-bold;
     }
   }
 
   .contact-info--desktop {
-    @apply hidden md:flex md:gap-[10px] lg:flex-row lg:items-center lg:gap-[60px];
+    @apply hidden xl:flex xl:flex-row xl:items-center xl:gap-[60px];
   }
 
   .nav-links {
