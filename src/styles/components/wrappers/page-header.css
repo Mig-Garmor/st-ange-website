@@ -20,7 +20,12 @@
   }
 
   .contact-info--mobile {
-    @apply md:hidden;
+    @apply gap-0 md:hidden;
+
+    /* 24px links with no gap: the 20px links 4px apart failed the tap-target check. */
+    .icon-text-container {
+      @apply min-h-6;
+    }
   }
 
   .contact-info--desktop {

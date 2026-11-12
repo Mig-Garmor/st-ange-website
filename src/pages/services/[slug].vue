@@ -61,7 +61,7 @@ usePageSeo({
               />
             </div>
           </div>
-          <img :src="service.image" :alt="service.name" class="service-hero-image" width="260" height="260" />
+          <img :src="service.image.replace(/\.webp$/, '-600.webp')" :alt="service.name" class="service-hero-image" width="260" height="260" />
         </div>
       </header>
 
