@@ -65,6 +65,7 @@ Customers mention these in reviews. They can only become shop statements on the 
 - The Hunter alignment rack, and whether the shop can align lowered cars.
 - Whether the shop works on European and Asian makes.
 - Transmission work and no-start diagnostics as services, possibly with their own service pages.
+- **The exact list of services the shop offers**, so the flyer, the website and the Business Profile list the same ones. Then add or remove service pages to match.
 
 ## Tooling
 
