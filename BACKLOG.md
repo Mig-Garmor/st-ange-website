@@ -49,6 +49,14 @@ Reviews keep praising good prices for excellent work, but the site never shows i
 2. **Choose how to show it** without quoting a fixed price, for example "typically less than the chains" next to the chains' published prices, or a "most cars between $X and $Y, exact price after inspection" range. The owner approves the wording before it goes live.
 3. **Ask the owner whether he offers a free inspection** (brakes, alignment check). If yes, make it the offer on the brake and alignment pages, the quote forms and the Business Profile: a reason to leave contact details and bring the car in.
 
+## Media to ask the owner for
+
+Clear audio matters most in the two process videos: the owner explaining each step in his own words is what builds trust. Phone video is fine.
+
+1. **Alignment video.** How a typical alignment works on the Hunter machine, step by step. For the alignment page.
+2. **Brake video.** How a typical brake repair works, step by step. For the brake page.
+3. **Facilities video.** The shop, bays and equipment. For the homepage.
+
 ## Waiting on owner confirmation
 
 Customers mention these in reviews. They can only become shop statements on the site once the owner confirms them (see review rule 9 in `AGENTS.md`).
@@ -57,6 +65,7 @@ Customers mention these in reviews. They can only become shop statements on the 
 - The Hunter alignment rack, and whether the shop can align lowered cars.
 - Whether the shop works on European and Asian makes.
 - Transmission work and no-start diagnostics as services, possibly with their own service pages.
+- **The exact list of services the shop offers**, so the flyer, the website and the Business Profile list the same ones. Then add or remove service pages to match.
 
 ## Tooling
 
