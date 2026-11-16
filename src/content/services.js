@@ -176,6 +176,56 @@ const details = {
     ],
   },
 
+  "transmission-repair": {
+    seoTitle: "Transmission Repair in Baytown, TX | St Ange Auto Service",
+    metaDescription:
+      "Slipping, shifting or leaks diagnosed first. Rated 5.0 on Google, upfront pricing.",
+    h1: "Transmission Repair in Baytown, TX",
+    zips: serviceZips,
+    quote: {
+      button: "Get a transmission quote",
+      title: "Get a transmission quote",
+      text: "Tell us your vehicle and what you're noticing, and we'll call you back with a price and a time to bring it in.",
+    },
+    intro: [
+      "Your transmission sends the engine's power to the wheels and changes gears so the car moves smoothly at every speed. When it starts slipping, shifting hard or leaking, the cause can be anything from low or worn-out fluid to a faulty sensor or worn internal parts, and the fix ranges from a small repair to a major one.",
+      `Transmission work can be one of the bigger bills a driver faces, so an honest diagnosis matters. At our Baytown auto repair shop we find the actual cause first, explain it in plain language and give you the price before any work starts. We serve drivers across Baytown, including the ${serviceZipsText} ZIP codes.`,
+    ],
+    signsTitle: "Signs your transmission needs checking",
+    signs: [
+      "Slipping: the engine revs climb but the car doesn't speed up",
+      "Hard, rough or delayed shifts",
+      "A pause before the car moves when you shift into Drive or Reverse",
+      "Red or brown fluid leaking under the car",
+      "Whining, humming or clunking that changes with the gear",
+      "A burning smell, or the check engine light is on",
+    ],
+    processTitle: "How we handle transmission problems",
+    process: [
+      "Listening to what you've noticed and test-driving the car when it's safe to",
+      "Checking the fluid level and condition, and looking for leaks",
+      "Reading the trouble codes and checking sensors and wiring",
+      "Explaining what we found and giving you the price before any work starts",
+    ],
+    faqs: [
+      {
+        question: "Does a transmission problem always mean a new transmission?",
+        answer:
+          "No. Low or worn-out fluid, leaks and faulty sensors can cause the same symptoms as a failing transmission. We find the actual cause before recommending anything bigger.",
+      },
+      {
+        question: "How much does transmission repair cost?",
+        answer:
+          "It depends on what's wrong and on your vehicle: fixing a leak costs far less than repairing internal parts. We diagnose the problem and give you the price before any work starts. Request a quote or call us to get started.",
+      },
+      {
+        question: "Is it safe to keep driving with a slipping transmission?",
+        answer:
+          "It's best not to. Slipping usually gets worse, and driving on it can turn a smaller repair into a bigger one. Bring it in as soon as you can.",
+      },
+    ],
+  },
+
   "suspension-steering": {
     seoTitle: "Suspension & Steering Repair in Baytown, TX | St Ange Auto Service",
     metaDescription:

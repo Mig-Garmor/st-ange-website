@@ -178,7 +178,7 @@
   }
 
   .other-services-grid {
-    @apply grid-cols-2 md:grid-cols-4;
+    @apply grid-cols-2 md:grid-cols-3 lg:grid-cols-5;
   }
 
   .services-overview {
