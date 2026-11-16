@@ -117,7 +117,7 @@ const reviews = [
     author: "Martin Phil",
     rating: 5,
     postedAgo: "2 years ago",
-    services: [],
+    services: ["transmission-repair"],
     themes: ["honesty", "speed", "value", "expertise", "loyalty"],
     url: "https://maps.app.goo.gl/ptpjx8srs7hCexh27",
     authorUrl: "https://www.google.com/maps/contrib/106333045948063748067/reviews",
@@ -380,7 +380,7 @@ export function reviewsForService(slug, limit = 3) {
     hasMatches: matching.length > 0,
     cards: [
       ...matching.map((review) => toCard(review, serviceName(slug))),
-      ...general.map((review) => toCard(review, "")),
+      ...general.filter((review) => !matching.includes(review)).map((review) => toCard(review, "")),
     ].slice(0, limit),
   };
 }

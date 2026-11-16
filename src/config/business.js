@@ -103,6 +103,13 @@ export const services = [
       "Squealing, grinding or a soft pedal? We inspect pads, rotors and the whole brake system, then fix only what needs fixing.",
   },
   {
+    slug: "transmission-repair",
+    name: "Transmission Repair",
+    image: "/assets/transmission-repair.webp",
+    summary:
+      "Slipping, hard shifts or a leak under the car? We find out what's actually wrong with your transmission before recommending any repair.",
+  },
+  {
     slug: "suspension-steering",
     name: "Suspension & Steering",
     image: "/assets/suspension-repair.webp",

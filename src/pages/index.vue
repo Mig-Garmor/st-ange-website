@@ -69,7 +69,8 @@ const trustPoints = [
           Our owner has been fixing cars for more than 30 years, starting at his uncle's tire shop
           and later running a mobile mechanic business from his truck. Today our Baytown shop handles
           <RouterLink to="/services/car-alignment">wheel alignments</RouterLink> on our new alignment machine,
-          A/C repair, <RouterLink to="/services/brake-repair">brake repair</RouterLink>, suspension and steering,
+          A/C repair, <RouterLink to="/services/brake-repair">brake repair</RouterLink>,
+          <RouterLink to="/services/transmission-repair">transmission repair</RouterLink>, suspension and steering,
           and new tires.
         </p>
         <p>
