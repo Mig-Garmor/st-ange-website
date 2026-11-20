@@ -12,7 +12,14 @@ defineProps({
         <slot name="answer" :item="item">
           <p>{{ item.answer }}</p>
         </slot>
-        <RouterLink v-if="item.link" :to="`/services/${item.link.slug}`" class="faq-link">
+        <RouterLink
+          v-if="item.link"
+          :to="`/services/${item.link.slug}`"
+          class="faq-link"
+          data-hub-tag="service_click"
+          :data-hub-service="item.link.slug"
+          data-hub-from="faq"
+        >
           {{ item.link.label }} →
         </RouterLink>
         <div v-if="item.sources?.length" class="faq-sources">
