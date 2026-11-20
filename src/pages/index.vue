@@ -68,9 +68,9 @@ const trustPoints = [
           St Ange Auto Service is a family-owned auto repair shop at {{ fullAddress }}.
           Our owner has been fixing cars for more than 30 years, starting at his uncle's tire shop
           and later running a mobile mechanic business from his truck. Today our Baytown shop handles
-          <RouterLink to="/services/car-alignment">wheel alignments</RouterLink> on our new alignment machine,
-          A/C repair, <RouterLink to="/services/brake-repair">brake repair</RouterLink>,
-          <RouterLink to="/services/transmission-repair">transmission repair</RouterLink>, suspension and steering,
+          <RouterLink to="/services/car-alignment" data-hub-tag="service_click" data-hub-service="car-alignment" data-hub-from="intro">wheel alignments</RouterLink> on our new alignment machine,
+          A/C repair, <RouterLink to="/services/brake-repair" data-hub-tag="service_click" data-hub-service="brake-repair" data-hub-from="intro">brake repair</RouterLink>,
+          <RouterLink to="/services/transmission-repair" data-hub-tag="service_click" data-hub-service="transmission-repair" data-hub-from="intro">transmission repair</RouterLink>, suspension and steering,
           and new tires.
         </p>
         <p>

@@ -38,6 +38,9 @@ const year = new Date().getFullYear();
           v-for="service in services"
           :key="service.slug"
           :to="`/services/${service.slug}`"
+          data-hub-tag="service_click"
+          :data-hub-service="service.slug"
+          data-hub-from="footer"
         >
           {{ service.name }}
         </RouterLink>

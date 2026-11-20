@@ -103,7 +103,14 @@ usePageSeo({
         <div class="related-callout">
           <h2>{{ service.related.title }}</h2>
           <p>{{ service.related.text }}</p>
-          <Badge :text="service.related.label" icon="mdi:arrow-right" :to="`/services/${service.related.slug}`" />
+          <Badge
+            :text="service.related.label"
+            icon="mdi:arrow-right"
+            :to="`/services/${service.related.slug}`"
+            data-hub-tag="service_click"
+            :data-hub-service="service.related.slug"
+            data-hub-from="related"
+          />
         </div>
       </section>
 

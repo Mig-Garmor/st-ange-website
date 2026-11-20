@@ -4,7 +4,7 @@ defineProps({
   name: { type: String, required: true },
   to: { type: [String, Object], required: true },
   summary: { type: String, default: "" },
-  // The service's slug: clicks on the card are counted in Website Hub as service_click.
+  // The service's slug: clicks on the card are counted in Website Hub as service_click, from: card.
   service: { type: String, default: "" },
 });
 </script>
@@ -15,6 +15,7 @@ defineProps({
     class="service-card"
     :data-hub-tag="service ? 'service_click' : null"
     :data-hub-service="service || null"
+    :data-hub-from="service ? 'card' : null"
   >
     <span class="service-card-container">
       <img :src="image.replace(/\.webp$/, '-400.webp')" :alt="name" class="service-image" loading="lazy" width="200" height="200" />

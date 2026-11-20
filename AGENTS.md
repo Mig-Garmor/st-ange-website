@@ -52,6 +52,7 @@ Never type business facts into a page or component. Change the source below and 
 - **New page:** add it under `src/pages/`. The sitemap picks it up automatically, but the "Pages" list in `src/seo/llmsTxt.js` is written by hand, so add it there too, and add it to `src/config/navigation.js` if it belongs in the menus.
 - **After any of these:** run `npm run build` and check `dist/llms.txt`, the JSON-LD in `dist/index.html` and a service page, and `dist/sitemap.xml`.
 - **Structured data:** every page outputs one JSON-LD graph (business, site, the page, its breadcrumbs, and the Service on service pages), linked by `@id`. Never mark up the Google reviews or the rating (`Review`, `AggregateRating`): Google forbids a business marking up its own reviews or ratings copied from another site, and a breach can remove every rich result on the site. The reviews stay visible on the pages; the build check fails if review markup comes back.
+- **Service link tracking:** every link to a service page carries `data-hub-tag="service_click"`, `data-hub-service="<slug>"` and `data-hub-from="<card|footer|intro|faq|related>"`, so Website Hub counts each click by service and by where on the page it was. The build fails on a service link without them; a page's link to itself is exempt.
 
 ## Google reviews: trust rules
 
