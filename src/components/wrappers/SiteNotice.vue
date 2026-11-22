@@ -23,6 +23,7 @@ const duration = `${Math.round(((textLength * 7.4 + 88) * 2) / 40)}s`;
     :aria-label="siteNotice.tag"
   >
     <span class="notice-emoji" aria-hidden="true">{{ siteNotice.emoji }}</span>
+    <span class="side-emoji" aria-hidden="true">{{ siteNotice.leadEmoji }}</span>
     <span class="notice-tag">{{ siteNotice.tag }}</span>
 
     <div class="ticker">

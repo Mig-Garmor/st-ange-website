@@ -11,6 +11,10 @@
     @apply shrink-0 grid place-items-center w-8 h-8 rounded-full bg-zinc-700 text-[20px] leading-none;
   }
 
+  .side-emoji {
+    @apply shrink-0 text-[26px] leading-none;
+  }
+
   .ticker {
     @apply flex-1 min-w-0 overflow-hidden;
     mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent);
