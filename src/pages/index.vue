@@ -14,7 +14,6 @@ import { usePageSeo } from "@composables/usePageSeo";
 import { pageDescriptions } from "@/content/pages";
 import { business, fullAddress, services } from "@/config/business";
 import { reasons, faqs } from "@/content/home";
-import { addressNote } from "@/content/relocation";
 import { featuredReviews, googleReviews } from "@/content/reviews";
 
 const rating = googleReviews.rating.toFixed(1);
@@ -142,7 +141,6 @@ const trustPoints = [
         <div class="visit-details">
           <h2 id="visit-title" class="section-title">Visit Our Baytown Shop</h2>
           <IconText icon="mdi:location" :text="fullAddress" :href="business.links.maps" external />
-          <p class="address-note">{{ addressNote }}</p>
           <IconText icon="mdi:phone" :text="business.phone.display" :href="business.phone.href" />
           <HoursList class="mt-2" />
           <p class="text-gray-700">Give us a call before you come in so we can make sure a bay is free.</p>

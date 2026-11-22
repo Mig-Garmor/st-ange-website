@@ -8,7 +8,6 @@ import Badge from "@components/utilities/Badge.vue";
 import { usePageSeo } from "@composables/usePageSeo";
 import { pageDescriptions } from "@/content/pages";
 import { business, fullAddress } from "@/config/business";
-import { addressNote } from "@/content/relocation";
 
 usePageSeo({
   title: "Contact St Ange Auto Service | Auto Repair in Baytown, TX",
@@ -39,7 +38,6 @@ usePageSeo({
             class="contact-call"
           />
           <IconText icon="mdi:location" :text="fullAddress" :href="business.links.maps" external :icon-size="20" />
-          <p class="contact-address-note">{{ addressNote }}</p>
           <a :href="business.links.maps" target="_blank" rel="noopener" class="contact-directions">Get directions →<span class="sr-only"> (opens in a new tab)</span></a>
           <div class="contact-hours">
             <h3>Hours</h3>

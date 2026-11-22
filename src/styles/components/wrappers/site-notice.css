@@ -1,11 +1,14 @@
-.relocation-notice {
+.site-notice {
   @apply flex items-center gap-2 sm:gap-3 h-[42px] px-[20px] overflow-hidden;
   @apply bg-amber-100 text-brand-navy border-b border-brand-yellow;
 
   .notice-tag {
     @apply shrink-0 flex items-center gap-1 px-2 py-[3px] rounded bg-brand-navy text-brand-yellow;
     @apply text-[12px] font-bold uppercase tracking-wide whitespace-nowrap;
-    @apply hover:bg-brand-navy/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-navy;
+  }
+
+  .notice-emoji {
+    @apply shrink-0 text-[24px] leading-none;
   }
 
   .ticker {
@@ -15,7 +18,7 @@
 
   .ticker-track {
     @apply flex w-max;
-    animation: relocation-ticker 30s linear infinite;
+    animation: site-notice-ticker 30s linear infinite;
   }
 
   .ticker-item {
@@ -37,14 +40,14 @@
   }
 }
 
-@keyframes relocation-ticker {
+@keyframes site-notice-ticker {
   to {
     transform: translateX(-50%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .relocation-notice {
+  .site-notice {
     @apply h-auto py-[10px];
 
     .ticker {

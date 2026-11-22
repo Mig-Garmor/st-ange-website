@@ -1,7 +1,7 @@
 import { localFlag, localOverride } from "./localOverride.js";
 import { business, chatUnavailable, fullAddress, serviceZipsText, services } from "../src/config/business.js";
 import { faqs } from "../src/content/home.js";
-import { relocationFaq } from "../src/content/relocation.js";
+import { isNoticeActive, noticeLine } from "../src/content/notice.js";
 import { googleReviews } from "../src/content/reviews.js";
 import { servicePages } from "../src/content/services.js";
 
@@ -28,10 +28,10 @@ const hoursText = business.hours
 const knowledge = `## Business knowledge
 
 ${business.name} is a family-owned auto repair shop. Owner experience: ${business.yearsExperience} years.
-Address: ${fullAddress}. ${relocationFaq.answer}
+Address: ${fullAddress}
 Phone: ${business.phone.display}
 Hours: ${hoursText}
-ZIP codes served: ${serviceZipsText}
+${isNoticeActive() ? `${noticeLine}\n` : ""}ZIP codes served: ${serviceZipsText}
 Google rating: ${googleReviews.rating.toFixed(1)} out of 5 from ${googleReviews.count} reviews
 
 ## Services

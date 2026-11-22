@@ -1,6 +1,5 @@
 // Imported by server code in Node, so only relative imports work here.
 import { business, fullAddress } from "../config/business.js";
-import { relocationFaq } from "./relocation.js";
 import { reviewSource } from "./reviews.js";
 
 export const reasons = [
@@ -27,7 +26,6 @@ export const reasons = [
 ];
 
 export const faqs = [
-  relocationFaq,
   {
     question: "Where is St Ange Auto Service located?",
     answer: `We're at ${fullAddress}, on ${business.address.area} in Baytown. Use the map on this page for directions.`,

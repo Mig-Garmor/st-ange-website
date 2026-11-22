@@ -1,39 +1,29 @@
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
-import { business } from "@/config/business";
-import { relocationNotice } from "@/content/relocation";
+import { isNoticeActive, siteNotice } from "@/content/notice";
 
 // Four copies keep the loop seamless up to ~2700px wide; only the first is exposed to assistive tech.
 const COPIES = 4;
 const isPaused = ref(false);
+// Checked in the browser too, so the banner disappears after the date without waiting for a rebuild.
+const isActive = ref(isNoticeActive());
+onMounted(() => (isActive.value = isNoticeActive()));
 
 // One cycle scrolls two copies; ~7.4px per character at 15px plus 88px of padding, at ~40px/s.
-const textLength = `${relocationNotice.lead} ${relocationNotice.parts.map((part) => part.text).join("")}`.length;
+const textLength = `${siteNotice.lead} ${siteNotice.parts.map((part) => part.text).join("")}`.length;
 const duration = `${Math.round(((textLength * 7.4 + 88) * 2) / 40)}s`;
 </script>
 
 <template>
   <aside
-    class="relocation-notice"
+    v-if="isActive"
+    class="site-notice"
     :class="{ 'is-paused': isPaused }"
-    aria-label="Shop relocation"
+    :aria-label="siteNotice.tag"
   >
-    <a
-      :href="business.links.maps"
-      target="_blank"
-      rel="noopener"
-      class="notice-tag"
-      :aria-label="`New location, ${business.address.street}, opens Google Maps in a new tab`"
-    >
-      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-        <path
-          d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"
-          fill="currentColor"
-        />
-      </svg>
-      New location
-    </a>
+    <span class="notice-emoji" aria-hidden="true">{{ siteNotice.emoji }}</span>
+    <span class="notice-tag">{{ siteNotice.tag }}</span>
 
     <div class="ticker">
       <div class="ticker-track" :style="{ animationDuration: duration }">
@@ -43,7 +33,7 @@ const duration = `${Math.round(((textLength * 7.4 + 88) * 2) / 40)}s`;
           class="ticker-item"
           :aria-hidden="copy > 1 ? 'true' : undefined"
         >
-          <strong>{{ relocationNotice.lead }}</strong>&#32;<template v-for="part in relocationNotice.parts" :key="part.text"><mark v-if="part.key">{{ part.text }}</mark><template v-else>{{ part.text }}</template></template>
+          <strong>{{ siteNotice.lead }}</strong>&#32;<template v-for="part in siteNotice.parts" :key="part.text"><mark v-if="part.key">{{ part.text }}</mark><template v-else>{{ part.text }}</template></template>
         </p>
       </div>
     </div>
@@ -64,4 +54,4 @@ const duration = `${Math.round(((textLength * 7.4 + 88) * 2) / 40)}s`;
   </aside>
 </template>
 
-<style src="@styles/components/wrappers/relocation-notice.css"></style>
+<style src="@styles/components/wrappers/site-notice.css"></style>
