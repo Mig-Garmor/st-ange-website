@@ -8,11 +8,7 @@
   }
 
   .notice-emoji {
-    @apply shrink-0 grid place-items-center w-8 h-8 text-[26px] leading-none;
-
-    &.has-circle {
-      @apply rounded-full bg-zinc-700 text-[20px];
-    }
+    @apply shrink-0 grid place-items-center w-8 h-8 rounded-full bg-zinc-700 text-[20px] leading-none;
   }
 
   .ticker {
@@ -27,6 +23,10 @@
 
   .ticker-item {
     @apply shrink-0 pl-6 pr-16 text-[15px] whitespace-nowrap;
+
+    .lead-emoji {
+      @apply text-[22px] leading-none align-middle;
+    }
 
     mark {
       @apply px-1 rounded-sm bg-brand-yellow text-brand-navy font-bold box-decoration-clone;

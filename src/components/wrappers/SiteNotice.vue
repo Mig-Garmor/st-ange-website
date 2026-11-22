@@ -22,13 +22,7 @@ const duration = `${Math.round(((textLength * 7.4 + 88) * 2) / 40)}s`;
     :class="{ 'is-paused': isPaused }"
     :aria-label="siteNotice.tag"
   >
-    <span
-      v-for="emoji in siteNotice.emojis"
-      :key="emoji.char"
-      class="notice-emoji"
-      :class="{ 'has-circle': emoji.circle }"
-      aria-hidden="true"
-    >{{ emoji.char }}</span>
+    <span class="notice-emoji" aria-hidden="true">{{ siteNotice.emoji }}</span>
     <span class="notice-tag">{{ siteNotice.tag }}</span>
 
     <div class="ticker">
@@ -39,7 +33,7 @@ const duration = `${Math.round(((textLength * 7.4 + 88) * 2) / 40)}s`;
           class="ticker-item"
           :aria-hidden="copy > 1 ? 'true' : undefined"
         >
-          <strong>{{ siteNotice.lead }}</strong>&#32;<template v-for="part in siteNotice.parts" :key="part.text"><mark v-if="part.key">{{ part.text }}</mark><template v-else>{{ part.text }}</template></template>
+          <strong>{{ siteNotice.lead }}</strong>&#32;<span class="lead-emoji" aria-hidden="true">{{ siteNotice.leadEmoji }}</span>&#32;<template v-for="part in siteNotice.parts" :key="part.text"><mark v-if="part.key">{{ part.text }}</mark><template v-else>{{ part.text }}</template></template>
         </p>
       </div>
     </div>
