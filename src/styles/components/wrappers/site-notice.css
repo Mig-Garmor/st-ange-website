@@ -8,7 +8,7 @@
   }
 
   .notice-emoji {
-    @apply shrink-0 text-[24px] leading-none;
+    @apply shrink-0 grid place-items-center w-8 h-8 rounded-full bg-white text-[20px] leading-none shadow-sm;
   }
 
   .ticker {
