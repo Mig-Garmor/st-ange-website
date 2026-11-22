@@ -1,6 +1,6 @@
 // Imported by vite.config.js at build time, so only relative imports work here.
 import { business, fullAddress, hoursSummary, services } from "../config/business.js";
-import { relocationLlmsLine } from "../content/relocation.js";
+import { isNoticeActive, noticeLine } from "../content/notice.js";
 import {
   allReviews,
   customerReports,
@@ -38,11 +38,10 @@ export function buildLlmsTxt() {
 ${business.name} is a family-owned St. Lucian mechanic shop on ${business.address.area} in Baytown, Texas. The owner has more than ${business.yearsExperience.replace("+", "")} years of experience, starting at his uncle's tire shop and later running a mobile mechanic business. The shop shows customers the problem and gives a clear price before any work starts.
 
 - Address: ${fullAddress}
-${relocationLlmsLine}
 - Phone: ${business.phone.display} (${business.phone.schema})
 - Email: ${business.email}
 - Hours: ${hoursSummary}
-- Google rating: ${googleReviews.rating.toFixed(1)} out of 5 from ${googleReviews.count} reviews (as of ${googleReviews.capturedAt})
+${isNoticeActive() ? `- ${noticeLine}\n` : ""}- Google rating: ${googleReviews.rating.toFixed(1)} out of 5 from ${googleReviews.count} reviews (as of ${googleReviews.capturedAt})
 - Google Business Profile: ${business.links.googleProfile}
 - Directions: ${business.links.maps}
 - Google reviews: ${googleReviews.url}

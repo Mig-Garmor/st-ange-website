@@ -2,7 +2,7 @@
 import PageHeaderComponent from "./PageHeaderComponent.vue";
 import PageFooterComponent from "./PageFooterComponent.vue";
 import MobileCallBar from "./MobileCallBar.vue";
-import RelocationNotice from "./RelocationNotice.vue";
+import SiteNotice from "./SiteNotice.vue";
 import ChatBubble from "../../../chat/widget/ChatBubble.vue";
 import { chatClientSettings } from "@/chatSettings.client.js";
 
@@ -14,7 +14,7 @@ defineProps({
 <template>
   <a href="#main" class="skip-link">Skip to main content</a>
   <PageHeaderComponent />
-  <RelocationNotice />
+  <SiteNotice />
   <slot />
   <PageFooterComponent />
   <MobileCallBar :hidden-over="callBarHiddenOver" />

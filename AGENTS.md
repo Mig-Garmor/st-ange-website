@@ -33,7 +33,7 @@ Never type business facts into a page or component. Change the source below and 
 | Google reviews, rating and review count | `src/content/reviews.js` | Review cards, rating text, `llms.txt` (never JSON-LD, see below) |
 | Review themes and customer reports | `src/content/reviews.js` (`themes` tags, `customerReports`) | Homepage "What customers mention most", `/reviews`, `llms.txt` |
 | Reviews page | `src/pages/reviews.vue` | `/reviews`: theme index and every written review, each with an anchor (`#review-<id>`, `#theme-<id>`) |
-| Move notice (banner, FAQ, address note) | `src/content/relocation.js` | Banner on every page, homepage FAQ, `llms.txt` |
+| Site notice (e.g. holiday closure) | `src/content/notice.js` | Banner on every page until `showUntil`, chat knowledge and `llms.txt` |
 | Homepage reasons and FAQs | `src/content/home.js` | Homepage |
 | Business and WebSite JSON-LD nodes | `src/seo/localBusinessSchema.js` | Every page |
 | Service and breadcrumb JSON-LD nodes | `src/seo/serviceSchema.js` | Service pages, and breadcrumbs on every page but the homepage |
@@ -42,11 +42,11 @@ Never type business facts into a page or component. Change the source below and 
 | `llms.txt` (plain-text summary for AI assistants) | `src/seo/llmsTxt.js` | `/llms.txt`, generated at build |
 | `sitemap.xml` | `vite.config.js` (`writeSitemap`) | `/sitemap.xml`, generated at build from the pre-rendered routes |
 
-`src/config/business.js`, `src/content/reviews.js`, `src/content/relocation.js` and everything in `src/seo/` are imported by `vite.config.js` at build time, so they must use relative imports only (`../config/business.js`), never the `@/` aliases.
+`src/config/business.js`, `src/content/reviews.js`, `src/content/notice.js` and everything in `src/seo/` are imported by `vite.config.js` at build time, so they must use relative imports only (`../config/business.js`), never the `@/` aliases.
 
 ## What to update when something changes
 
-- **Address or location:** update `address`, `geo`, `links.maps` and `mapEmbedUrl` in `business.js`, and check `relocation.js` (the banner text, or remove `<RelocationNotice />` from `src/components/wrappers/PageLayout.vue` once it's no longer needed). The address must match the Google Business Profile exactly.
+- **Address or location:** update `address`, `geo`, `links.maps` and `mapEmbedUrl` in `business.js`. The address must match the Google Business Profile exactly.
 - **Hours:** edit `business.hours` (full and short labels, display text, and `opens`/`closes` for the schema) and `hoursShort`. The FAQ, schema and `llms.txt` read from it.
 - **New service:** add it to `services` in `business.js` with a `slug`, then its copy in `src/content/services.js` and an image in `public/assets/`. The page, route, sitemap entry, footer link and `llms.txt` line follow automatically. Check whether any existing review describes it (see below).
 - **New page:** add it under `src/pages/`. The sitemap picks it up automatically, but the "Pages" list in `src/seo/llmsTxt.js` is written by hand, so add it there too, and add it to `src/config/navigation.js` if it belongs in the menus.

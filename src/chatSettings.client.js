@@ -1,4 +1,5 @@
 import { business, chatUnavailable, hoursAndLocation, services } from "@/config/business";
+import { isNoticeActive, noticeLine } from "@/content/notice";
 
 const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY ?? "";
 
@@ -9,7 +10,7 @@ export const chatClientSettings = {
   notice: "Automated AI assistant. We save this chat and use it to answer you and follow up on your request. Prices and promises only count once the shop confirms them.",
   privacyPath: "/privacy",
   quickReplies: ["Wheel alignment", "Brake repair", "Get a quote", "Hours & location"],
-  localAnswers: { "Hours & location": hoursAndLocation },
+  localAnswers: { "Hours & location": isNoticeActive() ? `${noticeLine}\n${hoursAndLocation}` : hoursAndLocation },
   unavailable: chatUnavailable,
   phoneDisplay: business.phone.display,
   phoneHref: business.phone.href,
