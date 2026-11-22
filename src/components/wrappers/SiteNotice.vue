@@ -33,7 +33,7 @@ const duration = `${Math.round(((textLength * 7.4 + 88) * 2) / 40)}s`;
           class="ticker-item"
           :aria-hidden="copy > 1 ? 'true' : undefined"
         >
-          <strong>{{ siteNotice.lead }}</strong>&#32;<span class="lead-emoji" aria-hidden="true">{{ siteNotice.leadEmoji }}</span>&#32;<template v-for="part in siteNotice.parts" :key="part.text"><mark v-if="part.key">{{ part.text }}</mark><template v-else>{{ part.text }}</template></template>
+          <span class="lead-emoji" aria-hidden="true">{{ siteNotice.leadEmoji }}</span>&#32;<strong>{{ siteNotice.lead }}</strong>&#32;<span class="lead-emoji" aria-hidden="true">{{ siteNotice.leadEmoji }}</span>&#32;<template v-for="part in siteNotice.parts" :key="part.text"><mark v-if="part.key">{{ part.text }}</mark><template v-else>{{ part.text }}</template></template>
         </p>
       </div>
     </div>
