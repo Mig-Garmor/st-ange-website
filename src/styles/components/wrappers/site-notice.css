@@ -4,7 +4,7 @@
 
   .notice-tag {
     @apply shrink-0 flex items-center gap-1 px-2 py-[3px] rounded bg-brand-navy text-brand-yellow;
-    @apply text-[12px] font-bold uppercase tracking-wide whitespace-nowrap;
+    @apply text-[12px] font-bold uppercase tracking-wide whitespace-nowrap max-sm:hidden;
   }
 
   .notice-emoji {
