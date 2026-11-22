@@ -22,7 +22,13 @@ const duration = `${Math.round(((textLength * 7.4 + 88) * 2) / 40)}s`;
     :class="{ 'is-paused': isPaused }"
     :aria-label="siteNotice.tag"
   >
-    <span v-for="emoji in siteNotice.emojis" :key="emoji" class="notice-emoji" aria-hidden="true">{{ emoji }}</span>
+    <span
+      v-for="emoji in siteNotice.emojis"
+      :key="emoji.char"
+      class="notice-emoji"
+      :class="{ 'has-circle': emoji.circle }"
+      aria-hidden="true"
+    >{{ emoji.char }}</span>
     <span class="notice-tag">{{ siteNotice.tag }}</span>
 
     <div class="ticker">

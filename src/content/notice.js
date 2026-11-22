@@ -1,7 +1,8 @@
 // Imported by llmsTxt.js and server/chatSettings.js, so only relative imports work here.
 export const siteNotice = {
   tag: "Thanksgiving",
-  emojis: ["🦃", "🎄"],
+  // circle: a dark backdrop for emojis that are too dark to read on the yellow banner.
+  emojis: [{ char: "🦃", circle: true }, { char: "🎄" }],
   lead: "Happy Thanksgiving!",
   parts: [
     { text: "We're closed " },
