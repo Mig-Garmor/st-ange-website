@@ -8,10 +8,10 @@
   }
 
   .notice-emoji {
-    @apply shrink-0 grid place-items-center w-8 h-8 text-[20px] leading-none;
+    @apply shrink-0 grid place-items-center w-8 h-8 text-[26px] leading-none;
 
     &.has-circle {
-      @apply rounded-full bg-zinc-700;
+      @apply rounded-full bg-zinc-700 text-[20px];
     }
   }
 
