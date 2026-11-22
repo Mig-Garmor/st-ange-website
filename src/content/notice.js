@@ -9,8 +9,8 @@ export const siteNotice = {
     { text: "Thursday to Saturday, November 26–28", key: true },
     { text: ". We reopen Monday, November 30 at 8 AM." },
   ],
-  // Midnight after Saturday, Baytown time; the banner, chat and llms.txt lines stop showing from then.
-  showUntil: "2026-11-29T00:00:00-06:00",
+  // Reopening time, Baytown time (Sunday is a normal closed day); the banner, chat and llms.txt lines stop showing from then.
+  showUntil: "2026-11-30T08:00:00-06:00",
 };
 
 export const isNoticeActive = (now = Date.now()) => now < Date.parse(siteNotice.showUntil);
