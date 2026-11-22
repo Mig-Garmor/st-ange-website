@@ -3,7 +3,7 @@ export const siteNotice = {
   tag: "Thanksgiving",
   emoji: "🦃",
   lead: "Happy Thanksgiving!",
-  leadEmoji: "🎄",
+  leadEmoji: "🍂",
   parts: [
     { text: "We're closed " },
     { text: "Thursday to Saturday, November 26–28", key: true },
